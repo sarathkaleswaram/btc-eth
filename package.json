@@ -1,0 +1,17 @@
+{
+  "name": "btc-eth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sarath Kaleswaram",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bitcoinjs-lib": "^5.1.7",
+    "ethereumjs-tx": "^2.1.2",
+    "web3": "^1.2.6"
+  }
+}
