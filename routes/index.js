@@ -10,5 +10,7 @@ Routes.ethCreate = require('./eth-create-account')
 Routes.ethBalance = require('./eth-get-balance')
 Routes.ethPrivateKeyToAddress = require('./eth-privateKey-to-account')
 Routes.ethSend = require('./eth-send')
+Routes.getTransaction = require('./eth-transaction')
+Routes.getBitcoinTransaction = require('./btc-transaction')
 
 module.exports = Routes
