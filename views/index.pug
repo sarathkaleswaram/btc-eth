@@ -10,7 +10,7 @@ html
     title='Payment Gateway'
     link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css')
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css')
-    link(href='css/style.css' rel='stylesheet')
+    link(rel='stylesheet' href='css/style.css')
 
   body
     nav.navbar.bg-brand.fixed-top
@@ -19,6 +19,9 @@ html
           img(src='image/a2z_new.svg' height='60' alt='')
 
     .container
+      #websocket-error
+      #websocket-submitted-message
+      #websocket-confirmed-message
       .jumbotron
         if error
           .alert.alert-danger 
@@ -33,7 +36,7 @@ html
           p.text-center
             strong Address: 
             span#copy-address #{account} 
-            i.far.fa-copy.copied-popover(style='cursor: pointer' onclick='copyClipboard()')
+            i.far.fa-copy.copied-popover#copy-clipboard(style='cursor: pointer')
 
   script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js')
   script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')

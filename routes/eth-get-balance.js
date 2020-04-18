@@ -1,13 +1,17 @@
 var server = require('../server')
 
+const log4js = require('log4js')
+var logger = log4js.getLogger('btc-eth')
+logger.level = 'debug'
+
 var ethBalance = function (req, res) {
     try {
-        console.log('\nethBalance params:', req.params)
+        logger.debug('\nethBalance params:', req.params)
         var web3 = server.web3
         var address = req.params.address
 
         if (!address) {
-            console.log('Address is empty')
+            logger.debug('Address is empty')
             res.json({
                 result: 'error',
                 message: 'Address is empty',
@@ -15,7 +19,7 @@ var ethBalance = function (req, res) {
             return
         }
         if (!web3.utils.isAddress(address)) {
-            console.log('Invalid address')
+            logger.debug('Invalid address')
             res.json({
                 result: 'error',
                 message: 'Invalid address',
@@ -25,14 +29,14 @@ var ethBalance = function (req, res) {
 
         web3.eth.getBalance(address, (err, result) => {
             if (err) {
-                console.error(err)
+                logger.error(err)
                 res.json({
                     result: 'error',
                     message: error,
                 })
             }
             var balance = web3.utils.fromWei(result, 'ether') + ' ETH'
-            console.log(balance)
+            logger.debug(balance)
             res.json({
                 result: 'success',
                 address: address,
@@ -40,7 +44,7 @@ var ethBalance = function (req, res) {
             })
         })
     } catch (error) {
-        console.error('ethBalance catch Error:', error)
+        logger.error('ethBalance catch Error:', error)
         res.json({
             result: 'error',
             message: error,
