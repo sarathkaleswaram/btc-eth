@@ -94,8 +94,7 @@ var btcSend = async function (req, res) {
                 }
                 // broadcast transaction
                 pushTransaction(payload, chain, res, function (txid) {
-                    var path = server.network === 'mainnet' ? 'btc' : 'btc-testnet'
-                    const url = `https://live.blockcypher.com/${path}/tx/${txid}`
+                    const url = `${server.btcExplorerUrl}/tx/${txid}`
                     logger.debug({ transactionHash: txid, link: url })
                     res.json({
                         result: 'success',
@@ -116,7 +115,7 @@ var btcSend = async function (req, res) {
 
 function getBalance(address, chain, res, callback) {
     request({
-        url: `https://api.blockcypher.com/v1/btc/${chain}/addrs/${address}/balance`,
+        url: `${server.btcAPI}/addrs/${address}/balance`,
         json: true
     }, function (error, response, body) {
         if (error) {
@@ -150,7 +149,7 @@ function getBalance(address, chain, res, callback) {
 
 function getUTXO(address, chain, res, callback) {
     request({
-        url: `http://api.blockcypher.com/v1/btc/${chain}/addrs/${address}?unspentOnly=true&includeScript=true`,
+        url: `${server.btcAPI}/addrs/${address}?unspentOnly=true&includeScript=true`,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
@@ -191,7 +190,7 @@ function getUTXO(address, chain, res, callback) {
 
 function pushTransaction(pload, chain, res, callback) {
     request({
-        url: `https://api.blockcypher.com/v1/btc/${chain}/txs/push`,
+        url: `${server.btcAPI}/txs/push`,
         method: 'POST',
         json: true,
         headers: { 'content-type': 'application/json' },

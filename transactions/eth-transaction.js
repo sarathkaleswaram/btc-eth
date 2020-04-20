@@ -1,7 +1,7 @@
 const request = require('request')
-var server = require('../server')
 var requests = require('../models/requests')
 var transactions = require('../models/transactions')
+var server = require('../server')
 var { makeCallback, wsSend } = require('./callback')
 
 const log4js = require('log4js')
@@ -10,8 +10,8 @@ logger.level = 'trace'
 
 var dbPendingEthTx = function (address, blocknumber) {
     var web3 = server.web3
-    var url = `${server.etherscan}&module=account&action=txlist&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.debug('Etherscan URL: ', url)
+    var url = `${server.etherscanAPI}&module=account&action=txlist&address=${address}&startblock=${blocknumber}&sort=asc`
+    logger.debug('Running Etherscan API: ', url)
     request({
         url: url,
         json: true
@@ -19,6 +19,7 @@ var dbPendingEthTx = function (address, blocknumber) {
         if (error) logger.error(error)
         if (body.status === '0') logger.error(body.message)
         if (body.status === '1') {
+            logger.debug('Txs length:', body.result.length)
             body.result.forEach(tx => {
                 if (tx.to === address.toLowerCase()) {
                     logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
@@ -35,7 +36,7 @@ var dbPendingEthTx = function (address, blocknumber) {
                         blockHash: tx.blockHash,
                         blockNumber: tx.blockNumber,
                         fee: web3.utils.fromWei(tx.gas, 'ether')
-                    }).then(() => logger.debug('Transaction inserted')).catch(error => logger.error(error))
+                    }).then(() => logger.debug('ETH Transaction inserted')).catch(error => logger.error(error))
                 }
             })
         }
@@ -62,24 +63,25 @@ var dbPendingEthTx = function (address, blocknumber) {
 }
 
 var subscribeEthPendingTx = function () {
-    var web3ws = server.web3ws, web3 = server.web3
-    const subscription = web3ws.eth.subscribe('pendingTransactions', (err, res) => {
+    const subscription = server.web3ws.eth.subscribe('pendingTransactions', (err, res) => {
         if (err) logger.error(err)
     })
-    logger.debug('Subscribed to ETH transactions...')
+    logger.debug('Subscribed to ETH live pending transactions...')
     subscription.on('data', async (txHash) => {
-        logger.trace('ETH getting pending tx:', txHash)
-        try {
-            let tx = await web3.eth.getTransaction(txHash)
-            if (tx.to) {
-                if (server.ethAccounts.includes(tx.to)) {
-                    logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
-                    server.ethTxHashes.push(tx.hash)
-                    wsSend(tx.to, 'eth', 'submitted', web3.utils.fromWei(tx.value, 'ether'), tx.hash, '')
+        if (server.ethAccounts.length) {
+            logger.trace('ETH getting all pending tx:', txHash, ', Checking with Accounts length:', server.ethAccounts.length, ', Accounts:', server.ethAccounts)
+            try {
+                let tx = await server.web3.eth.getTransaction(txHash)
+                if (tx.to) {
+                    if (server.ethAccounts.includes(tx.to)) {
+                        logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
+                        server.ethTxHashes.push(tx.hash)
+                        wsSend(tx.to, 'eth', 'submitted', server.web3.utils.fromWei(tx.value, 'ether'), tx.hash)
+                    }
                 }
+            } catch (err) {
+                logger.error(err)
             }
-        } catch (err) {
-            logger.error(err)
         }
     })
 }
@@ -110,11 +112,11 @@ var getEthTxByHashes = function () {
                 blockHash: tx.blockHash,
                 blockNumber: tx.blockNumber,
                 fee: web3.utils.fromWei(tx.gas.toString(), 'ether')
-            }).then(() => logger.debug('Transaction inserted')).catch(error => logger.error(error))
+            }).then(() => logger.debug('ETH Transaction inserted')).catch(error => logger.error(error))
         }
     })
 }
 
-exports.getEthTxByHashes = getEthTxByHashes
 exports.dbPendingEthTx = dbPendingEthTx
 exports.subscribeEthPendingTx = subscribeEthPendingTx
+exports.getEthTxByHashes = getEthTxByHashes

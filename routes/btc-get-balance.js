@@ -30,7 +30,7 @@ var btcBalance = function (req, res) {
             return
         }
         request({
-            url: `https://api.blockcypher.com/v1/btc/${chain}/addrs/${address}/balance`,
+            url: `${server.btcAPI}/addrs/${address}/balance`,
             json: true
         }, function (error, response, body) {
             if (error) {

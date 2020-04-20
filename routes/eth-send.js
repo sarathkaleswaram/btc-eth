@@ -118,8 +118,7 @@ var ethSend = async function (req, res) {
                         })
                         return
                     }
-                    var subdomain = server.ethNetwork === 'mainnet' ? '' : server.ethNetwork + '.'
-                    const url = `https://${subdomain}etherscan.io/tx/${id}`
+                    const url = `${server.etherscanExplorerUrl}/tx/${id}`
                     logger.debug({ transactionHash: id, link: url })
                     res.json({
                         result: 'success',

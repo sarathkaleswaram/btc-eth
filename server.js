@@ -12,34 +12,67 @@ const CronJob = require('cron').CronJob
 var routes = require('./routes')
 var { runCronJob, checkPendingRequests } = require('./transactions')
 var { subscribeEthPendingTx } = require('./transactions/eth-transaction')
+var { sendBtcWsEvent, subscribeBtcUnconfirmedTx } = require('./transactions/btc-transaction')
 
 // Logger
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
-// Networks
-const network = 'testnet' // mainnet, testnet
-const ethNetwork = 'ropsten' // mainnet, ropsten, rinkeby
+// mainnet or testnet
+const isMainnet = false // true, false
 
-// web3 API Key
+// Networks
+const network = isMainnet ? 'mainnet' : 'testnet'
+const ethNetwork = isMainnet ? 'mainnet' : 'ropsten'
+const etherscanAPINetwork = isMainnet ? 'api' : 'api-ropsten'
+const etherscanSubdomain = isMainnet ? '' : ethNetwork + '.'
+const btcChain = isMainnet ? 'main' : 'test3'
+const btcExplorerPath = isMainnet ? 'btc' : 'btc-testnet'
+
+// Bitcoin Blockcypher URL
+const btcAPI = `https://api.blockcypher.com/v1/btc/${btcChain}`
+const btcWsAPI = `wss://testnet-ws.smartbit.com.au/v1/blockchain`
+const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
+
+// web3 API
 const ethInfuraApiKey = '605567f94946494a81e52ac8ca2784de'
-const web3Url = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
+const web3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
 const web3WsUrl = `wss://${ethNetwork}.infura.io/ws/v3/${ethInfuraApiKey}`
 
-// etherscan.io API Key
-const etherscanNetwork = 'api-ropsten' // api, api-ropsten, api-rinkeby
+// etherscan API
 const etherscanApiKey = '1R2ACZ69YGQQ4DVH8SPUEXAZTWV3G415IM'
-const etherscan = `https://${etherscanNetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
+const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
+const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // A2ZURL
 const a2zUrl = 'https://test.a2zbetting.com/api/transactions/crypto'
 
+// Ethereum ws connections
+var web3WsProvider = new Web3.providers.WebsocketProvider(web3WsUrl)
+web3WsProvider.on('error', e => logger.error('ETH web3 websocket connection error:', e))
+web3WsProvider.on('connect', () => {
+    logger.debug('ETH Websocket connected')
+    subscribeEthPendingTx()
+})
+
+// Bitcoin ws connection
+// var btcWebsocket = new WebSocket(btcWsAPI)
+// btcWebsocket.on('open', function open() {
+//     logger.debug('BTC Websocket connected')
+//     sendBtcWsEvent()
+//     subscribeBtcUnconfirmedTx()
+// })
+
 // Exports
 exports.network = network
 exports.ethNetwork = ethNetwork
-exports.etherscan = etherscan
-exports.web3 = new Web3(new Web3.providers.HttpProvider(web3Url))
-exports.web3ws = new Web3(new Web3.providers.WebsocketProvider(web3WsUrl))
+exports.etherscanAPI = etherscanAPI
+exports.etherscanExplorerUrl = etherscanExplorerUrl
+exports.btcAPI = btcAPI
+exports.btcExplorerUrl = btcExplorerUrl
+// exports.btcWebsocket = btcWebsocket
+exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
+exports.web3ws = new Web3(web3WsProvider)
 exports.a2zUrl = a2zUrl
 
 // BTC-ETH accounts & transactions
@@ -57,14 +90,11 @@ mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFin
     })
     .catch(err => logger.error(err))
 
-// Cron Job
+// Cron Job runs every 5 secs
 var job = new CronJob('*/5 * * * * *', function () {
     runCronJob()
 })
 job.start()
-
-// Get incomming transactions
-subscribeEthPendingTx()
 
 // Express
 const app = express()
@@ -109,7 +139,6 @@ var server = app.listen(port, () => {
 })
 // Websocket
 var wss = new WebSocket.Server({ server })
-exports.wss = wss
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         logger.debug(`Address: ${message} is connected through Websocket`)
@@ -118,3 +147,5 @@ wss.on('connection', (ws) => {
 wss.on('listening', function listen() {
     logger.info(`Websocket server running on port ${port}`)
 })
+// export wss
+exports.wss = wss

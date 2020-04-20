@@ -27,7 +27,7 @@ $(document).ready(function () {
                 if (message.type === 'submitted') {
                     console.log('Got submitted message')
                     $('#websocket-submitted-message').append(`
-                        <div class='alert alert-success'>
+                        <div class='alert alert-primary'>
                             <strong>${message.title}</strong>
                             <p>${message.template}</p>
                             <p>${message.message}</p>
@@ -40,7 +40,6 @@ $(document).ready(function () {
                     $('#websocket-confirmed-message').append(`
                         <div class='alert alert-success'>
                             <strong>${message.title}</strong>
-                            <p>${message.template}</p>
                             <p>${message.message}</p>
                         </div>
                     `)

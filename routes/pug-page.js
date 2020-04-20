@@ -1,5 +1,6 @@
 const bitcore = require('bitcore-lib')
 const QRCode = require('qrcode')
+const request = require('request')
 var server = require('../server')
 var requests = require('../models/requests')
 
@@ -71,15 +72,42 @@ var pugPage = function (req, res) {
                         res.render('index', { error: true, message: err.toString() })
                     } else {
                         if (!doc) {
+                            // BTC
                             if (params.type === 'btc') {
-                                if (!bitcore.Address.isValid(params.address, server.network)) {
-                                    error = true
-                                    message += 'Invalid address. '
-                                }
+                                request({
+                                    url: `${server.btcAPI}`,
+                                    json: true
+                                }, function (error, response, body) {
+                                    if (error) {
+                                        logger.error(error)
+                                        res.render('index', { error: true, message: error.toString() })
+                                        return
+                                    }
+                                    logger.debug('BTC current blocknumber:', body.height)
+                                    // add to btc accounts array
+                                    server.btcAccounts.push(params.address)
+                                    // Save request
+                                    requests.create({
+                                        type: params.type,
+                                        address: params.address,
+                                        token: params.token,
+                                        timestamp: params.timestamp,
+                                        callback: params.callback,
+                                        blocknumber: body.height,
+                                        status: 'Pending'
+                                    }).then(() => {
+                                        logger.debug('Request inserted')
+                                        res.render('index', { src: url, account: params.address })
+                                    }, error => {
+                                        logger.error(error)
+                                        res.render('index', { error: true, message: error.toString() })
+                                    })
+                                })
                             }
+                            // ETH
                             if (params.type === 'eth') {
                                 server.web3.eth.getBlockNumber().then((blocknumber) => {
-                                    logger.debug('Eth blocknumber:', blocknumber)
+                                    logger.debug('ETH current blocknumber:', blocknumber)
                                     // add to eth accounts array
                                     server.ethAccounts.push(params.address)
                                     // Save request
@@ -104,8 +132,13 @@ var pugPage = function (req, res) {
                                 })
                             }
                         } else {
-                            logger.debug('Request already exists.')
-                            res.render('index', { src: url, account: params.address })
+                            if (doc.status === 'Completed') {
+                                logger.debug('Request already exists. Account already used.')
+                                res.render('index', { error: true, message: 'Account address already used.' })
+                            } else {
+                                logger.debug('Request already exists. Account not used.')
+                                res.render('index', { src: url, account: params.address })
+                            }
                         }
                     }
                 })

@@ -17,7 +17,7 @@ var makeCallback = function (type, sender, receiver, tid, amount) {
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
-            wsSend(receiver, 'eth', 'confirmed', amount, tid, doc.callback)
+            wsSend(receiver, 'eth', 'confirmed', amount, tid, doc.callback, doc.token, doc.timestamp, sender)
             var payload = {
                 type: type,
                 token: doc.token,
@@ -44,18 +44,17 @@ var makeCallback = function (type, sender, receiver, tid, amount) {
     })
 }
 
-var wsSend = function (address, type, wsType, amount, txHash, callbackUrl) {
+var wsSend = function (address, type, wsType, amount, txHash, callback, token, timestamp, sender) {
     server.wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
             var url, title, wsMessage, currency
+            var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}`
             if (type === 'btc') {
-                var path = server.network === 'mainnet' ? 'btc' : 'btc-testnet'
-                url = `https://live.blockcypher.com/${path}/tx/${txHash}`
+                url = `${server.btcExplorerUrl}/tx/${txHash}`
                 currency = 'BTC'
             }
             if (type === 'eth') {
-                var subdomain = server.ethNetwork === 'mainnet' ? '' : server.ethNetwork + '.'
-                url = `https://${subdomain}etherscan.io/tx/${txHash}`
+                url = `${server.etherscanExplorerUrl}/tx/${txHash}`
                 currency = 'ETH'
             }
             if (wsType === 'submitted') {
