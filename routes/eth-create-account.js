@@ -6,7 +6,7 @@ logger.level = 'debug'
 
 var ethCreate = function (req, res) {
     try {
-        logger.debug('\nethCreate')
+        logger.debug('ethCreate')
         var web3 = server.web3
         var account = web3.eth.accounts.create()
         logger.debug({ address: account.address, privateKey: account.privateKey })

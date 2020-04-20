@@ -9,7 +9,7 @@ logger.level = 'debug'
 
 var btcSend = async function (req, res) {
     try {
-        logger.debug('\nbtcSend body:', req.body)
+        logger.debug('btcSend body:', req.body)
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress

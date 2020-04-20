@@ -7,7 +7,7 @@ logger.level = 'debug'
 
 var btcCreate = function (req, res) {
     try {
-        logger.debug('\nbtcCreate')
+        logger.debug('btcCreate')
         var privateKey = new bitcore.PrivateKey(server.network)
         // var wif = privateKey.toWIF()
         var address = privateKey.toAddress()

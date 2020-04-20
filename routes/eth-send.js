@@ -8,7 +8,7 @@ logger.level = 'debug'
 
 var ethSend = async function (req, res) {
     try {
-        logger.debug('\nethSend body:', req.body)
+        logger.debug('ethSend body:', req.body)
         var web3 = server.web3
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey

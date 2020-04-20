@@ -7,7 +7,7 @@ logger.level = 'debug'
 
 var btcPrivateKeyToAddress = function (req, res) {
     try {
-        logger.debug('\nbtcPrivateKeyToAddress body:', req.body)
+        logger.debug('btcPrivateKeyToAddress body:', req.body)
         var pKey = req.body.privateKey
 
         if (!pKey) {

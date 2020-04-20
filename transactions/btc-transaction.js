@@ -10,8 +10,7 @@ var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
 var dbPendingBtcTx = function (address, blocknumber) {
-    var web3 = server.web3
-    var url = `${server.btcAPI}/addrs/${address}/full?before=${blocknumber}`
+    var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}`
     logger.debug('Running Blockcypher API: ', url)
     request({
         url: url,
@@ -22,6 +21,10 @@ var dbPendingBtcTx = function (address, blocknumber) {
             logger.error(body.message)
         } else {
             logger.debug('Txs length:', body.txs.length)
+            if (!body.txs.length) {
+                logger.debug('Subscribe addresses')
+                btcWsSubscribeAddressOnOpen()
+            }
             body.txs.forEach(tx => {
                 var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
                 if (outputIndex >= 0) {
@@ -48,74 +51,117 @@ var dbPendingBtcTx = function (address, blocknumber) {
     })
 }
 
-var sendBtcWsEvent = function () {
-    // if (server.btcAccounts.length)
-
-    // server.btcWebsocket.send(JSON.stringify({ "op": "unconfirmed_sub" }))
-    // server.btcWebsocket.send(JSON.stringify({ "event": "unconfirmed-tx" }))
-    // server.btcWebsocket.send(JSON.stringify({ type: "new-transaction" }))
-    server.btcWebsocket.send(JSON.stringify({ type: "transaction", txid: "bc7d5ac1d795ee783dd37389a99aeb3abd10cd614cea57540656bffc5900c31e" }))
-    // server.btcWebsocket.send(JSON.stringify({ type: "new-transaction", unsubscribe: true }))
-    // server.btcWebsocket.send(JSON.stringify({ type: "new-block", unsubscribe: true }))
+var btcWsSubscribeAddressOnOpen = function (address) {
+    server.btcWebsocket.on('open', function open() {
+        server.btcAccounts.forEach(address => {
+            btcWsSubscribeAddress(address)
+        })
+    })
 }
 
-var subscribeBtcUnconfirmedTx = function () {
+var btcWsSubscribeAddress = function (address) {
+    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address }))
+}
+
+var btcWsUnsubscribeAddress = function (address) {
+    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
+}
+
+// var sendBtcWsEvent = function () {
+// server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction' }))
+// server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: '62a82a27b7a6329d74c002a4650b43647ae74f320a0a64a4a7919a8c5ecdf10c' }))
+// server.btcWebsocket.send(JSON.stringify({ type: 'address', address: 'muwXiE64xymEQnd389N9V3j4cga3sZWyGP' }))
+// server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction', unsubscribe: true }))
+// }
+
+var btcWsOnMessage = function () {
     server.btcWebsocket.on('message', function incoming(data) {
         data = JSON.parse(data)
-        // console.log(data)
         if (data.type === 'subscribe-response') {
             logger.trace(data.payload.message)
         } else if (data.type === 'heartbeat') {
             // logger.trace(data)
         } else if (data.type === 'new-transaction') {
-            logger.trace(data.payload.txid)
-            // server.btcWebsocket.send(JSON.stringify({ type: "transaction", txid: "c2ea1f535b9c5261c9e08605bb298e1ffc374984c3a6ef687eb7fb01bad510ea", unsubscribe: true }))
-            server.btcWebsocket.send(JSON.stringify({ type: "new-transaction", unsubscribe: true }))
-        } else if (data.type === 'new-block') {
-            logger.trace(data)
+            // logger.trace('BTC getting all new tx:', data.payload.txid, ', Checking with Accounts length:', server.btcAccounts.length, ', Accounts:', server.btcAccounts)
+            // var outputIndex = data.payload.outputs.findIndex(x => x.addresses.some(r => server.btcAccounts.includes(r)))
+            // if (outputIndex >= 0) {
+            //     var inputAddresses = data.payload.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+            //     logger.debug('Got BTC tx from: ', inputAddresses, ', amount: ', data.payload.outputs[outputIndex].value, ', hash:', data.payload.txid)
+            //     server.btcTxHashes.push(data.payload.txid)
+            //     server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: data.payload.txid }))
+            //     wsSend(data.payload.outputs[outputIndex].addresses[0], 'btc', 'submitted', data.payload.outputs[outputIndex].value, data.payload.txid)
+            // }
+        } else if (data.type === 'address') {
+            logger.debug('BTC ws address method for address:', data.payload.address, ', tx:', data.payload.transaction.txid)
+            var outputIndex = data.payload.transaction.outputs.findIndex(x => x.addresses.includes(data.payload.address))
+            if (outputIndex >= 0) {
+                var inputAddresses = data.payload.transaction.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                logger.debug('Got BTC tx from: ', inputAddresses, ', amount: ', data.payload.transaction.outputs[outputIndex].value, ', hash:', data.payload.transaction.txid)
+                // subscribe to transaction
+                server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: data.payload.transaction.txid }))
+                // send message to frontend
+                wsSend(data.payload.address, 'btc', 'submitted', data.payload.transaction.outputs[outputIndex].value, data.payload.transaction.txid)
+            } else {
+                logger.debug('BTC our address was a sender')
+            }
+        } else if (data.type === 'transaction') {
+            logger.debug('BTC confirmed tx:', data.payload.txid)
+            getBtcTxRecurrsive(data.payload.txid)
         } else {
-            logger.trace(data)
+            logger.debug('BTC ws unknown type:', data)
         }
-        // if (data.op === 'utx') {
-        //     logger.trace(data.x.hash)            
-        // }
     })
 }
 
-var getBitcoinTransaction = function (address) {
-    var ws = new WebSocket("wss://socket.blockcypher.com/v1/btc/main");
-    var count = 0;
-    // logger.debug(ws)s
-    ws.onmessage = function (event) {
-        logger.debug(event)
-        // var tx = JSON.parse(event.data);
-        // var shortHash = tx.hash.substring(0, 6) + "...";
-        // var total = tx.total / 100000000;
-        // var addrs = tx.addresses.join(", ");
-        // console.loog(addrs,total)
-        //   $('#browser-websocket').before("<div>Unconfirmed transaction " + shortHash + " totalling " + total + "BTC involving addresses " + addrs + "</div>");
-        //   count++;
-        //   if (count > 10) ws.close();
-    }
-    ws.onopen = function (event) {
-        // logger.debug(ws.onopen)
-        // ws.send(JSON.stringify({ "event": "ping" }));
-        ws.send(JSON.stringify({ event: "unconfirmed-tx" }));
-    }
-    //   address='1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD'
-    //   logger.debug(address,"=================-")
-    //   const  url = 'https://api.blockcypher.com/v1/btc/main/addrs/'+address+'/full';
-    //   logger.debug(url,"=================")
-    //   request({
-    //     url: url,
-    //     json: true
-    // }, function (error, response, body) {
-    //   logger.debug(body,"----");
-    //   logger.debug(error,"+++++++++=");
-
-    //   })
+function getBtcTxRecurrsive(txid) {
+    var url = `${server.btcAPI}/txs/${txid}`
+    logger.debug('Running Blockcypher API: ', url)
+    request({
+        url: url,
+        json: true
+    }, function (error, response, body) {
+        if (error) logger.error(error)
+        if (body.error) {
+            logger.error(body.message)
+        } else {
+            if (body.block_height > 0) {
+                if (outputIndex >= 0) {
+                    // unsubscribe to tx and address
+                    server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: txid, unsubscribe: true }))
+                    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
+                    // get output array index
+                    var outputIndex = body.outputs.findIndex(x => x.addresses.some(r => server.btcAccounts.includes(r)))
+                    var address = body.outputs[outputIndex].addresses.find(x => server.btcAccounts.includes(x))
+                    // get unique inputs
+                    var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                    // make callback
+                    makeCallback('btc', inputAddresses, address, body.hash, sb.toBitcoin(body.outputs[outputIndex].value))
+                    // save transaction
+                    transactions.create({
+                        type: 'btc',
+                        address: address,
+                        from: inputAddresses,
+                        amount: sb.toBitcoin(body.outputs[outputIndex].value),
+                        timeStamp: body.confirmed,
+                        transactionHash: body.hash,
+                        blockHash: body.block_hash,
+                        blockNumber: body.block_height,
+                        fee: sb.toBitcoin(body.fees)
+                    }).then(() => logger.debug('BTC Transaction inserted')).catch(error => logger.error(error))
+                } else {
+                    logger.warn('BTC tx dont have output address:', body, ', btcAccounts:', server.btcAccounts)
+                }
+            } else {
+                setTimeout(() => {
+                    logger.debug('Getting BTC tx after 2 sec. Tx is confrimed by ws but not in http. TX:', txid)
+                    getBtcTxRecurrsive(txid)
+                }, 2000)
+            }
+        }
+    })
 }
 
 exports.dbPendingBtcTx = dbPendingBtcTx
-exports.sendBtcWsEvent = sendBtcWsEvent
-exports.subscribeBtcUnconfirmedTx = subscribeBtcUnconfirmedTx
+exports.btcWsSubscribeAddress = btcWsSubscribeAddress
+exports.btcWsUnsubscribeAddress = btcWsUnsubscribeAddress
+exports.btcWsOnMessage = btcWsOnMessage

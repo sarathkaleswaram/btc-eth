@@ -6,7 +6,7 @@ logger.level = 'debug'
 
 var ethBalance = function (req, res) {
     try {
-        logger.debug('\nethBalance params:', req.params)
+        logger.debug('ethBalance params:', req.params)
         var web3 = server.web3
         var address = req.params.address
 

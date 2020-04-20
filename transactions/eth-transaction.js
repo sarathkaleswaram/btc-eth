@@ -74,7 +74,7 @@ var subscribeEthPendingTx = function () {
                 let tx = await server.web3.eth.getTransaction(txHash)
                 if (tx.to) {
                     if (server.ethAccounts.includes(tx.to)) {
-                        logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
+                        logger.debug('Got ETH tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
                         server.ethTxHashes.push(tx.hash)
                         wsSend(tx.to, 'eth', 'submitted', server.web3.utils.fromWei(tx.value, 'ether'), tx.hash)
                     }
@@ -94,7 +94,7 @@ var getEthTxByHashes = function () {
         var tx = await web3.eth.getTransaction(txHash)
         logger.debug('ETH pending hash blocknumber:', tx.blockNumber, ', blockHash:', tx.blockHash)
         if (tx.blockNumber !== null) {
-            logger.debug('ETH tx:', tx)
+            logger.debug('ETH confirmed tx:', tx)
             // remove hash from array
             server.ethTxHashes.splice(server.ethTxHashes.findIndex(x => x === txHash), 1)
             // make callback

@@ -1,6 +1,6 @@
 $(document).ready(function () {
     window.WebSocket = window.WebSocket || window.MozWebSocket
-    var wsUrl = 'ws://127.0.0.1:3002'
+    var wsUrl = `ws://${window.location.host}`
     var connection = new WebSocket(wsUrl)
 
     var address = $('#copy-address').text().trim()

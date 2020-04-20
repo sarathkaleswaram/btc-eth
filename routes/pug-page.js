@@ -3,13 +3,14 @@ const QRCode = require('qrcode')
 const request = require('request')
 var server = require('../server')
 var requests = require('../models/requests')
+var { btcWsSubscribeAddress } = require('../transactions/btc-transaction')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
 
 var pugPage = function (req, res) {
-    logger.debug('\npugPage query params:', req.query)
+    logger.debug('pugPage query params:', req.query)
     var error = false, message = ''
     var params = {
         type: req.query.type,
@@ -86,6 +87,7 @@ var pugPage = function (req, res) {
                                     logger.debug('BTC current blocknumber:', body.height)
                                     // add to btc accounts array
                                     server.btcAccounts.push(params.address)
+                                    btcWsSubscribeAddress(params.address)
                                     // Save request
                                     requests.create({
                                         type: params.type,

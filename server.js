@@ -12,7 +12,7 @@ const CronJob = require('cron').CronJob
 var routes = require('./routes')
 var { runCronJob, checkPendingRequests } = require('./transactions')
 var { subscribeEthPendingTx } = require('./transactions/eth-transaction')
-var { sendBtcWsEvent, subscribeBtcUnconfirmedTx } = require('./transactions/btc-transaction')
+var { btcWsOnMessage } = require('./transactions/btc-transaction')
 
 // Logger
 var logger = log4js.getLogger('btc-eth')
@@ -27,11 +27,12 @@ const ethNetwork = isMainnet ? 'mainnet' : 'ropsten'
 const etherscanAPINetwork = isMainnet ? 'api' : 'api-ropsten'
 const etherscanSubdomain = isMainnet ? '' : ethNetwork + '.'
 const btcChain = isMainnet ? 'main' : 'test3'
+const btcWsNetwork = isMainnet ? 'ws' : 'testnet-ws'
 const btcExplorerPath = isMainnet ? 'btc' : 'btc-testnet'
 
 // Bitcoin Blockcypher URL
 const btcAPI = `https://api.blockcypher.com/v1/btc/${btcChain}`
-const btcWsAPI = `wss://testnet-ws.smartbit.com.au/v1/blockchain`
+const btcWsAPI = `wss://${btcWsNetwork}.smartbit.com.au/v1/blockchain`
 const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 
 // web3 API
@@ -47,7 +48,7 @@ const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 // A2ZURL
 const a2zUrl = 'https://test.a2zbetting.com/api/transactions/crypto'
 
-// Ethereum ws connections
+// Ethereum ws connection
 var web3WsProvider = new Web3.providers.WebsocketProvider(web3WsUrl)
 web3WsProvider.on('error', e => logger.error('ETH web3 websocket connection error:', e))
 web3WsProvider.on('connect', () => {
@@ -56,12 +57,12 @@ web3WsProvider.on('connect', () => {
 })
 
 // Bitcoin ws connection
-// var btcWebsocket = new WebSocket(btcWsAPI)
-// btcWebsocket.on('open', function open() {
-//     logger.debug('BTC Websocket connected')
-//     sendBtcWsEvent()
-//     subscribeBtcUnconfirmedTx()
-// })
+var btcWebsocket = new WebSocket(btcWsAPI)
+btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
+btcWebsocket.on('open', function open() {
+    logger.debug('BTC Websocket connected')
+    btcWsOnMessage()
+})
 
 // Exports
 exports.network = network
@@ -70,7 +71,7 @@ exports.etherscanAPI = etherscanAPI
 exports.etherscanExplorerUrl = etherscanExplorerUrl
 exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
-// exports.btcWebsocket = btcWebsocket
+exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
 exports.web3ws = new Web3(web3WsProvider)
 exports.a2zUrl = a2zUrl

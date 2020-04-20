@@ -6,7 +6,7 @@ logger.level = 'debug'
 
 var ethPrivateKeyToAddress = function (req, res) {
     try {
-        logger.debug('\nethPrivateKeyToAddress body:', req.body)
+        logger.debug('ethPrivateKeyToAddress body:', req.body)
         var web3 = server.web3
         var privateKey = req.body.privateKey
         var account

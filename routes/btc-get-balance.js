@@ -9,7 +9,7 @@ logger.level = 'debug'
 
 var btcBalance = function (req, res) {
     try {
-        logger.debug('\nbtcBalance params:', req.params)
+        logger.debug('btcBalance params:', req.params)
         var address = req.params.address
         var chain = server.network === 'testnet' ? 'test3' : 'main'
 
