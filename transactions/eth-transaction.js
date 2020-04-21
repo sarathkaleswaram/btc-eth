@@ -1,5 +1,4 @@
 const request = require('request')
-var requests = require('../models/requests')
 var transactions = require('../models/transactions')
 var server = require('../server')
 var { checkTxAndSave, wsSend } = require('./callback')
@@ -87,8 +86,9 @@ var getEthTxByHashes = function () {
             server.ethTxHashes.splice(server.ethTxHashes.findIndex(x => x === txHash), 1)
             // get block
             var block = await web3.eth.getBlock(tx.blockNumber)
+            var timeStamp = block ? new Date(block.timestamp * 1000) : new Date()
             // check transaction hash with db before making callback and save
-            checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value, 'ether'), new Date(block.timestamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
+            checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value, 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
         }
     })
 }

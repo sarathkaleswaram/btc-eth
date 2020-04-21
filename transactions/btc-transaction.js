@@ -1,6 +1,5 @@
 const request = require('request')
 const sb = require('satoshi-bitcoin')
-var requests = require('../models/requests')
 var server = require('../server')
 var { checkTxAndSave, wsSend } = require('./callback')
 

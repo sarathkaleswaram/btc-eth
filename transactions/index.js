@@ -15,6 +15,9 @@ var checkPendingRequests = function () {
             if (doc.length) {
                 server.btcAccounts = server.btcAccounts.concat(doc.filter(x => x.type === 'btc').map(x => { return x.address }))
                 server.ethAccounts = server.ethAccounts.concat(doc.filter(x => x.type === 'eth').map(x => { return x.address }))
+                // remove duplicates
+                server.btcAccounts = server.btcAccounts.filter((item, pos) => { return server.btcAccounts.indexOf(item) == pos })
+                server.ethAccounts = server.ethAccounts.filter((item, pos) => { return server.ethAccounts.indexOf(item) == pos })
                 logger.debug('BTC length:', server.btcAccounts.length, 'ETH length:', server.ethAccounts.length)
                 doc.forEach(req => {
                     logger.debug('Checking transaction for type:', req.type, ', address:', req.address)

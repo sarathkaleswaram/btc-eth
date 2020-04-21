@@ -46,7 +46,7 @@ var makeCallback = function (type, sender, receiver, tid, amount) {
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
-            wsSend(receiver, 'eth', 'confirmed', amount, tid, doc.callback, doc.token, doc.timestamp, sender)
+            wsSend(receiver, type, 'confirmed', amount, tid, doc.callback, doc.token, doc.timestamp, sender)
             var payload = {
                 type: type,
                 token: doc.token,
