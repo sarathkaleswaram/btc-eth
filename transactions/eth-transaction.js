@@ -2,7 +2,7 @@ const request = require('request')
 var requests = require('../models/requests')
 var transactions = require('../models/transactions')
 var server = require('../server')
-var { makeCallback, wsSend } = require('./callback')
+var { checkTxAndSave, wsSend } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -23,20 +23,8 @@ var dbPendingEthTx = function (address, blocknumber) {
             body.result.forEach(tx => {
                 if (tx.to === address.toLowerCase()) {
                     logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
-                    // make callback
-                    makeCallback('eth', tx.from, address, tx.hash, web3.utils.fromWei(tx.value, 'ether'))
-                    // save transaction
-                    transactions.create({
-                        type: 'eth',
-                        address: tx.to,
-                        from: tx.from,
-                        amount: web3.utils.fromWei(tx.value, 'ether'),
-                        timeStamp: new Date(tx.timeStamp * 1000),
-                        transactionHash: tx.hash,
-                        blockHash: tx.blockHash,
-                        blockNumber: tx.blockNumber,
-                        fee: web3.utils.fromWei(tx.gas, 'ether')
-                    }).then(() => logger.debug('ETH Transaction inserted')).catch(error => logger.error(error))
+                    // check transaction hash with db before making callback and save
+                    checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value, 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
                 }
             })
         }
@@ -97,22 +85,10 @@ var getEthTxByHashes = function () {
             logger.debug('ETH confirmed tx:', tx)
             // remove hash from array
             server.ethTxHashes.splice(server.ethTxHashes.findIndex(x => x === txHash), 1)
-            // make callback
-            makeCallback('eth', tx.from, tx.to, tx.hash, web3.utils.fromWei(tx.value, 'ether'))
             // get block
             var block = await web3.eth.getBlock(tx.blockNumber)
-            // save transaction
-            transactions.create({
-                type: 'eth',
-                address: tx.to,
-                from: tx.from,
-                amount: web3.utils.fromWei(tx.value, 'ether'),
-                timeStamp: new Date(block.timestamp * 1000),
-                transactionHash: tx.hash,
-                blockHash: tx.blockHash,
-                blockNumber: tx.blockNumber,
-                fee: web3.utils.fromWei(tx.gas.toString(), 'ether')
-            }).then(() => logger.debug('ETH Transaction inserted')).catch(error => logger.error(error))
+            // check transaction hash with db before making callback and save
+            checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value, 'ether'), new Date(block.timestamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
         }
     })
 }

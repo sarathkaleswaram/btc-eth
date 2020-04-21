@@ -63,7 +63,7 @@ var pugPage = function (req, res) {
     }
 
     if (error) {
-        logger.debug('Error message:', message)
+        logger.error('Error message:', message)
         res.render('index', { error: error, message: message })
     } else {
         try {

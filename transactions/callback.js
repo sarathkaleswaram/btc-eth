@@ -2,10 +2,39 @@ const request = require('request')
 const WebSocket = require('ws')
 var server = require('../server')
 var requests = require('../models/requests')
+var transactions = require('../models/transactions')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
+
+var checkTxAndSave = function (type, address, from, amount, timeStamp, transactionHash, blockHash, blockNumber, fee) {
+    // check tx hash in db
+    transactions.findOne({ transactionHash: transactionHash }, (err, doc) => {
+        if (err) {
+            logger.error('DB Error:', err)
+        } else {
+            if (!doc) {
+                // make callback
+                makeCallback(type, from, address, transactionHash, amount)
+                // save transaction
+                transactions.create({
+                    type: type,
+                    address: address,
+                    from: from,
+                    amount: amount,
+                    timeStamp: timeStamp,
+                    transactionHash: transactionHash,
+                    blockHash: blockHash,
+                    blockNumber: blockNumber,
+                    fee: fee
+                }).then(() => logger.debug(`${type === 'btc' ? 'BTC' : 'ETH'} Transaction inserted`)).catch(error => logger.error(error))
+            } else {
+                logger.warn('Transaction hash already present in db. Got same tx again. Tx:', transactionHash)
+            }
+        }
+    })
+}
 
 var makeCallback = function (type, sender, receiver, tid, amount) {
     logger.debug('Making callback:', type, sender, receiver, tid, amount)
@@ -80,4 +109,4 @@ var wsSend = function (address, type, wsType, amount, txHash, callback, token, t
 }
 
 exports.wsSend = wsSend
-exports.makeCallback = makeCallback
+exports.checkTxAndSave = checkTxAndSave

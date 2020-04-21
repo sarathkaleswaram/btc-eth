@@ -12,7 +12,7 @@ var ethPrivateKeyToAddress = function (req, res) {
         var account
 
         if (!privateKey) {
-            logger.debug('PrivateKey is empty')
+            logger.error('PrivateKey is empty')
             res.json({
                 result: 'error',
                 message: 'PrivateKey is empty',
@@ -22,7 +22,7 @@ var ethPrivateKeyToAddress = function (req, res) {
         try {
             account = web3.eth.accounts.privateKeyToAccount(privateKey)
         } catch (error) {
-            logger.debug('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',

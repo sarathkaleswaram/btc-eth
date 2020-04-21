@@ -18,7 +18,7 @@ var btcSend = async function (req, res) {
         var amountSatoshi
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
-            logger.debug('Invalid arguments')
+            logger.error('Invalid arguments')
             res.json({
                 result: 'error',
                 message: 'Invalid arguments',
@@ -26,7 +26,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(sourceAddress, server.network)) {
-            logger.debug('Invalid sourceAddress')
+            logger.error('Invalid sourceAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid sourceAddress',
@@ -34,7 +34,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(destinationAddress, server.network)) {
-            logger.debug('Invalid destinationAddress')
+            logger.error('Invalid destinationAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid destinationAddress',
@@ -42,7 +42,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.PrivateKey.isValid(privateKey, server.network)) {
-            logger.debug('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',
@@ -63,7 +63,7 @@ var btcSend = async function (req, res) {
         getBalance(sourceAddress, chain, res, function (balance) {
             logger.debug(balance, ' < ', amountSatoshi)
             if (balance < amountSatoshi) {
-                logger.debug('Insufficient funds')
+                logger.error('Insufficient funds')
                 res.json({
                     result: 'error',
                     message: 'Insufficient funds',
@@ -127,7 +127,7 @@ function getBalance(address, chain, res, callback) {
             return
         }
         if (body.error) {
-            logger.debug(body.error)
+            logger.error(body.error)
             res.json({
                 result: 'error',
                 message: body.error,
@@ -154,7 +154,7 @@ function getUTXO(address, chain, res, callback) {
     }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             if (!body.txrefs) {
-                logger.debug('Empty Unspend Transaction (Pending other Transaction)')
+                logger.error('Empty Unspend Transaction (Pending other Transaction)')
                 res.json({
                     result: 'error',
                     message: 'Empty Unspend Transaction (Pending other Transaction)',
@@ -177,8 +177,8 @@ function getUTXO(address, chain, res, callback) {
             }
             callback(utxos)
         } else {
-            logger.debug(error)
-            logger.debug('Unable to get UTXO')
+            logger.error(error)
+            logger.error('Unable to get UTXO')
             res.json({
                 result: 'error',
                 message: 'Unable to get UTXO',
@@ -197,8 +197,8 @@ function pushTransaction(pload, chain, res, callback) {
         body: pload
     }, function (err, response, body) {
         if (err) {
-            logger.debug(err)
-            logger.debug('Broadcast failed. Please try later')
+            logger.error(err)
+            logger.error('Broadcast failed. Please try later')
             res.json({
                 result: 'error',
                 message: 'Broadcast failed. Please try later',
@@ -206,7 +206,7 @@ function pushTransaction(pload, chain, res, callback) {
             return
         } else {
             if (body.error) {
-                logger.debug(body.error)
+                logger.error(body.error)
                 res.json({
                     result: 'error',
                     message: body.error,

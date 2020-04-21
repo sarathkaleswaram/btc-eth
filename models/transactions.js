@@ -9,7 +9,7 @@ const transactionSchema = new Schema({
     timeStamp: { type: Date, required: true },
     transactionHash: { type: String, required: true },
     blockHash: { type: String, required: true },
-    blockNumber: { type: String, required: true },
+    blockNumber: { type: Number, required: true },
     fee: { type: String, required: true }
 })
 

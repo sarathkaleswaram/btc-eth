@@ -14,7 +14,7 @@ var btcBalance = function (req, res) {
         var chain = server.network === 'testnet' ? 'test3' : 'main'
 
         if (!address) {
-            logger.debug('Address is empty')
+            logger.error('Address is empty')
             res.json({
                 result: 'error',
                 message: 'Address is empty',
@@ -22,7 +22,7 @@ var btcBalance = function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(address, server.network)) {
-            logger.debug('Invalid address')
+            logger.error('Invalid address')
             res.json({
                 result: 'error',
                 message: 'Invalid address',

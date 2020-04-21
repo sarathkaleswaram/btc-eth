@@ -17,7 +17,7 @@ var ethSend = async function (req, res) {
         var account
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
-            logger.debug('Invalid arguments')
+            logger.error('Invalid arguments')
             res.json({
                 result: 'error',
                 message: 'Invalid arguments',
@@ -25,7 +25,7 @@ var ethSend = async function (req, res) {
             return
         }
         if (!web3.utils.isAddress(sourceAddress)) {
-            logger.debug('Invalid sourceAddress')
+            logger.error('Invalid sourceAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid sourceAddress',
@@ -33,7 +33,7 @@ var ethSend = async function (req, res) {
             return
         }
         if (!web3.utils.isAddress(destinationAddress)) {
-            logger.debug('Invalid destinationAddress')
+            logger.error('Invalid destinationAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid destinationAddress',
@@ -43,7 +43,7 @@ var ethSend = async function (req, res) {
         try {
             account = web3.eth.accounts.privateKeyToAccount(privateKey)
         } catch (error) {
-            logger.debug('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',
@@ -75,7 +75,7 @@ var ethSend = async function (req, res) {
             logger.debug('Source Account Balance: ', balance + ' ETH')
             logger.debug(balance, ' < ', amount)
             if (parseFloat(balance) < amount) {
-                logger.debug('Insufficient funds')
+                logger.error('Insufficient funds')
                 res.json({
                     result: 'error',
                     message: 'Insufficient funds',
@@ -99,7 +99,7 @@ var ethSend = async function (req, res) {
                     var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
                     transaction.sign(privateKeyHex)
                 } catch (error) {
-                    logger.debug('Failed to sign Transaction')
+                    logger.error('Failed to sign Transaction')
                     logger.error(error)
                     res.json({
                         result: 'error',
@@ -111,7 +111,7 @@ var ethSend = async function (req, res) {
                 const serializedTransaction = transaction.serialize()
                 web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
                     if (err) {
-                        logger.debug(err)
+                        logger.error(err)
                         res.json({
                             result: 'error',
                             message: err,

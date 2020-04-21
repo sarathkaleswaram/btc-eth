@@ -11,7 +11,7 @@ var btcPrivateKeyToAddress = function (req, res) {
         var pKey = req.body.privateKey
 
         if (!pKey) {
-            logger.debug('PrivateKey is empty')
+            logger.error('PrivateKey is empty')
             res.json({
                 result: 'error',
                 message: 'PrivateKey is empty',
@@ -19,7 +19,7 @@ var btcPrivateKeyToAddress = function (req, res) {
             return
         }
         if (!bitcore.PrivateKey.isValid(pKey, server.network)) {
-            logger.debug('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',

@@ -11,7 +11,7 @@ var ethBalance = function (req, res) {
         var address = req.params.address
 
         if (!address) {
-            logger.debug('Address is empty')
+            logger.error('Address is empty')
             res.json({
                 result: 'error',
                 message: 'Address is empty',
@@ -19,7 +19,7 @@ var ethBalance = function (req, res) {
             return
         }
         if (!web3.utils.isAddress(address)) {
-            logger.debug('Invalid address')
+            logger.error('Invalid address')
             res.json({
                 result: 'error',
                 message: 'Invalid address',

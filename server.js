@@ -92,10 +92,16 @@ mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFin
     .catch(err => logger.error(err))
 
 // Cron Job runs every 5 secs
-var job = new CronJob('*/5 * * * * *', function () {
+var job1 = new CronJob('*/5 * * * * *', function () {
     runCronJob()
 })
-job.start()
+job1.start()
+
+// Cron Job runs every 10 mins
+var job2 = new CronJob('*/10 * * * *', function () {
+    checkPendingRequests()
+})
+job2.start()
 
 // Express
 const app = express()

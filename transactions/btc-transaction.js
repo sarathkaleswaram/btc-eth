@@ -1,9 +1,8 @@
 const request = require('request')
 const sb = require('satoshi-bitcoin')
 var requests = require('../models/requests')
-var transactions = require('../models/transactions')
 var server = require('../server')
-var { makeCallback, wsSend } = require('./callback')
+var { checkTxAndSave, wsSend } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -23,28 +22,18 @@ var dbPendingBtcTx = function (address, blocknumber) {
             logger.debug('Txs length:', body.txs.length)
             if (!body.txs.length) {
                 logger.debug('Subscribe addresses')
-                btcWsSubscribeAddressOnOpen()
+                btcWsSubscribeAddressOnOpen(address)
             }
             body.txs.forEach(tx => {
-                var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
-                if (outputIndex >= 0) {
-                    // get all input addresses - make unique - join to single string
-                    var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                    logger.debug('Got tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
-                    // make callback
-                    makeCallback('btc', inputAddresses, address, tx.hash, sb.toBitcoin(tx.outputs[outputIndex].value))
-                    // save transaction
-                    transactions.create({
-                        type: 'btc',
-                        address: address,
-                        from: inputAddresses,
-                        amount: sb.toBitcoin(tx.outputs[outputIndex].value),
-                        timeStamp: tx.confirmed,
-                        transactionHash: tx.hash,
-                        blockHash: tx.block_hash,
-                        blockNumber: tx.block_height,
-                        fee: sb.toBitcoin(tx.fees)
-                    }).then(() => logger.debug('BTC Transaction inserted')).catch(error => logger.error(error))
+                if (tx.block_height > 0) {
+                    var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
+                    if (outputIndex >= 0) {
+                        // get all input addresses - make unique - join to single string
+                        var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                        logger.debug('Got tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
+                        // check transaction hash with db before making callback and save
+                        checkTxAndSave('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
+                    }
                 }
             })
         }
@@ -53,9 +42,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
 
 var btcWsSubscribeAddressOnOpen = function (address) {
     server.btcWebsocket.on('open', function open() {
-        server.btcAccounts.forEach(address => {
-            btcWsSubscribeAddress(address)
-        })
+        btcWsSubscribeAddress(address)
     })
 }
 
@@ -125,29 +112,17 @@ function getBtcTxRecurrsive(txid) {
             logger.error(body.message)
         } else {
             if (body.block_height > 0) {
+                // get output array index
+                var outputIndex = body.outputs.findIndex(x => x.addresses.some(r => server.btcAccounts.includes(r)))
                 if (outputIndex >= 0) {
+                    var address = body.outputs[outputIndex].addresses.find(x => server.btcAccounts.includes(x))
                     // unsubscribe to tx and address
                     server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: txid, unsubscribe: true }))
                     server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
-                    // get output array index
-                    var outputIndex = body.outputs.findIndex(x => x.addresses.some(r => server.btcAccounts.includes(r)))
-                    var address = body.outputs[outputIndex].addresses.find(x => server.btcAccounts.includes(x))
-                    // get unique inputs
+                    // get unique address inputs
                     var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                    // make callback
-                    makeCallback('btc', inputAddresses, address, body.hash, sb.toBitcoin(body.outputs[outputIndex].value))
-                    // save transaction
-                    transactions.create({
-                        type: 'btc',
-                        address: address,
-                        from: inputAddresses,
-                        amount: sb.toBitcoin(body.outputs[outputIndex].value),
-                        timeStamp: body.confirmed,
-                        transactionHash: body.hash,
-                        blockHash: body.block_hash,
-                        blockNumber: body.block_height,
-                        fee: sb.toBitcoin(body.fees)
-                    }).then(() => logger.debug('BTC Transaction inserted')).catch(error => logger.error(error))
+                    // check transaction hash with db before making callback and save
+                    checkTxAndSave('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
                 } else {
                     logger.warn('BTC tx dont have output address:', body, ', btcAccounts:', server.btcAccounts)
                 }
