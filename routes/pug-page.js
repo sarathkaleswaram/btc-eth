@@ -11,9 +11,10 @@ logger.level = 'debug'
 
 var pugPage = function (req, res) {
     logger.debug('pugPage query params:', req.query)
-    var error = false, message = ''
+    var error = false, message = '', contractAddress
     var params = {
         type: req.query.type,
+        ercToken: req.query.ercToken,
         address: req.query.address,
         token: req.query.token,
         timestamp: req.query.timestamp,
@@ -56,6 +57,17 @@ var pugPage = function (req, res) {
                     if (!server.web3.utils.isAddress(params.address)) {
                         error = true
                         message += 'Invalid address. '
+                    }
+                    // Check ERC Token
+                    if (params.ercToken) {
+                        var index = server.ercToken.findIndex(x => x.ercToken === params.ercToken.toUpperCase())
+                        if (index >= 0) {
+                            contractAddress = server.ercToken[index].contractAddress
+                        }
+                        if (!contractAddress) {
+                            error = true
+                            message += 'Unknown ERC Token. '
+                        }
                     }
                 }
             }
@@ -111,9 +123,14 @@ var pugPage = function (req, res) {
                                 server.web3.eth.getBlockNumber().then((blocknumber) => {
                                     logger.debug('ETH current blocknumber:', blocknumber)
                                     // add to eth accounts array
-                                    server.ethAccounts.push(params.address)
+                                    if (params.ercToken) {
+                                        server.ethAccounts.push(contractAddress)
+                                        server.ethErcTokenAccounts.push(params.address)
+                                    } else {
+                                        server.ethAccounts.push(params.address)
+                                    }
                                     // Save request
-                                    requests.create({
+                                    var ethRequest = {
                                         type: params.type,
                                         address: params.address,
                                         token: params.token,
@@ -121,7 +138,10 @@ var pugPage = function (req, res) {
                                         callback: params.callback,
                                         blocknumber: blocknumber,
                                         status: 'Pending'
-                                    }).then(() => {
+                                    }
+                                    if (params.ercToken)
+                                        ethRequest.ercToken = params.ercToken.toUpperCase()
+                                    requests.create(ethRequest).then(() => {
                                         logger.debug('Request inserted')
                                         res.render('index', { src: url, account: params.address })
                                     }, error => {
@@ -135,7 +155,7 @@ var pugPage = function (req, res) {
                             }
                         } else {
                             if (doc.status === 'Completed') {
-                                logger.debug('Request already exists. Account already used.')
+                                logger.error('Request already exists. Account already used.')
                                 res.render('index', { error: true, message: 'Account address already used.' })
                             } else {
                                 logger.debug('Request already exists. Account not used.')
@@ -146,6 +166,7 @@ var pugPage = function (req, res) {
                 })
             })
         } catch (error) {
+            logger.error(error)
             res.render('index', { error: true, message: error.toString() })
         }
     }

@@ -1,6 +1,4 @@
-# BTC, ETH - Payment Gateway
-
-### Create and Send Transactions
+# BTC, ETH - (ERC20) - Payment Gateway
 
 ## Links
 
@@ -14,6 +12,25 @@ https://infura.io/
 
 https://web3js.readthedocs.io/en/v1.2.6/
 
+https://medium.com/@codetractio/inside-an-ethereum-transaction-fa94ffca912f
+
+## Install and run
+```sh
+npm install
+npm start
+```
+
+Open link by passing params
+```
+type
+address
+token
+timestamp
+callback
+ercToken (optional)
+```
+
+### Create and Send Transactions
 
 ## API
 
@@ -109,6 +126,32 @@ body:
 	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
 	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
 	"amount": 1.10
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "0x8514cc130412ae0764ec6660ea3e885f2dcfdde70847a9717f576fa9406686f8",
+    "link": "https://ropsten.etherscan.io/tx/0x8514cc130412ae0764ec6660ea3e885f2dcfdde70847a9717f576fa9406686f8"
+}
+```
+
+### ERC20 Token API
+```json
+GET: /eth/ercToken/SHAR/balance/:address
+Response:
+{
+    "result": "success",
+    "address": "0xe75F5C9C9177fC3553Db4332F419b91d2A3D6Edc",
+    "balance": "160.73000000000000002 SHAR"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /eth/ercToken/SHAR/send
+body:
+{
+	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
+	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
+	"amount": 10
 }
 Response:
 {

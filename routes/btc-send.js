@@ -108,7 +108,7 @@ var btcSend = async function (req, res) {
         logger.error('btcSend catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }
@@ -122,7 +122,7 @@ function getBalance(address, chain, res, callback) {
             logger.error(error)
             res.json({
                 result: 'error',
-                message: error,
+                message: error.toString(),
             })
             return
         }

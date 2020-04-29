@@ -39,7 +39,7 @@ var ethPrivateKeyToAddress = function (req, res) {
         logger.error('ethPrivateKeyToAddress catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }

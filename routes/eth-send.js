@@ -67,7 +67,7 @@ var ethSend = async function (req, res) {
                 logger.error(error)
                 res.json({
                     result: 'error',
-                    message: error,
+                    message: error.toString(),
                 })
                 return
             }
@@ -114,7 +114,7 @@ var ethSend = async function (req, res) {
                         logger.error(err)
                         res.json({
                             result: 'error',
-                            message: err,
+                            message: err.toString(),
                         })
                         return
                     }
@@ -132,7 +132,7 @@ var ethSend = async function (req, res) {
         logger.error('ethSend catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }

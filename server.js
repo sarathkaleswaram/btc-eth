@@ -64,6 +64,24 @@ btcWebsocket.on('open', function open() {
     btcWsOnMessage()
 })
 
+// ETH Tokens
+var erc20Tokens = [
+    {
+        ercToken: 'JAN',
+        contractAddress: '0xAf80e6612D9C2E883122e7F2292Ee6C34176ad4F'
+    },
+    {
+        ercToken: 'GRT',
+        contractAddress: '0xb83Cd8d39462B761bb0092437d38b37812dd80A2'
+    }
+]
+var testERC20Tokens = [
+    {
+        ercToken: 'SHAR',
+        contractAddress: '0x3d64cd48f4dBa0979a64C320C353198c7a28348E'
+    }
+]
+
 // Exports
 exports.network = network
 exports.ethNetwork = ethNetwork
@@ -74,6 +92,7 @@ exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
 exports.web3ws = new Web3(web3WsProvider)
+exports.ercToken = isMainnet ? erc20Tokens : testERC20Tokens
 exports.a2zUrl = a2zUrl
 
 // BTC-ETH accounts & transactions
@@ -81,6 +100,8 @@ exports.btcAccounts = []
 exports.btcTxHashes = []
 exports.ethAccounts = []
 exports.ethTxHashes = []
+exports.ethErcTokenAccounts = []
+exports.ethErcTokenTxHashes = []
 
 // Mongodb
 var mongoUrl = 'mongodb://127.0.0.1:27017/btc_eth'
@@ -131,6 +152,9 @@ app.get('/eth/create', routes.ethCreate)
 app.get('/eth/balance/:address', routes.ethBalance)
 app.post('/eth/privatekey-to-address', routes.ethPrivateKeyToAddress)
 app.post('/eth/send', routes.ethSend)
+// ERC20 Token
+app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
+app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
 
 // 404
 app.get('/*', (_, res) => {

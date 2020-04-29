@@ -42,7 +42,7 @@ var btcPrivateKeyToAddress = function (req, res) {
         logger.error('btcPrivateKeyToAddress catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }

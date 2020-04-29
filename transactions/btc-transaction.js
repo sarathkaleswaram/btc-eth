@@ -14,8 +14,12 @@ var dbPendingBtcTx = function (address, blocknumber) {
         url: url,
         json: true
     }, function (error, response, body) {
-        if (error) logger.error(error)
+        if (error) {
+            logger.error(error)
+            return
+        }
         if (body.error) {
+            logger.error(body.error)
             logger.error(body.message)
         } else {
             logger.debug('Txs length:', body.txs.length)
@@ -54,10 +58,10 @@ var btcWsUnsubscribeAddress = function (address) {
 }
 
 // var sendBtcWsEvent = function () {
-// server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction' }))
-// server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: '62a82a27b7a6329d74c002a4650b43647ae74f320a0a64a4a7919a8c5ecdf10c' }))
-// server.btcWebsocket.send(JSON.stringify({ type: 'address', address: 'muwXiE64xymEQnd389N9V3j4cga3sZWyGP' }))
-// server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction', unsubscribe: true }))
+//     server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction' }))
+//     server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: '62a82a27b7a6329d74c002a4650b43647ae74f320a0a64a4a7919a8c5ecdf10c' }))
+//     server.btcWebsocket.send(JSON.stringify({ type: 'address', address: 'muwXiE64xymEQnd389N9V3j4cga3sZWyGP' }))
+//     server.btcWebsocket.send(JSON.stringify({ type: 'new-transaction', unsubscribe: true }))
 // }
 
 var btcWsOnMessage = function () {
@@ -106,8 +110,12 @@ function getBtcTxRecurrsive(txid) {
         url: url,
         json: true
     }, function (error, response, body) {
-        if (error) logger.error(error)
+        if (error) {
+            logger.error(error)
+            return
+        }
         if (body.error) {
+            logger.error(body.error)
             logger.error(body.message)
         } else {
             if (body.block_height > 0) {
@@ -120,6 +128,8 @@ function getBtcTxRecurrsive(txid) {
                     server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
                     // get unique address inputs
                     var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                    // remove from arrays
+                    server.btcAccounts.splice(server.btcAccounts.findIndex(x => x === address), 1)
                     // check transaction hash with db before making callback and save
                     checkTxAndSave('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
                 } else {

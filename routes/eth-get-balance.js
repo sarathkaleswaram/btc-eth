@@ -47,7 +47,7 @@ var ethBalance = function (req, res) {
         logger.error('ethBalance catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }

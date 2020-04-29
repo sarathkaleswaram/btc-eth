@@ -19,7 +19,7 @@ var ethCreate = function (req, res) {
         logger.error('btcCreate catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }
