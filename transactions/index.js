@@ -1,6 +1,6 @@
 var server = require('../server')
 var requests = require('../models/requests')
-var { dbPendingEthTx, getEthTxByHashes } = require('./eth-transaction')
+var { dbPendingEthTx, getEthTxByHashes, getEthErcTokenTxByHashes } = require('./eth-transaction')
 var { dbPendingBtcTx } = require('./btc-transaction')
 
 const log4js = require('log4js')
@@ -36,6 +36,8 @@ var checkPendingRequests = function () {
 var runCronJob = function () {
     if (server.ethTxHashes.length)
         getEthTxByHashes()
+    if (server.ethErcTokenTxHashes.length)
+        getEthErcTokenTxByHashes()
 }
 
 exports.checkPendingRequests = checkPendingRequests

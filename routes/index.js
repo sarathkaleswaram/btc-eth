@@ -7,10 +7,13 @@ Routes.btcCreate = require('./btc-create-account')
 Routes.btcBalance = require('./btc-get-balance')
 Routes.btcPrivateKeyToAddress = require('./btc-privateKey-to-account')
 Routes.btcSend = require('./btc-send')
-// // Ethereum
+// Ethereum
 Routes.ethCreate = require('./eth-create-account')
 Routes.ethBalance = require('./eth-get-balance')
 Routes.ethPrivateKeyToAddress = require('./eth-privateKey-to-account')
 Routes.ethSend = require('./eth-send')
+// Ethereum ERC20 Token
+Routes.ethTokenBalance = require('./eth-token-get-balance')
+Routes.ethTokenSend = require('./eth-token-send')
 
 module.exports = Routes

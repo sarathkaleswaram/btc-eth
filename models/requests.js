@@ -3,6 +3,7 @@ const Schema = mongoose.Schema
 
 const requestSchema = new Schema({
     type: { type: String, required: true },
+    ercToken: { type: String },
     address: { type: String, required: true, unique: true },
     token: { type: String, required: true },
     timestamp: { type: String, required: true },

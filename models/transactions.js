@@ -3,6 +3,7 @@ const Schema = mongoose.Schema
 
 const transactionSchema = new Schema({
     type: { type: String, required: true },
+    ercToken: { type: String },
     address: { type: String, required: true },
     from: { type: String, required: true },
     amount: { type: String, required: true },

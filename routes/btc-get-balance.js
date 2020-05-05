@@ -37,7 +37,7 @@ var btcBalance = function (req, res) {
                 logger.error(error)
                 res.json({
                     result: 'error',
-                    message: error,
+                    message: error.toString(),
                 })
                 return
             }
@@ -61,7 +61,7 @@ var btcBalance = function (req, res) {
         logger.error('btcBalance catch Error:', error)
         res.json({
             result: 'error',
-            message: error,
+            message: error.toString(),
         })
     }
 }
