@@ -1,0 +1,43 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    meta(name='description' content='')
+    meta(name='author' content='')
+    link(rel='icon' href='image/a2z_fav.png')
+    title='Payment Gateway'
+    link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css')
+    link(rel='stylesheet' href='css/style.css')
+
+  body
+    nav.navbar.bg-brand.fixed-top
+      .container
+        span.navbar-brand
+          img(src='image/a2z_new.svg' height='60' alt='')
+
+    .container
+      #websocket-error
+      #websocket-submitted-message
+      #websocket-confirmed-message
+      .jumbotron
+        if error
+          .alert.alert-danger 
+            strong Invalid Request. 
+            span #{message}
+        else
+          p.text-center.lead Welcome! Scan QR Code
+          .card.mx-auto
+            .card-body
+              img.qrcode(alt='QR Code' src=src)
+          br
+          p.text-center
+            strong Address: 
+            span#copy-address #{account} 
+            i.far.fa-copy.copied-popover#copy-clipboard(style='cursor: pointer')
+
+  script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js')
+  script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')
+  script(src='js/app.js')

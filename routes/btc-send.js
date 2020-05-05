@@ -3,9 +3,13 @@ const request = require('request')
 const sb = require('satoshi-bitcoin')
 var server = require('../server')
 
+const log4js = require('log4js')
+var logger = log4js.getLogger('btc-eth')
+logger.level = 'debug'
+
 var btcSend = async function (req, res) {
     try {
-        console.log('\nbtcSend body:', req.body)
+        logger.debug('btcSend body:', req.body)
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
@@ -14,7 +18,7 @@ var btcSend = async function (req, res) {
         var amountSatoshi
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
-            console.log('Invalid arguments')
+            logger.error('Invalid arguments')
             res.json({
                 result: 'error',
                 message: 'Invalid arguments',
@@ -22,7 +26,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(sourceAddress, server.network)) {
-            console.log('Invalid sourceAddress')
+            logger.error('Invalid sourceAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid sourceAddress',
@@ -30,7 +34,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(destinationAddress, server.network)) {
-            console.log('Invalid destinationAddress')
+            logger.error('Invalid destinationAddress')
             res.json({
                 result: 'error',
                 message: 'Invalid destinationAddress',
@@ -38,7 +42,7 @@ var btcSend = async function (req, res) {
             return
         }
         if (!bitcore.PrivateKey.isValid(privateKey, server.network)) {
-            console.log('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',
@@ -48,7 +52,7 @@ var btcSend = async function (req, res) {
         try {
             amountSatoshi = sb.toSatoshi(amount)
         } catch (error) {
-            console.error('Invalid amount')
+            logger.error('Invalid amount')
             res.json({
                 result: 'error',
                 message: 'Invalid amount',
@@ -57,9 +61,9 @@ var btcSend = async function (req, res) {
         }
 
         getBalance(sourceAddress, chain, res, function (balance) {
-            console.log(balance, ' < ', amountSatoshi)
+            logger.debug(balance, ' < ', amountSatoshi)
             if (balance < amountSatoshi) {
-                console.log('Insufficient funds')
+                logger.error('Insufficient funds')
                 res.json({
                     result: 'error',
                     message: 'Insufficient funds',
@@ -76,8 +80,8 @@ var btcSend = async function (req, res) {
                         // .fee(fee)
                         .sign(privateKey)
                 } catch (error) {
-                    console.log('Failed to sign Transaction')
-                    console.error(error)
+                    logger.debug('Failed to sign Transaction')
+                    logger.error(error)
                     res.json({
                         result: 'error',
                         message: 'Failed to sign Transaction',
@@ -90,9 +94,8 @@ var btcSend = async function (req, res) {
                 }
                 // broadcast transaction
                 pushTransaction(payload, chain, res, function (txid) {
-                    var path = server.network === 'mainnet' ? 'btc' : 'btc-testnet'
-                    const url = `https://live.blockcypher.com/${path}/tx/${txid}`
-                    console.log({ transactionHash: txid, link: url })
+                    const url = `${server.btcExplorerUrl}/tx/${txid}`
+                    logger.debug({ transactionHash: txid, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: txid,
@@ -102,7 +105,7 @@ var btcSend = async function (req, res) {
             })
         })
     } catch (error) {
-        console.error('btcSend catch Error:', error)
+        logger.error('btcSend catch Error:', error)
         res.json({
             result: 'error',
             message: error,
@@ -112,11 +115,11 @@ var btcSend = async function (req, res) {
 
 function getBalance(address, chain, res, callback) {
     request({
-        url: `https://api.blockcypher.com/v1/btc/${chain}/addrs/${address}/balance`,
+        url: `${server.btcAPI}/addrs/${address}/balance`,
         json: true
     }, function (error, response, body) {
         if (error) {
-            console.error(error)
+            logger.error(error)
             res.json({
                 result: 'error',
                 message: error,
@@ -124,7 +127,7 @@ function getBalance(address, chain, res, callback) {
             return
         }
         if (body.error) {
-            console.log(body.error)
+            logger.error(body.error)
             res.json({
                 result: 'error',
                 message: body.error,
@@ -132,7 +135,7 @@ function getBalance(address, chain, res, callback) {
             return
         }
         var balance = sb.toBitcoin(body.final_balance)
-        console.log('Source address balance is:', balance + ' BTC')
+        logger.debug('Source address balance is:', balance + ' BTC')
         if (body.final_balance <= 0) {
             res.json({
                 result: 'error',
@@ -146,19 +149,19 @@ function getBalance(address, chain, res, callback) {
 
 function getUTXO(address, chain, res, callback) {
     request({
-        url: `http://api.blockcypher.com/v1/btc/${chain}/addrs/${address}?unspentOnly=true&includeScript=true`,
+        url: `${server.btcAPI}/addrs/${address}?unspentOnly=true&includeScript=true`,
         json: true
     }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             if (!body.txrefs) {
-                console.log('Empty Unspend Transaction (Pending other Transaction)')
+                logger.error('Empty Unspend Transaction (Pending other Transaction)')
                 res.json({
                     result: 'error',
                     message: 'Empty Unspend Transaction (Pending other Transaction)',
                 })
                 return
             }
-            console.log('UTXO length: ', body.txrefs.length)
+            logger.debug('UTXO length: ', body.txrefs.length)
             var utxos = []
             var totalSats = 0
             var txSize = 44
@@ -174,8 +177,8 @@ function getUTXO(address, chain, res, callback) {
             }
             callback(utxos)
         } else {
-            console.log(error)
-            console.log('Unable to get UTXO')
+            logger.error(error)
+            logger.error('Unable to get UTXO')
             res.json({
                 result: 'error',
                 message: 'Unable to get UTXO',
@@ -187,15 +190,15 @@ function getUTXO(address, chain, res, callback) {
 
 function pushTransaction(pload, chain, res, callback) {
     request({
-        url: `https://api.blockcypher.com/v1/btc/${chain}/txs/push`,
+        url: `${server.btcAPI}/txs/push`,
         method: 'POST',
         json: true,
         headers: { 'content-type': 'application/json' },
         body: pload
     }, function (err, response, body) {
         if (err) {
-            console.log(err)
-            console.log('Broadcast failed. Please try later')
+            logger.error(err)
+            logger.error('Broadcast failed. Please try later')
             res.json({
                 result: 'error',
                 message: 'Broadcast failed. Please try later',
@@ -203,7 +206,7 @@ function pushTransaction(pload, chain, res, callback) {
             return
         } else {
             if (body.error) {
-                console.log(body.error)
+                logger.error(body.error)
                 res.json({
                     result: 'error',
                     message: body.error,

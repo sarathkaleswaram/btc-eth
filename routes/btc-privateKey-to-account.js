@@ -1,13 +1,17 @@
 const bitcore = require('bitcore-lib')
 var server = require('../server')
 
+const log4js = require('log4js')
+var logger = log4js.getLogger('btc-eth')
+logger.level = 'debug'
+
 var btcPrivateKeyToAddress = function (req, res) {
     try {
-        console.log('\nbtcPrivateKeyToAddress body:', req.body)
+        logger.debug('btcPrivateKeyToAddress body:', req.body)
         var pKey = req.body.privateKey
 
         if (!pKey) {
-            console.log('PrivateKey is empty')
+            logger.error('PrivateKey is empty')
             res.json({
                 result: 'error',
                 message: 'PrivateKey is empty',
@@ -15,7 +19,7 @@ var btcPrivateKeyToAddress = function (req, res) {
             return
         }
         if (!bitcore.PrivateKey.isValid(pKey, server.network)) {
-            console.log('Invalid PrivateKey')
+            logger.error('Invalid PrivateKey')
             res.json({
                 result: 'error',
                 message: 'Invalid PrivateKey',
@@ -27,7 +31,7 @@ var btcPrivateKeyToAddress = function (req, res) {
         var wif = privateKey.toWIF()
         var address = privateKey.toAddress()
 
-        console.log({ address: address.toString(), privateKey: privateKey.toString() })
+        logger.debug({ address: address.toString(), privateKey: privateKey.toString() })
 
         res.json({
             result: 'success',
@@ -35,7 +39,7 @@ var btcPrivateKeyToAddress = function (req, res) {
             privateKey: privateKey.toString()
         })
     } catch (error) {
-        console.error('btcPrivateKeyToAddress catch Error:', error)
+        logger.error('btcPrivateKeyToAddress catch Error:', error)
         res.json({
             result: 'error',
             message: error,

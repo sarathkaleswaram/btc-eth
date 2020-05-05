@@ -3,14 +3,18 @@ const request = require('request')
 const sb = require('satoshi-bitcoin')
 var server = require('../server')
 
+const log4js = require('log4js')
+var logger = log4js.getLogger('btc-eth')
+logger.level = 'debug'
+
 var btcBalance = function (req, res) {
     try {
-        console.log('\nbtcBalance params:', req.params)
+        logger.debug('btcBalance params:', req.params)
         var address = req.params.address
         var chain = server.network === 'testnet' ? 'test3' : 'main'
 
         if (!address) {
-            console.log('Address is empty')
+            logger.error('Address is empty')
             res.json({
                 result: 'error',
                 message: 'Address is empty',
@@ -18,7 +22,7 @@ var btcBalance = function (req, res) {
             return
         }
         if (!bitcore.Address.isValid(address, server.network)) {
-            console.log('Invalid address')
+            logger.error('Invalid address')
             res.json({
                 result: 'error',
                 message: 'Invalid address',
@@ -26,11 +30,11 @@ var btcBalance = function (req, res) {
             return
         }
         request({
-            url: `https://api.blockcypher.com/v1/btc/${chain}/addrs/${address}/balance`,
+            url: `${server.btcAPI}/addrs/${address}/balance`,
             json: true
         }, function (error, response, body) {
             if (error) {
-                console.error(error)
+                logger.error(error)
                 res.json({
                     result: 'error',
                     message: error,
@@ -38,7 +42,7 @@ var btcBalance = function (req, res) {
                 return
             }
             if (body.error) {
-                console.log(body.error)
+                logger.debug(body.error)
                 res.json({
                     result: 'error',
                     message: body.error,
@@ -46,7 +50,7 @@ var btcBalance = function (req, res) {
                 return
             }
             var balance = sb.toBitcoin(body.final_balance) + ' BTC'
-            console.log(balance)
+            logger.debug(balance)
             res.json({
                 result: 'success',
                 address: address,
@@ -54,7 +58,7 @@ var btcBalance = function (req, res) {
             })
         })
     } catch (error) {
-        console.error('btcBalance catch Error:', error)
+        logger.error('btcBalance catch Error:', error)
         res.json({
             result: 'error',
             message: error,

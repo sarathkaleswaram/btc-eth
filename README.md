@@ -1,4 +1,4 @@
-# BTC-ETH
+# BTC, ETH - Payment Gateway
 
 ### Create and Send Transactions
 
@@ -22,13 +22,12 @@ Networks two types
 2. testnet
 
 Update in server.js 
-```
-network = 'mainnet' 
-ethNetwork = 'mainnet' 
+```js
+const isMainnet = false // true, false
 ```
 
 ### Bitcoin
-```
+```json
 GET: /btc/create
 Response:
 {
@@ -74,7 +73,7 @@ Response:
 ```
 
 ### Ethereum
-```
+```json
 GET: /eth/create'
 Response:
 {
@@ -120,7 +119,7 @@ Response:
 ```
 
 ### API Error 
-```
+```json
 {
     "result": "error",
     "message": "Insufficient funds"
