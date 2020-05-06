@@ -1,7 +1,7 @@
 const request = require('request')
 var transactions = require('../models/transactions')
 var server = require('../server')
-var { checkTxAndSave, wsSend } = require('./callback')
+var { checkTxAndCallback, makeSubmittedCallback } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -26,7 +26,7 @@ var dbPendingEthTx = function (address, blocknumber) {
                 if (tx.to === address.toLowerCase()) {
                     logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
                     // check transaction hash with db before making callback and save
-                    checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
+                    checkTxAndCallback('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
                 }
             })
         }
@@ -78,11 +78,11 @@ var subscribeEthPendingTx = function () {
                             var amountHex = '0x' + tx.input.substr(76)
                             var amount = server.web3.utils.hexToNumberString(amountHex)
                             server.ethErcTokenTxHashes.push(tx.hash)
-                            wsSend(to, 'eth', 'submitted', server.web3.utils.fromWei(amount, 'ether'), tx.hash, server.ercToken[index].ercToken)
+                            makeSubmittedCallback('eth', tx.from, to, tx.hash, server.web3.utils.fromWei(amount, 'ether'), server.ercToken[index].ercToken)
                         } else {
                             // Normal Transaction
                             server.ethTxHashes.push(tx.hash)
-                            wsSend(tx.to, 'eth', 'submitted', server.web3.utils.fromWei(tx.value.toString(), 'ether'), tx.hash)
+                            makeSubmittedCallback('eth', tx.from, tx.to, tx.hash, server.web3.utils.fromWei(tx.value.toString(), 'ether'))
                         }
                     }
                 }
@@ -122,7 +122,7 @@ var getEthTxByHashes = function () {
             // remove from arrays
             server.ethTxHashes.splice(server.ethTxHashes.findIndex(x => x === txHash), 1)
             // check transaction hash with db before making callback and save
-            checkTxAndSave('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee)
+            checkTxAndCallback('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee)
         }
     })
 }
@@ -161,7 +161,7 @@ var getEthErcTokenTxByHashes = function () {
             server.ethErcTokenAccounts.splice(server.ethErcTokenAccounts.findIndex(x => x === to), 1)
             if (to) {
                 // check transaction hash with db before making callback and save
-                checkTxAndSave('eth', to, from, web3.utils.fromWei(amount.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee, server.ercToken[tokenIndex].ercToken)
+                checkTxAndCallback('eth', to, from, web3.utils.fromWei(amount.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee, server.ercToken[tokenIndex].ercToken)
             } else {
                 logger.warn('To Address is empty')
             }

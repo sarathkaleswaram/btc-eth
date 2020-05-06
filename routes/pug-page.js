@@ -154,13 +154,15 @@ var pugPage = function (req, res) {
                                 })
                             }
                         } else {
-                            if (doc.status === 'Completed') {
-                                logger.error('Request already exists. Account already used.')
-                                res.render('index', { error: true, message: 'Account address already used.' })
-                            } else {
-                                logger.debug('Request already exists. Account not used.')
-                                res.render('index', { src: url, account: params.address })
-                            }
+                            logger.error('Request already exists. Account already used.')
+                            res.render('index', { error: true, message: 'Account address already used.' })
+                            // if (doc.status === 'Completed') {
+                            //     logger.error('Request already exists. Account already used.')
+                            //     res.render('index', { error: true, message: 'Account address already used.' })
+                            // } else {
+                            //     logger.debug('Request already exists. Account not used.')
+                            //     res.render('index', { src: url, account: params.address })
+                            // }
                         }
                     }
                 })

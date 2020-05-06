@@ -10,6 +10,7 @@ const log4js = require('log4js')
 const WebSocket = require('ws')
 const CronJob = require('cron').CronJob
 var routes = require('./routes')
+var requests = require('./models/requests')
 var { runCronJob, checkPendingRequests } = require('./transactions')
 var { subscribeEthPendingTx } = require('./transactions/eth-transaction')
 var { btcWsOnMessage } = require('./transactions/btc-transaction')
@@ -59,7 +60,7 @@ web3WsProvider.on('connect', () => {
 // Bitcoin ws connection
 var btcWebsocket = new WebSocket(btcWsAPI)
 btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
-btcWebsocket.on('open', function open() {
+btcWebsocket.on('open', function () {
     logger.debug('BTC Websocket connected')
     btcWsOnMessage()
 })
@@ -82,6 +83,7 @@ var testERC20Tokens = [
     }
 ]
 
+var ercToken = isMainnet ? erc20Tokens : testERC20Tokens
 // Exports
 exports.network = network
 exports.ethNetwork = ethNetwork
@@ -92,16 +94,20 @@ exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
 exports.web3ws = new Web3(web3WsProvider)
-exports.ercToken = isMainnet ? erc20Tokens : testERC20Tokens
+exports.ercToken = ercToken
 exports.a2zUrl = a2zUrl
 
+var ethAccounts = []
+var ethTxHashes = []
+var ethErcTokenAccounts = []
+var ethErcTokenTxHashes = []
 // BTC-ETH accounts & transactions
 exports.btcAccounts = []
 exports.btcTxHashes = []
-exports.ethAccounts = []
-exports.ethTxHashes = []
-exports.ethErcTokenAccounts = []
-exports.ethErcTokenTxHashes = []
+exports.ethAccounts = ethAccounts
+exports.ethTxHashes = ethTxHashes
+exports.ethErcTokenAccounts = ethErcTokenAccounts
+exports.ethErcTokenTxHashes = ethErcTokenTxHashes
 
 // Mongodb
 var mongoUrl = 'mongodb://127.0.0.1:27017/btc_eth'
@@ -172,7 +178,28 @@ var server = app.listen(port, () => {
 var wss = new WebSocket.Server({ server })
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
-        logger.debug(`Address: ${message} is connected through Websocket`)
+        message = JSON.parse(message)
+        if (message.status === 'connected') {
+            logger.debug(`Address: ${message.address} is connected through Websocket`)
+        }
+        if (message.status === 'closed') {
+            logger.debug(`Address: ${message.address} window closed`)
+            // update db
+            requests.findOneAndUpdate({ address: message.address }, { status: 'Closed' }, (err, doc) => {
+                if (err) logger.error(err)
+            })
+            // remove from array
+            if (message.ercToken) {
+                var index = ercToken.findIndex(x => x.ercToken === message.ercToken.toUpperCase())
+                if (index >= 0) {
+                    contractAddress = ercToken[index].contractAddress
+                    ethAccounts.splice(ethAccounts.findIndex(x => x === contractAddress), 1)
+                    ethErcTokenAccounts.splice(ethErcTokenAccounts.findIndex(x => x === message.address), 1)
+                }
+            } else {
+                ethAccounts.splice(ethAccounts.findIndex(x => x === message.address), 1)
+            }
+        }
     })
 })
 wss.on('listening', function listen() {

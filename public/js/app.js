@@ -2,8 +2,7 @@ $(document).ready(function () {
     window.WebSocket = window.WebSocket || window.MozWebSocket
     var wsUrl = `ws://${window.location.host}`
     var connection = new WebSocket(wsUrl)
-
-    var address = $('#copy-address').text().trim()
+    var urlParams = new URLSearchParams(window.location.search)
 
     if (!window.WebSocket) {
         appendWsError()
@@ -11,7 +10,11 @@ $(document).ready(function () {
 
     connection.onopen = function () {
         console.log('Websocket connected.')
-        connection.send(address)
+        connection.send(JSON.stringify({ address: urlParams.get('address'), status: 'connected' }))
+
+        $(window).on('unload', function () {
+            connection.send(JSON.stringify({ address: urlParams.get('address'), status: 'closed', ercToken: urlParams.get('ercToken') || undefined }))
+        })
     }
 
     connection.onerror = function (error) {
@@ -33,6 +36,9 @@ $(document).ready(function () {
                             <p>${message.message}</p>
                         </div>
                     `)
+                    setTimeout(function () {
+                        window.location.replace(message.callbackUrl)
+                    }, 3000)
                 }
                 if (message.type === 'confirmed') {
                     console.log('Got confirmed message')
@@ -46,7 +52,6 @@ $(document).ready(function () {
                     setTimeout(function () {
                         window.location.replace(message.callbackUrl)
                     }, 2000)
-
                 }
             }
         } catch (e) {

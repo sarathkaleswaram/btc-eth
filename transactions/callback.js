@@ -8,7 +8,7 @@ const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
 
-var checkTxAndSave = function (type, address, from, amount, timeStamp, transactionHash, blockHash, blockNumber, fee, ercToken) {
+var checkTxAndCallback = function (type, address, from, amount, timeStamp, transactionHash, blockHash, blockNumber, fee, ercToken) {
     // check tx hash in db
     transactions.findOne({ transactionHash: transactionHash }, (err, doc) => {
         if (err) {
@@ -16,7 +16,7 @@ var checkTxAndSave = function (type, address, from, amount, timeStamp, transacti
         } else {
             if (!doc) {
                 // make callback
-                makeCallback(type, from, address, transactionHash, amount, ercToken)
+                makeConfirmedCallback(type, from, address, transactionHash, amount, ercToken)
                 // save transaction
                 var saveTx = {
                     type: type,
@@ -39,12 +39,12 @@ var checkTxAndSave = function (type, address, from, amount, timeStamp, transacti
     })
 }
 
-var makeCallback = function (type, sender, receiver, tid, amount, ercToken) {
+var makeConfirmedCallback = function (type, sender, receiver, tid, amount, ercToken) {
     logger.debug('Making callback:', type, sender, receiver, tid, amount, ercToken)
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
-            wsSend(receiver, type, 'confirmed', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender)
+            wsSend(receiver, type, 'confirmed', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 1)
             var payload = {
                 type: type,
                 token: doc.token,
@@ -52,7 +52,8 @@ var makeCallback = function (type, sender, receiver, tid, amount, ercToken) {
                 receiver: receiver,
                 sender: sender,
                 amount: amount,
-                tid: tid
+                tid: tid,
+                status: 1
             }
             if (ercToken)
                 payload.ercToken = ercToken
@@ -73,11 +74,46 @@ var makeCallback = function (type, sender, receiver, tid, amount, ercToken) {
     })
 }
 
-var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback, token, timestamp, sender) {
+var makeSubmittedCallback = function (type, sender, receiver, tid, amount, ercToken) {
+    logger.debug('Making callback:', type, sender, receiver, tid, amount, ercToken)
+    requests.findOne({ address: receiver }, (err, doc) => {
+        if (err) logger.error(err)
+        if (doc) {
+            wsSend(receiver, type, 'submitted', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 0)
+            var payload = {
+                type: type,
+                token: doc.token,
+                timestamp: doc.timestamp,
+                receiver: receiver,
+                sender: sender,
+                amount: amount,
+                tid: tid,
+                status: 0
+            }
+            if (ercToken)
+                payload.ercToken = ercToken
+            request({
+                url: server.a2zUrl,
+                method: 'POST',
+                json: true,
+                headers: { 'content-type': 'application/json' },
+                body: payload
+            }, function (err, response, body) {
+                if (err) {
+                    logger.error(err)
+                } else {
+                    logger.debug('A2Z Callback response:', body)
+                }
+            })
+        }
+    })
+}
+
+var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback, token, timestamp, sender, status) {
     server.wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
             var url, title, wsMessage, currency
-            var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}`
+            var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}&status=${status}`
             if (ercToken) {
                 callbackUrl += `&ercToken=${ercToken}`
             }
@@ -91,7 +127,7 @@ var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback
             }
             if (wsType === 'submitted') {
                 title = 'Your transaction is submitted and pending.'
-                wsMessage = 'Once transaction is confirmed, we will credit the amount.'
+                wsMessage = 'Once transaction is confirmed, we will credit the amount. <br><br> You will be redirected back.'
             }
             if (wsType === 'confirmed') {
                 title = 'Your transaction is confirmed.'
@@ -111,5 +147,5 @@ var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback
     })
 }
 
-exports.wsSend = wsSend
-exports.checkTxAndSave = checkTxAndSave
+exports.makeSubmittedCallback = makeSubmittedCallback
+exports.checkTxAndCallback = checkTxAndCallback

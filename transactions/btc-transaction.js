@@ -1,7 +1,7 @@
 const request = require('request')
 const sb = require('satoshi-bitcoin')
 var server = require('../server')
-var { checkTxAndSave, wsSend } = require('./callback')
+var { checkTxAndCallback, makeSubmittedCallback } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -35,7 +35,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
                         var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
                         logger.debug('Got tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
                         // check transaction hash with db before making callback and save
-                        checkTxAndSave('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
+                        checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
                     }
                 }
             })
@@ -79,7 +79,7 @@ var btcWsOnMessage = function () {
             //     logger.debug('Got BTC tx from: ', inputAddresses, ', amount: ', data.payload.outputs[outputIndex].value, ', hash:', data.payload.txid)
             //     server.btcTxHashes.push(data.payload.txid)
             //     server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: data.payload.txid }))
-            //     wsSend(data.payload.outputs[outputIndex].addresses[0], 'btc', 'submitted', data.payload.outputs[outputIndex].value, data.payload.txid)
+            //     makeSubmittedCallback(data.payload.outputs[outputIndex].addresses[0], 'btc', 'submitted', data.payload.outputs[outputIndex].value, data.payload.txid)
             // }
         } else if (data.type === 'address') {
             logger.debug('BTC ws address method for address:', data.payload.address, ', tx:', data.payload.transaction.txid)
@@ -90,7 +90,7 @@ var btcWsOnMessage = function () {
                 // subscribe to transaction
                 server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: data.payload.transaction.txid }))
                 // send message to frontend
-                wsSend(data.payload.address, 'btc', 'submitted', data.payload.transaction.outputs[outputIndex].value, data.payload.transaction.txid)
+                makeSubmittedCallback('btc', inputAddresses, data.payload.address, data.payload.transaction.txid, data.payload.transaction.outputs[outputIndex].value)
             } else {
                 logger.debug('BTC our address was a sender')
             }
@@ -131,7 +131,7 @@ function getBtcTxRecurrsive(txid) {
                     // remove from arrays
                     server.btcAccounts.splice(server.btcAccounts.findIndex(x => x === address), 1)
                     // check transaction hash with db before making callback and save
-                    checkTxAndSave('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
+                    checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
                 } else {
                     logger.warn('BTC tx dont have output address:', body, ', btcAccounts:', server.btcAccounts)
                 }
