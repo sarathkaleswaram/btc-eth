@@ -185,7 +185,7 @@ wss.on('connection', (ws) => {
         if (message.status === 'closed') {
             logger.debug(`Address: ${message.address} window closed`)
             // update db
-            requests.findOneAndUpdate({ address: message.address }, { status: 'Closed' }, (err, doc) => {
+            requests.findOneAndUpdate({ address: message.address, status: 'Pending' }, { status: 'Closed' }, (err, doc) => {
                 if (err) logger.error(err)
             })
             // remove from array

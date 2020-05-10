@@ -3,6 +3,7 @@ $(document).ready(function () {
     var wsUrl = `ws://${window.location.host}`
     var connection = new WebSocket(wsUrl)
     var urlParams = new URLSearchParams(window.location.search)
+    var address = urlParams.get('address')
 
     if (!window.WebSocket) {
         appendWsError()
@@ -10,16 +11,16 @@ $(document).ready(function () {
 
     connection.onopen = function () {
         console.log('Websocket connected.')
-        connection.send(JSON.stringify({ address: urlParams.get('address'), status: 'connected' }))
-
-        $(window).on('unload', function () {
-            connection.send(JSON.stringify({ address: urlParams.get('address'), status: 'closed', ercToken: urlParams.get('ercToken') || undefined }))
-        })
+        connection.send(JSON.stringify({ address: address, status: 'connected' }))
     }
 
     connection.onerror = function (error) {
         appendWsError()
     }
+
+    $(window).on('unload', function () {
+        connection.send(JSON.stringify({ address: address, status: 'closed', ercToken: urlParams.get('ercToken') || undefined }))
+    })
 
     connection.onmessage = function (message) {
         console.log(message.data)
@@ -55,7 +56,7 @@ $(document).ready(function () {
                 }
             }
         } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data)
+            console.log(e)
             return
         }
     }

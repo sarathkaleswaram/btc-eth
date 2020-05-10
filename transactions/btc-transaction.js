@@ -24,7 +24,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
         } else {
             logger.debug('Txs length:', body.txs.length)
             if (!body.txs.length) {
-                logger.debug('Subscribe addresses')
+                logger.debug('Subscribe addresses:', address)
                 btcWsSubscribeAddressOnOpen(address)
             }
             body.txs.forEach(tx => {
