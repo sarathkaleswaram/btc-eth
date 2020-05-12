@@ -14,6 +14,11 @@ https://web3js.readthedocs.io/en/v1.2.6/
 
 https://medium.com/@codetractio/inside-an-ethereum-transaction-fa94ffca912f
 
+### Exchange Rate API
+https://min-api.cryptocompare.com/documentation
+
+https://api.ratesapi.io/api/latest
+
 ## Install and run
 ```sh
 npm install

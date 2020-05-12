@@ -152,12 +152,14 @@ app.get('/btc/create', routes.btcCreate)
 app.get('/btc/balance/:address', routes.btcBalance)
 app.post('/btc/privatekey-to-address', routes.btcPrivateKeyToAddress)
 app.post('/btc/send', routes.btcSend)
+app.get('/btc/rates', routes.btcExchangeRates)
 
 // Ethereum
 app.get('/eth/create', routes.ethCreate)
 app.get('/eth/balance/:address', routes.ethBalance)
 app.post('/eth/privatekey-to-address', routes.ethPrivateKeyToAddress)
 app.post('/eth/send', routes.ethSend)
+app.get('/eth/rates', routes.ethExchangeRates)
 // ERC20 Token
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
