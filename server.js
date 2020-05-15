@@ -167,6 +167,7 @@ app.get('/eth/rates', routes.ethExchangeRates)
 // ERC20 Token
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
+app.get('/eth/ercToken/:ercToken/rates', routes.ethTokenExchangeRates)
 
 // 404
 app.get('/*', (_, res) => {

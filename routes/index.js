@@ -17,5 +17,6 @@ Routes.ethExchangeRates = require('./eth-rates')
 // Ethereum ERC20 Token
 Routes.ethTokenBalance = require('./eth-token-get-balance')
 Routes.ethTokenSend = require('./eth-token-send')
+Routes.ethTokenExchangeRates = require('./eth-token-rates')
 
 module.exports = Routes

@@ -184,7 +184,7 @@ Response:
 
 ### ERC20 Token API
 ```json
-GET: /eth/ercToken/SHAR/balance/:address
+GET: /eth/ercToken/:token/balance/:address
 Response:
 {
     "result": "success",
@@ -192,7 +192,7 @@ Response:
     "balance": "160.73000000000000002 SHAR"
 }
 -------------------------------------------------------------------------------------------------------------------------------------
-POST: /eth/ercToken/SHAR/send
+POST: /eth/ercToken/:token/send
 body:
 {
 	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
@@ -205,6 +205,24 @@ Response:
     "result": "success",
     "transactionHash": "0x8514cc130412ae0764ec6660ea3e885f2dcfdde70847a9717f576fa9406686f8",
     "link": "https://ropsten.etherscan.io/tx/0x8514cc130412ae0764ec6660ea3e885f2dcfdde70847a9717f576fa9406686f8"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /eth/ercToken/:token/rates
+Response: 
+{
+    "result": "success",
+    "data": {
+        "AUD": 0.00290575,
+        "EUR": 0.00172937,
+        "GBP": 0.00153558,
+        "CZK": 0.04771592,
+        "DKK": 0.01289692,
+        "HUF": 0.613377,
+        "INR": 0.141817,
+        "PLN": 0.00789246,
+        "SEK": 0.01844144,
+        "USD": 0.0018679
+    }
 }
 ```
 
