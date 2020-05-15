@@ -25,8 +25,10 @@ var dbPendingEthTx = function (address, blocknumber) {
             body.result.forEach(tx => {
                 if (tx.to === address.toLowerCase()) {
                     logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
+                    // remove from array
+                    server.ethAccounts.splice(server.ethAccounts.findIndex(x => x === address), 1)
                     // check transaction hash with db before making callback and save
-                    checkTxAndCallback('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
+                    checkTxAndCallback('eth', address, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
                 }
             })
         }
@@ -50,6 +52,37 @@ var dbPendingEthTx = function (address, blocknumber) {
     //         }
     //     }
     // })
+}
+
+var dbPendingEthTokenTx = function (address, blocknumber, ercToken) {
+    var web3 = server.web3
+    var url = `${server.etherscanAPI}&module=account&action=tokentx&address=${address}&startblock=${blocknumber}&sort=asc`
+    logger.debug('Running Etherscan API: ', url)
+    request({
+        url: url,
+        json: true
+    }, function (error, response, body) {
+        if (error) {
+            logger.error(error)
+            return
+        }
+        if (body.status === '0') logger.error(body.message)
+        if (body.status === '1') {
+            logger.debug('Txs length:', body.result.length)
+            body.result.forEach(tx => {
+                if (ercToken === tx.tokenSymbol) {
+                    if (tx.to.toLowerCase() === address.toLowerCase()) {
+                        logger.debug('Got tx type:', tx.tokenSymbol, ', from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
+                        // remove from array
+                        server.ethAccounts.splice(server.ethAccounts.findIndex(x => x.toLowerCase() === tx.contractAddress.toLowerCase()), 1)
+                        server.ethErcTokenAccounts.splice(server.ethErcTokenAccounts.findIndex(x => x.toLowerCase() === address.toLowerCase()), 1)
+                        // check transaction hash with db before making callback and save
+                        checkTxAndCallback('eth', address, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'), tx.tokenSymbol)
+                    }
+                }
+            })
+        }
+    })
 }
 
 var subscribeEthPendingTx = function () {
@@ -170,6 +203,7 @@ var getEthErcTokenTxByHashes = function () {
 }
 
 exports.dbPendingEthTx = dbPendingEthTx
+exports.dbPendingEthTokenTx = dbPendingEthTokenTx
 exports.subscribeEthPendingTx = subscribeEthPendingTx
 exports.getEthTxByHashes = getEthTxByHashes
 exports.getEthErcTokenTxByHashes = getEthErcTokenTxByHashes

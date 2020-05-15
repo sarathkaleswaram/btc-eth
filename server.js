@@ -74,6 +74,10 @@ var erc20Tokens = [
     {
         ercToken: 'GRT',
         contractAddress: '0xb83Cd8d39462B761bb0092437d38b37812dd80A2'
+    },
+    {
+        ercToken: 'SATX',
+        contractAddress: '0xe96F2c381E267a96C29bbB8ab05AB7d3527b45Ab'
     }
 ]
 var testERC20Tokens = [

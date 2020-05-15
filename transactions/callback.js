@@ -34,6 +34,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
                 transactions.create(saveTx).then(() => logger.debug(`${type === 'btc' ? 'BTC' : 'ETH'} ${ercToken ? ercToken : ''} Transaction inserted`)).catch(error => logger.error(error))
             } else {
                 logger.warn('Transaction hash already present in db. Got same tx again. Tx:', transactionHash)
+                requests.findOneAndUpdate({ address: address }, { status: 'Completed' }, (err, doc) => { })
             }
         }
     })

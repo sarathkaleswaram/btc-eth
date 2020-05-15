@@ -34,6 +34,8 @@ var dbPendingBtcTx = function (address, blocknumber) {
                         // get all input addresses - make unique - join to single string
                         var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
                         logger.debug('Got tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
+                        // remove from arrays
+                        server.btcAccounts.splice(server.btcAccounts.findIndex(x => x === address), 1)
                         // check transaction hash with db before making callback and save
                         checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
                     }
