@@ -9,7 +9,7 @@ var ethExchangeRates = function (req, res) {
         logger.debug('ethExchangeRates')
 
         request({
-            url: 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD',
+            url: 'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD',
             json: true
         }, function (error, response, body) {
             if (error) {

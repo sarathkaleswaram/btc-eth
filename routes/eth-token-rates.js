@@ -20,7 +20,7 @@ var ethTokenExchangeRates = function (req, res) {
         }
 
         request({
-            url: `https://api.coingecko.com/api/v3/simple/price?ids=${ercTokenId}&vs_currencies=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD`,
+            url: `https://api.coingecko.com/api/v3/simple/price?ids=${ercTokenId}&vs_currencies=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD`,
             json: true
         }, function (error, response, body) {
             if (error) {
@@ -54,7 +54,8 @@ var ethTokenExchangeRates = function (req, res) {
                 'PLN': body[ercTokenId].pln,
                 'RON': body[ercTokenId].ron,
                 'SEK': body[ercTokenId].sek,
-                'USD': body[ercTokenId].usd
+                'USD': body[ercTokenId].usd,
+                'CAD': body[ercTokenId].cad
             }
             res.json({
                 result: 'success',
