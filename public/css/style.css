@@ -3,7 +3,7 @@ body {
 }
 
 .bg-brand {
-    background: linear-gradient(45deg, #4a0692 0%, #2f0060 100%);
+    background: linear-gradient(45deg, #212529 0%, #000000 100%);
 }
 
 .card {
