@@ -27,7 +27,8 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
                     transactionHash: transactionHash,
                     blockHash: blockHash,
                     blockNumber: blockNumber,
-                    fee: fee
+                    fee: fee,
+                    createdDate: new Date()
                 }
                 if (ercToken)
                     saveTx.ercToken = ercToken
@@ -45,7 +46,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount, ercTo
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
-            wsSend(receiver, type, 'confirmed', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 1)
+            wsSend(receiver, type, 'confirmed', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 1, 0)
             var payload = {
                 type: type,
                 token: doc.token,
@@ -54,7 +55,8 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount, ercTo
                 sender: sender,
                 amount: amount,
                 tid: tid,
-                status: 1
+                status: 1, // 1 = tx confirmed as per game
+                timeout: 0 // 0 = session not expired as per game
             }
             if (ercToken)
                 payload.ercToken = ercToken
@@ -80,7 +82,7 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount, ercTo
     requests.findOne({ address: receiver }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
-            wsSend(receiver, type, 'submitted', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 0)
+            wsSend(receiver, type, 'submitted', amount, tid, ercToken, doc.callback, doc.token, doc.timestamp, sender, 0, 0)
             var payload = {
                 type: type,
                 token: doc.token,
@@ -89,7 +91,8 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount, ercTo
                 sender: sender,
                 amount: amount,
                 tid: tid,
-                status: 0
+                status: 0, // 0 = tx submitted as per game
+                timeout: 0 // 0 = session not expired as per game
             }
             if (ercToken)
                 payload.ercToken = ercToken
@@ -110,11 +113,48 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount, ercTo
     })
 }
 
-var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback, token, timestamp, sender, status) {
+var makeTimeoutCallback = function (type, address, ercToken) {
+    logger.debug('Making Timeout callback:', type, address, ercToken)
+    requests.findOne({ address: address }, (err, doc) => {
+        if (err) logger.error(err)
+        if (doc) {
+            wsSend(address, type, 'timeout', undefined, undefined, ercToken, doc.callback, doc.token, doc.timestamp, undefined, 0, 1)
+            var payload = {
+                type: type,
+                token: doc.token,
+                timestamp: doc.timestamp,
+                receiver: address,
+                sender: undefined,
+                amount: undefined,
+                tid: undefined,
+                status: 0, // 0 = tx submitted as per game
+                timeout: 1 // 1 = session expired as per game
+            }
+            if (ercToken)
+                payload.ercToken = ercToken
+            request({
+                url: server.a2zUrl,
+                method: 'POST',
+                json: true,
+                headers: { 'content-type': 'application/json' },
+                body: payload
+            }, function (err, response, body) {
+                if (err) {
+                    logger.error(err)
+                } else {
+                    logger.debug('A2Z Callback response:', body)
+                }
+            })
+        }
+    })
+}
+
+var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback, token, timestamp, sender, status, timeout) {
+    logger.debug('WS send:', address, type, wsType, amount, txHash, ercToken, callback, token, timestamp, sender, status, timeout)
     server.wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
             var url, title, wsMessage, currency
-            var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}&status=${status}`
+            var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}&status=${status}&timeout=${timeout}`
             if (ercToken) {
                 callbackUrl += `&ercToken=${ercToken}`
             }
@@ -142,7 +182,6 @@ var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback
                 message: wsMessage,
                 callbackUrl: callbackUrl
             }
-            logger.debug('WS send:', message)
             client.send(JSON.stringify(message))
         }
     })
@@ -150,3 +189,4 @@ var wsSend = function (address, type, wsType, amount, txHash, ercToken, callback
 
 exports.makeSubmittedCallback = makeSubmittedCallback
 exports.checkTxAndCallback = checkTxAndCallback
+exports.makeTimeoutCallback = makeTimeoutCallback

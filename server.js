@@ -37,7 +37,7 @@ const btcWsAPI = `wss://${btcWsNetwork}.smartbit.com.au/v1/blockchain`
 const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 
 // web3 API
-const ethInfuraApiKey = '605567f94946494a81e52ac8ca2784de'
+const ethInfuraApiKey = isMainnet ? '3c4d6cb30db54dd1b10bd5fc3cb422b8' : '605567f94946494a81e52ac8ca2784de'
 const web3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
 const web3WsUrl = `wss://${ethNetwork}.infura.io/ws/v3/${ethInfuraApiKey}`
 
@@ -177,6 +177,13 @@ app.post('/*', (_, res) => {
     res.json({ result: 'error', message: 'Invalid Request' })
 })
 
+function removeElement(array, elem) {
+    var index = array.indexOf(elem)
+    if (index > -1) {
+        array.splice(index, 1)
+    }
+}
+
 // Http
 var server = app.listen(port, () => {
     logger.info(`Http Server running on port ${port}`)
@@ -186,10 +193,11 @@ var wss = new WebSocket.Server({ server })
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         message = JSON.parse(message)
-        if (message.status === 'connected') {
+        if (message.status === 'Connected') {
             logger.debug(`Address: ${message.address} is connected through Websocket`)
         }
-        if (message.status === 'closed') {
+        // stop calling http api for ETH
+        if (message.status === 'Closed') {
             logger.debug(`Address: ${message.address} window closed`)
             // update db
             requests.findOneAndUpdate({ address: message.address, status: 'Pending' }, { status: 'Closed' }, (err, doc) => {
@@ -199,12 +207,12 @@ wss.on('connection', (ws) => {
             if (message.ercToken) {
                 var index = ercToken.findIndex(x => x.ercToken === message.ercToken.toUpperCase())
                 if (index >= 0) {
-                    contractAddress = ercToken[index].contractAddress
-                    ethAccounts.splice(ethAccounts.findIndex(x => x === contractAddress), 1)
-                    ethErcTokenAccounts.splice(ethErcTokenAccounts.findIndex(x => x === message.address), 1)
+                    var contractAddress = ercToken[index].contractAddress
+                    removeElement(ethAccounts, contractAddress)
+                    removeElement(ethErcTokenAccounts, message.address)
                 }
             } else {
-                ethAccounts.splice(ethAccounts.findIndex(x => x === message.address), 1)
+                removeElement(ethAccounts, message.address)
             }
         }
     })

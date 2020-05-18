@@ -9,7 +9,8 @@ const requestSchema = new Schema({
     timestamp: { type: String, required: true },
     callback: { type: String, required: true },
     blocknumber: { type: Number, required: true },
-    status: { type: String, required: true }
+    status: { type: String, required: true },
+    createdDate: { type: Date, required: true }
 })
 
 module.exports = mongoose.model('request', requestSchema)

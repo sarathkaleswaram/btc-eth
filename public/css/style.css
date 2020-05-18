@@ -16,3 +16,12 @@ body {
     margin-left: auto;
     margin-right: auto;
 }
+
+.count-down-alert {
+    text-align: center;
+    width: 20em;
+    height: 6em;
+    padding: 1em;
+    margin: auto;
+    margin-bottom: 1em;
+}

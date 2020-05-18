@@ -2,6 +2,7 @@ var server = require('../server')
 var requests = require('../models/requests')
 var { dbPendingEthTx, dbPendingEthTokenTx, getEthTxByHashes, getEthErcTokenTxByHashes } = require('./eth-transaction')
 var { dbPendingBtcTx } = require('./btc-transaction')
+var { makeTimeoutCallback } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -46,6 +47,46 @@ var checkPendingRequests = function () {
     })
 }
 
+var checkSessionTimeout = function (address, ercToken) {
+    logger.debug(`Address: ${address} session started`)
+    setTimeout(() => {
+        // BTC
+        if (server.btcAccounts.includes(address)) {
+            logger.warn(`Address: ${address} session timeout`)
+            // update db
+            requests.findOneAndUpdate({ address: address, status: 'Pending' }, { status: 'Timeout' }, (err, doc) => {
+                if (err) logger.error(err)
+            })
+            removeElement(server.btcAccounts, address)
+            // make timeout callback
+            makeTimeoutCallback('btc', address)
+        }
+        // ETH
+        if (server.ethAccounts.includes(address) || server.ethErcTokenAccounts.includes(address)) {
+            logger.warn(`Address: ${address} session timeout`)
+            // update db
+            requests.findOneAndUpdate({ address: address, status: 'Pending' }, { status: 'Timeout' }, (err, doc) => {
+                if (err) logger.error(err)
+            })
+            // remove from array
+            if (ercToken) {
+                var index = server.ercToken.findIndex(x => x.ercToken === ercToken.toUpperCase())
+                if (index >= 0) {
+                    var contractAddress = server.ercToken[index].contractAddress
+                    removeElement(server.ethAccounts, contractAddress)
+                    removeElement(server.ethErcTokenAccounts, address)
+                    // make timeout callback
+                    makeTimeoutCallback('eth', address, ercToken)
+                }
+            } else {
+                removeElement(server.ethAccounts, address)
+                // make timeout callback
+                makeTimeoutCallback('eth', address)
+            }
+        }
+    }, 310000) // session expires in 5 mins 10 secs (310000). 10 secs more for page loading and user to read message
+}
+
 var runCronJob = function () {
     if (server.ethTxHashes.length)
         getEthTxByHashes()
@@ -53,5 +94,13 @@ var runCronJob = function () {
         getEthErcTokenTxByHashes()
 }
 
+function removeElement(array, elem) {
+    var index = array.indexOf(elem)
+    if (index > -1) {
+        array.splice(index, 1)
+    }
+}
+
 exports.checkPendingRequests = checkPendingRequests
+exports.checkSessionTimeout = checkSessionTimeout
 exports.runCronJob = runCronJob

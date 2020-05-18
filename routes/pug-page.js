@@ -3,6 +3,7 @@ const QRCode = require('qrcode')
 const request = require('request')
 var server = require('../server')
 var requests = require('../models/requests')
+var { checkSessionTimeout } = require('../transactions')
 var { btcWsSubscribeAddress } = require('../transactions/btc-transaction')
 
 const log4js = require('log4js')
@@ -85,6 +86,8 @@ var pugPage = function (req, res) {
                         res.render('index', { error: true, message: err.toString() })
                     } else {
                         if (!doc) {
+                            // session expires in 5 mins
+                            checkSessionTimeout(params.address, params.ercToken)
                             // BTC
                             if (params.type === 'btc') {
                                 request({
@@ -108,7 +111,8 @@ var pugPage = function (req, res) {
                                         timestamp: params.timestamp,
                                         callback: params.callback,
                                         blocknumber: body.height,
-                                        status: 'Pending'
+                                        status: 'Pending',
+                                        createdDate: new Date()
                                     }).then(() => {
                                         logger.debug('Request inserted')
                                         res.render('index', { src: url, account: params.address })
@@ -137,7 +141,8 @@ var pugPage = function (req, res) {
                                         timestamp: params.timestamp,
                                         callback: params.callback,
                                         blocknumber: blocknumber,
-                                        status: 'Pending'
+                                        status: 'Pending',
+                                        createdDate: new Date()
                                     }
                                     if (params.ercToken)
                                         ethRequest.ercToken = params.ercToken.toUpperCase()

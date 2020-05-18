@@ -35,7 +35,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
                         var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
                         logger.debug('Got tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
                         // remove from arrays
-                        server.btcAccounts.splice(server.btcAccounts.findIndex(x => x === address), 1)
+                        removeElement(server.btcAccounts, address)
                         // check transaction hash with db before making callback and save
                         checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
                     }
@@ -43,6 +43,13 @@ var dbPendingBtcTx = function (address, blocknumber) {
             })
         }
     })
+}
+
+function removeElement(array, elem) {
+    var index = array.indexOf(elem)
+    if (index > -1) {
+        array.splice(index, 1)
+    }
 }
 
 var btcWsSubscribeAddressOnOpen = function (address) {
@@ -67,6 +74,7 @@ var btcWsUnsubscribeAddress = function (address) {
 // }
 
 var btcWsOnMessage = function () {
+    logger.debug('Subscribed to BTC websocket...')
     server.btcWebsocket.on('message', function incoming(data) {
         data = JSON.parse(data)
         if (data.type === 'subscribe-response') {
@@ -131,7 +139,7 @@ function getBtcTxRecurrsive(txid) {
                     // get unique address inputs
                     var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
                     // remove from arrays
-                    server.btcAccounts.splice(server.btcAccounts.findIndex(x => x === address), 1)
+                        removeElement(server.btcAccounts, address)
                     // check transaction hash with db before making callback and save
                     checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
                 } else {

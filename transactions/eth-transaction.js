@@ -26,7 +26,7 @@ var dbPendingEthTx = function (address, blocknumber) {
                 if (tx.to === address.toLowerCase()) {
                     logger.debug('Got tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
                     // remove from array
-                    server.ethAccounts.splice(server.ethAccounts.findIndex(x => x === address), 1)
+                    removeElement(server.ethAccounts, address)
                     // check transaction hash with db before making callback and save
                     checkTxAndCallback('eth', address, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'))
                 }
@@ -54,6 +54,13 @@ var dbPendingEthTx = function (address, blocknumber) {
     // })
 }
 
+function removeElement(array, elem) {
+    var index = array.findIndex(x => x.toLowerCase() === elem.toLowerCase())
+    if (index > -1) {
+        array.splice(index, 1)
+    }
+}
+
 var dbPendingEthTokenTx = function (address, blocknumber, ercToken) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=tokentx&address=${address}&startblock=${blocknumber}&sort=asc`
@@ -74,8 +81,8 @@ var dbPendingEthTokenTx = function (address, blocknumber, ercToken) {
                     if (tx.to.toLowerCase() === address.toLowerCase()) {
                         logger.debug('Got tx type:', tx.tokenSymbol, ', from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
                         // remove from array
-                        server.ethAccounts.splice(server.ethAccounts.findIndex(x => x.toLowerCase() === tx.contractAddress.toLowerCase()), 1)
-                        server.ethErcTokenAccounts.splice(server.ethErcTokenAccounts.findIndex(x => x.toLowerCase() === address.toLowerCase()), 1)
+                        removeElement(server.ethAccounts, tx.contractAddress)
+                        removeElement(server.ethErcTokenAccounts, address)
                         // check transaction hash with db before making callback and save
                         checkTxAndCallback('eth', address, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), new Date(tx.timeStamp * 1000), tx.hash, tx.blockHash, tx.blockNumber, web3.utils.fromWei(tx.gas.toString(), 'ether'), tx.tokenSymbol)
                     }
@@ -100,7 +107,7 @@ var subscribeEthPendingTx = function () {
                         logger.debug('Got ETH tx from: ', tx.from, ', amount: ', tx.value, ', hash:', tx.hash)
                         var index = server.ercToken.findIndex(x => x.contractAddress === tx.to)
                         // remove from array
-                        server.ethAccounts.splice(server.ethAccounts.findIndex(x => x === tx.to), 1)
+                        removeElement(server.ethAccounts, tx.to)
                         // ERC20 Transaction
                         if (index >= 0) {
                             // reciverAddress will be lowercase, get address format from array
@@ -153,7 +160,7 @@ var getEthTxByHashes = function () {
             var timeStamp = block ? new Date(block.timestamp * 1000) : new Date()
             var fee = web3.utils.fromWei((tx.gas * parseInt(tx.gasPrice)).toString(), 'ether')
             // remove from arrays
-            server.ethTxHashes.splice(server.ethTxHashes.findIndex(x => x === txHash), 1)
+            removeElement(server.ethTxHashes, txHash)
             // check transaction hash with db before making callback and save
             checkTxAndCallback('eth', tx.to, tx.from, web3.utils.fromWei(tx.value.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee)
         }
@@ -184,14 +191,15 @@ var getEthErcTokenTxByHashes = function () {
             var timeStamp = block ? new Date(block.timestamp * 1000) : new Date()
             // get token tx details
             var from = tx.from
-            var recieverAddress = formatAddress(txReceipt.logs[0].topics['2'])
+            var to = web3.utils.toChecksumAddress(formatAddress(txReceipt.logs[0].topics['2']))
             var amount = web3.utils.hexToNumberString(txReceipt.logs[0].data)
-            var recieverIndex = server.ethErcTokenAccounts.findIndex(x => x.toLowerCase() === recieverAddress.toLowerCase())
-            var to = server.ethErcTokenAccounts[recieverIndex]
+            // var recieverAddress = formatAddress(txReceipt.logs[0].topics['2'])
+            // var recieverIndex = server.ethErcTokenAccounts.findIndex(x => x.toLowerCase() === recieverAddress.toLowerCase())
+            // var to = server.ethErcTokenAccounts[recieverIndex]
             var tokenIndex = server.ercToken.findIndex(x => x.contractAddress === txReceipt.logs[0].address)
             // remove from arrays
-            server.ethErcTokenTxHashes.splice(server.ethErcTokenTxHashes.findIndex(x => x === txHash), 1)
-            server.ethErcTokenAccounts.splice(server.ethErcTokenAccounts.findIndex(x => x === to), 1)
+            removeElement(server.ethErcTokenTxHashes, txHash)
+            removeElement(server.ethErcTokenAccounts, to)
             if (to) {
                 // check transaction hash with db before making callback and save
                 checkTxAndCallback('eth', to, from, web3.utils.fromWei(amount.toString(), 'ether'), timeStamp, tx.hash, tx.blockHash, tx.blockNumber, fee, server.ercToken[tokenIndex].ercToken)

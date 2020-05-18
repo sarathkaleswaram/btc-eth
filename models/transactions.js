@@ -11,7 +11,8 @@ const transactionSchema = new Schema({
     transactionHash: { type: String, required: true },
     blockHash: { type: String, required: true },
     blockNumber: { type: Number, required: true },
-    fee: { type: String, required: true }
+    fee: { type: String, required: true },
+    createdDate: { type: Date, required: true }
 })
 
 module.exports = mongoose.model('transaction', transactionSchema)
