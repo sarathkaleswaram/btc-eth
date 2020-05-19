@@ -121,7 +121,7 @@ var makeTimeoutCallback = function (address) {
                 sender: undefined,
                 amount: undefined,
                 tid: undefined,
-                status: 0, // 0 = tx submitted as per game
+                status: undefined,
                 timeout: 1 // 1 = session expired as per game
             }
             request({

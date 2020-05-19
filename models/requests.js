@@ -10,6 +10,7 @@ const requestSchema = new Schema({
     callback: { type: String, required: true },
     blocknumber: { type: Number, required: true },
     status: { type: String, required: true },
+    apiCallCount: { type: Number, required: true },
     createdDate: { type: Date, required: true }
 })
 

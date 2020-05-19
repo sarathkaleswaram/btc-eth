@@ -3,7 +3,6 @@ const QRCode = require('qrcode')
 const request = require('request')
 var server = require('../server')
 var requests = require('../models/requests')
-var { checkSessionTimeout } = require('../transactions')
 var { btcWsSubscribeAddress } = require('../transactions/btc-transaction')
 
 const log4js = require('log4js')
@@ -82,8 +81,6 @@ var pugPage = function (req, res) {
                         res.render('index', { error: true, message: err.toString() })
                     } else {
                         if (!doc) {
-                            // session expires in 5 mins
-                            checkSessionTimeout(params.address)
                             // BTC
                             if (params.type === 'btc') {
                                 request({
@@ -107,6 +104,7 @@ var pugPage = function (req, res) {
                                         callback: params.callback,
                                         blocknumber: body.height,
                                         status: 'Pending',
+                                        apiCallCount: 0,
                                         createdDate: new Date()
                                     }).then(() => {
                                         logger.info('DB Request inserted')
@@ -130,6 +128,7 @@ var pugPage = function (req, res) {
                                         callback: params.callback,
                                         blocknumber: blocknumber,
                                         status: 'Pending',
+                                        apiCallCount: 0,
                                         createdDate: new Date()
                                     }
                                     if (contractAddress)

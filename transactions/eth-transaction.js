@@ -10,7 +10,7 @@ logger.level = 'trace'
 var dbPendingEthTx = function (address, blocknumber) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=txlist&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.debug('Running Etherscan API: ', url)
+    logger.debug('Running Etherscan API:', url)
     request({
         url: url,
         json: true
@@ -21,7 +21,7 @@ var dbPendingEthTx = function (address, blocknumber) {
         }
         if (body.status === '0') logger.error(body.message)
         if (body.status === '1') {
-            logger.debug('Txs length:', body.result.length, ' for address:', address)
+            logger.debug('Txs length:', body.result.length, ', for address:', address)
             body.result.forEach(tx => {
                 if (tx.to === address.toLowerCase()) {
                     logger.info('Got ETH tx from:', tx.from, ', amount:', tx.value, ', hash:', tx.hash)

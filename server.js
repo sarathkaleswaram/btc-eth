@@ -92,7 +92,7 @@ exports.ercToken = ercToken
 exports.gameCallbackURL = gameCallbackURL
 
 // Mongodb
-var mongoUrl = 'mongodb://127.0.0.1:27017/btc_eth'
+var mongoUrl = `mongodb://127.0.0.1:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}`
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
@@ -108,7 +108,7 @@ job.start()
 
 // Express
 const app = express()
-const port = 3002
+const port = isMainnet ? 8001 : 8000
 
 app.use(cors())
 app.use(compression())
@@ -161,19 +161,11 @@ wss.on('connection', (ws) => {
         if (message.status === 'Connected') {
             logger.trace(`Address: ${message.address} is connected through Websocket`)
         }
-        // user QR window closed or timeout
-        if (message.status === 'Closed' || message.status === 'Timeout') {
-            // update db
-            requests.findOneAndUpdate({ address: message.address, status: 'Pending' }, { status: message.status }, (err, doc) => {
-                if (err) logger.error(err)
-                if (doc) {
-                    logger.trace(`Address: ${message.address} window ${message.status}`)
-                    logger.info(`DB request status updated as ${message.status}`)
-                    // make timeout callback
-                    if (message.status === 'Timeout')
-                        makeTimeoutCallback(message.address)
-                }
-            })
+        // user QR window timeout
+        if (message.status === 'Timeout') {
+            logger.trace(`Address: ${message.address} window timeout`)
+            // make timeout callback
+            makeTimeoutCallback(message.address)
         }
     })
 })

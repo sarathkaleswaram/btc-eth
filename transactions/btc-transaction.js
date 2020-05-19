@@ -10,7 +10,7 @@ logger.level = 'trace'
 
 var dbPendingBtcTx = function (address, blocknumber) {
     var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}`
-    logger.debug('Running Blockcypher API: ', url)
+    logger.debug('Running Blockcypher API:', url)
     request({
         url: url,
         json: true
@@ -23,30 +23,20 @@ var dbPendingBtcTx = function (address, blocknumber) {
             logger.error(body.error)
             logger.error(body.message)
         } else {
-            logger.debug('Txs length:', body.txs.length, ' for address:', address)
-            if (!body.txs.length) {
-                logger.debug('Subscribe addresses:', address)
-                btcWsSubscribeAddressOnOpen(address)
-            }
+            logger.debug('Txs length:', body.txs.length, 'for address:', address)
             body.txs.forEach(tx => {
                 if (tx.block_height > 0) {
                     var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
                     if (outputIndex >= 0) {
                         // get all input addresses - make unique - join to single string
                         var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                        logger.info('Got BTC tx from: ', inputAddresses, ', amount: ', tx.outputs[outputIndex].value, ', hash:', tx.hash)
+                        logger.info('Got BTC tx from:', inputAddresses, ', amount:', tx.outputs[outputIndex].value, ', hash:', tx.hash)
                         // check transaction hash with db before making callback and save
                         checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
                     }
                 }
             })
         }
-    })
-}
-
-var btcWsSubscribeAddressOnOpen = function (address) {
-    server.btcWebsocket.on('open', function open() {
-        btcWsSubscribeAddress(address)
     })
 }
 
@@ -70,7 +60,7 @@ var btcWsOnMessage = function () {
             var outputIndex = data.payload.transaction.outputs.findIndex(x => x.addresses.includes(data.payload.address))
             if (outputIndex >= 0) {
                 var inputAddresses = data.payload.transaction.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                logger.info('Got BTC tx from: ', inputAddresses, ', amount: ', data.payload.transaction.outputs[outputIndex].value, ', hash:', data.payload.transaction.txid)
+                logger.info('Got BTC tx from:', inputAddresses, ', amount:', data.payload.transaction.outputs[outputIndex].value, ', hash:', data.payload.transaction.txid)
                 // subscribe to transaction
                 server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: data.payload.transaction.txid }))
                 // send message to frontend
@@ -89,7 +79,7 @@ var btcWsOnMessage = function () {
 
 function getBtcTxRecurrsive(txid) {
     var url = `${server.btcAPI}/txs/${txid}`
-    logger.debug('Running Blockcypher API: ', url)
+    logger.debug('Running Blockcypher API:', url)
     request({
         url: url,
         json: true

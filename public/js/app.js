@@ -4,7 +4,10 @@ $(document).ready(function () {
     var connection = new WebSocket(wsUrl)
     var urlParams = new URLSearchParams(window.location.search)
     var address = $('#copy-address').text().trim()
+    var callback = `${urlParams.get('callback')}?type=${urlParams.get('type')}&token=${urlParams.get('token')}&timestamp=${urlParams.get('timestamp')}&receiver=${address}&sender=${undefined}&amount=${undefined}&tid=${undefined}`
     var interval
+
+    console.log('Callback:', callback)
 
     if (address) {
         $('.count-down').append(`
@@ -13,7 +16,7 @@ $(document).ready(function () {
                 <p id='countdown-timer'></p>
             </div>
         `)
-        startCountDown(300, $('#countdown-timer')) // 300 sec = 5 mins
+        startCountDown(3, $('#countdown-timer')) // 300 sec = 5 mins
         // if ETH or ERC tokens. Display message
         if (urlParams.get('type').toLowerCase() !== 'btc') {
             $('#note-message').append(`
@@ -27,11 +30,7 @@ $(document).ready(function () {
         }
         // capture button click event
         $('#backToGame').on('click', function () {
-            var callback = urlParams.get('callback')
-            callback += `?type=${urlParams.get('type')}&token=${urlParams.get('token')}&timestamp=${urlParams.get('timestamp')}&receiver=${address}&sender=&amount=&tid=&status=0&timeout=0`
-
-            console.log('Callback:', callback)
-            window.location.replace(callback)
+            window.location.replace(callback + '&status=0&timeout=0')
         })
     }
 
@@ -48,11 +47,6 @@ $(document).ready(function () {
     connection.onerror = function (error) {
         appendWsError()
     }
-
-    $(window).on('unload', function () {
-        if (address)
-            connection.send(JSON.stringify({ address: address, status: 'Closed' }))
-    })
 
     connection.onmessage = function (message) {
         console.log(message.data)
@@ -90,7 +84,9 @@ $(document).ready(function () {
                 }
                 if (message.type === 'timeout') {
                     console.log('Got timeout message')
-                    window.location.replace(message.callbackUrl)
+                    setTimeout(function () {
+                        window.location.replace(message.callbackUrl)
+                    }, 2000)
                 }
             }
         } catch (e) {
@@ -123,8 +119,12 @@ $(document).ready(function () {
                 timer = duration
                 sessionExpired()
                 clearInterval(interval)
-                if (address)
-                    connection.send(JSON.stringify({ address: address, status: 'Timeout' }))
+                // send Timeout status
+                connection.send(JSON.stringify({ address: address, status: 'Timeout' }))
+                // if websocket did not connected. redirect after 5 secs
+                setTimeout(function () {
+                    window.location.replace(callback + `&status=${undefined}&timeout=1`)
+                }, 5000)
             }
         }, 1000)
     }
