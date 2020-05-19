@@ -15,7 +15,6 @@ var pugPage = function (req, res) {
     var error = false, message = '', contractAddress
     var params = {
         type: req.query.type,
-        ercToken: req.query.ercToken,
         address: req.query.address,
         token: req.query.token,
         timestamp: req.query.timestamp,
@@ -43,34 +42,31 @@ var pugPage = function (req, res) {
         message += 'Type is empty. '
     } else {
         params.type = params.type.toLowerCase()
-        if (params.type !== 'btc' && params.type !== 'eth') {
-            error = true
-            message += 'Invalid type. '
-        } else {
-            if (params.address) {
-                if (params.type === 'btc') {
-                    if (!bitcore.Address.isValid(params.address, server.network)) {
+        if (params.address) {
+            if (params.type === 'btc') {
+                if (!bitcore.Address.isValid(params.address, server.network)) {
+                    error = true
+                    message += 'Invalid address. '
+                }
+            } else if (params.type === 'eth' || server.ercToken.some(x => x.ercToken === params.type)) {
+                if (!server.web3.utils.isAddress(params.address)) {
+                    error = true
+                    message += 'Invalid address. '
+                }
+                // Check ERC Token
+                if (server.ercToken.some(x => x.ercToken === params.type)) {
+                    var index = server.ercToken.findIndex(x => x.ercToken === params.type)
+                    if (index >= 0) {
+                        contractAddress = server.ercToken[index].contractAddress
+                    }
+                    if (!contractAddress) {
                         error = true
-                        message += 'Invalid address. '
+                        message += 'Invalid type. '
                     }
                 }
-                if (params.type === 'eth') {
-                    if (!server.web3.utils.isAddress(params.address)) {
-                        error = true
-                        message += 'Invalid address. '
-                    }
-                    // Check ERC Token
-                    if (params.ercToken) {
-                        var index = server.ercToken.findIndex(x => x.ercToken === params.ercToken.toUpperCase())
-                        if (index >= 0) {
-                            contractAddress = server.ercToken[index].contractAddress
-                        }
-                        if (!contractAddress) {
-                            error = true
-                            message += 'Unknown ERC Token. '
-                        }
-                    }
-                }
+            } else {
+                error = true
+                message += 'Invalid type. '
             }
         }
     }
@@ -87,7 +83,7 @@ var pugPage = function (req, res) {
                     } else {
                         if (!doc) {
                             // session expires in 5 mins
-                            checkSessionTimeout(params.address, params.ercToken)
+                            checkSessionTimeout(params.address)
                             // BTC
                             if (params.type === 'btc') {
                                 request({
@@ -100,8 +96,7 @@ var pugPage = function (req, res) {
                                         return
                                     }
                                     logger.debug('BTC current blocknumber:', body.height)
-                                    // add to btc accounts array
-                                    server.btcAccounts.push(params.address)
+                                    // subscibe address
                                     btcWsSubscribeAddress(params.address)
                                     // Save request
                                     requests.create({
@@ -114,7 +109,7 @@ var pugPage = function (req, res) {
                                         status: 'Pending',
                                         createdDate: new Date()
                                     }).then(() => {
-                                        logger.debug('Request inserted')
+                                        logger.info('DB Request inserted')
                                         res.render('index', { src: url, account: params.address })
                                     }, error => {
                                         logger.error(error)
@@ -122,17 +117,10 @@ var pugPage = function (req, res) {
                                     })
                                 })
                             }
-                            // ETH
-                            if (params.type === 'eth') {
+                            // ETH or ERC tokens
+                            if (params.type === 'eth' || server.ercToken.some(x => x.ercToken === params.type)) {
                                 server.web3.eth.getBlockNumber().then((blocknumber) => {
                                     logger.debug('ETH current blocknumber:', blocknumber)
-                                    // add to eth accounts array
-                                    if (params.ercToken) {
-                                        server.ethAccounts.push(contractAddress)
-                                        server.ethErcTokenAccounts.push(params.address)
-                                    } else {
-                                        server.ethAccounts.push(params.address)
-                                    }
                                     // Save request
                                     var ethRequest = {
                                         type: params.type,
@@ -144,10 +132,10 @@ var pugPage = function (req, res) {
                                         status: 'Pending',
                                         createdDate: new Date()
                                     }
-                                    if (params.ercToken)
-                                        ethRequest.ercToken = params.ercToken.toUpperCase()
+                                    if (contractAddress)
+                                        ethRequest.contractAddress = contractAddress
                                     requests.create(ethRequest).then(() => {
-                                        logger.debug('Request inserted')
+                                        logger.info('DB Request inserted')
                                         res.render('index', { src: url, account: params.address })
                                     }, error => {
                                         logger.error(error)
@@ -159,8 +147,8 @@ var pugPage = function (req, res) {
                                 })
                             }
                         } else {
-                            logger.error('Request already exists. Account already used.')
-                            res.render('index', { error: true, message: 'Account address already used.' })
+                            logger.warn('Address already used.')
+                            res.render('index', { error: true, message: 'Address already used.' })
                             // if (doc.status === 'Completed') {
                             //     logger.error('Request already exists. Account already used.')
                             //     res.render('index', { error: true, message: 'Account address already used.' })

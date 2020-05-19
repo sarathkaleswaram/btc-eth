@@ -14,6 +14,25 @@ $(document).ready(function () {
             </div>
         `)
         startCountDown(300, $('#countdown-timer')) // 300 sec = 5 mins
+        // if ETH or ERC tokens. Display message
+        if (urlParams.get('type').toLowerCase() !== 'btc') {
+            $('#note-message').append(`
+                <b>Note:</b> 
+                “Once the transaction is confirmed, amount will be deposited into your casino account. Please check back in 10 minutes”
+            `)
+            $('#button-message').append(`
+                “Please click below button after you submit the transaction.” <br>
+                <button id='backToGame' type='button' class='btn btn-primary' style='margin: 1rem;'>Continue to play</button>
+            `)
+        }
+        // capture button click event
+        $('#backToGame').on('click', function () {
+            var callback = urlParams.get('callback')
+            callback += `?type=${urlParams.get('type')}&token=${urlParams.get('token')}&timestamp=${urlParams.get('timestamp')}&receiver=${address}&sender=&amount=&tid=&status=0&timeout=0`
+
+            console.log('Callback:', callback)
+            window.location.replace(callback)
+        })
     }
 
     if (!window.WebSocket) {
@@ -32,7 +51,7 @@ $(document).ready(function () {
 
     $(window).on('unload', function () {
         if (address)
-            connection.send(JSON.stringify({ address: address, status: 'Closed', ercToken: urlParams.get('ercToken') || undefined }))
+            connection.send(JSON.stringify({ address: address, status: 'Closed' }))
     })
 
     connection.onmessage = function (message) {
@@ -104,6 +123,8 @@ $(document).ready(function () {
                 timer = duration
                 sessionExpired()
                 clearInterval(interval)
+                if (address)
+                    connection.send(JSON.stringify({ address: address, status: 'Timeout' }))
             }
         }, 1000)
     }

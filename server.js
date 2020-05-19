@@ -11,9 +11,9 @@ const WebSocket = require('ws')
 const CronJob = require('cron').CronJob
 var routes = require('./routes')
 var requests = require('./models/requests')
-var { runCronJob, checkPendingRequests } = require('./transactions')
-var { subscribeEthPendingTx } = require('./transactions/eth-transaction')
+var { checkPendingRequests } = require('./transactions')
 var { btcWsOnMessage } = require('./transactions/btc-transaction')
+var { makeTimeoutCallback } = require('./transactions/callback')
 
 // Logger
 var logger = log4js.getLogger('btc-eth')
@@ -39,23 +39,14 @@ const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 // web3 API
 const ethInfuraApiKey = isMainnet ? '3c4d6cb30db54dd1b10bd5fc3cb422b8' : '605567f94946494a81e52ac8ca2784de'
 const web3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
-const web3WsUrl = `wss://${ethNetwork}.infura.io/ws/v3/${ethInfuraApiKey}`
 
 // etherscan API
 const etherscanApiKey = '1R2ACZ69YGQQ4DVH8SPUEXAZTWV3G415IM'
 const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
-// A2ZURL
-const a2zUrl = 'https://test.a2zbetting.com/api/transactions/crypto'
-
-// Ethereum ws connection
-var web3WsProvider = new Web3.providers.WebsocketProvider(web3WsUrl)
-web3WsProvider.on('error', e => logger.error('ETH web3 websocket connection error:', e))
-web3WsProvider.on('connect', () => {
-    logger.debug('ETH Websocket connected')
-    subscribeEthPendingTx()
-})
+// Game Callback URL
+const gameCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
 
 // Bitcoin ws connection
 var btcWebsocket = new WebSocket(btcWsAPI)
@@ -68,21 +59,21 @@ btcWebsocket.on('open', function () {
 // ETH Tokens
 var erc20Tokens = [
     {
-        ercToken: 'JAN',
+        ercToken: 'jan',
         contractAddress: '0xAf80e6612D9C2E883122e7F2292Ee6C34176ad4F'
     },
     {
-        ercToken: 'GRT',
+        ercToken: 'grt',
         contractAddress: '0xb83Cd8d39462B761bb0092437d38b37812dd80A2'
     },
     {
-        ercToken: 'SATX',
+        ercToken: 'satx',
         contractAddress: '0xe96F2c381E267a96C29bbB8ab05AB7d3527b45Ab'
     }
 ]
 var testERC20Tokens = [
     {
-        ercToken: 'SHAR',
+        ercToken: 'shar',
         contractAddress: '0x3d64cd48f4dBa0979a64C320C353198c7a28348E'
     }
 ]
@@ -97,21 +88,8 @@ exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
-exports.web3ws = new Web3(web3WsProvider)
 exports.ercToken = ercToken
-exports.a2zUrl = a2zUrl
-
-var ethAccounts = []
-var ethTxHashes = []
-var ethErcTokenAccounts = []
-var ethErcTokenTxHashes = []
-// BTC-ETH accounts & transactions
-exports.btcAccounts = []
-exports.btcTxHashes = []
-exports.ethAccounts = ethAccounts
-exports.ethTxHashes = ethTxHashes
-exports.ethErcTokenAccounts = ethErcTokenAccounts
-exports.ethErcTokenTxHashes = ethErcTokenTxHashes
+exports.gameCallbackURL = gameCallbackURL
 
 // Mongodb
 var mongoUrl = 'mongodb://127.0.0.1:27017/btc_eth'
@@ -122,17 +100,11 @@ mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFin
     })
     .catch(err => logger.error(err))
 
-// Cron Job runs every 5 secs
-var job1 = new CronJob('*/5 * * * * *', function () {
-    runCronJob()
-})
-job1.start()
-
-// Cron Job runs every 10 mins
-var job2 = new CronJob('*/10 * * * *', function () {
+// Cron Job runs every 5 mins
+var job = new CronJob('*/5 * * * *', function () {
     checkPendingRequests()
 })
-job2.start()
+job.start()
 
 // Express
 const app = express()
@@ -177,13 +149,6 @@ app.post('/*', (_, res) => {
     res.json({ result: 'error', message: 'Invalid Request' })
 })
 
-function removeElement(array, elem) {
-    var index = array.indexOf(elem)
-    if (index > -1) {
-        array.splice(index, 1)
-    }
-}
-
 // Http
 var server = app.listen(port, () => {
     logger.info(`Http Server running on port ${port}`)
@@ -194,26 +159,21 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         message = JSON.parse(message)
         if (message.status === 'Connected') {
-            logger.debug(`Address: ${message.address} is connected through Websocket`)
+            logger.trace(`Address: ${message.address} is connected through Websocket`)
         }
-        // stop calling http api for ETH
-        if (message.status === 'Closed') {
-            logger.debug(`Address: ${message.address} window closed`)
+        // user QR window closed or timeout
+        if (message.status === 'Closed' || message.status === 'Timeout') {
             // update db
-            requests.findOneAndUpdate({ address: message.address, status: 'Pending' }, { status: 'Closed' }, (err, doc) => {
+            requests.findOneAndUpdate({ address: message.address, status: 'Pending' }, { status: message.status }, (err, doc) => {
                 if (err) logger.error(err)
-            })
-            // remove from array
-            if (message.ercToken) {
-                var index = ercToken.findIndex(x => x.ercToken === message.ercToken.toUpperCase())
-                if (index >= 0) {
-                    var contractAddress = ercToken[index].contractAddress
-                    removeElement(ethAccounts, contractAddress)
-                    removeElement(ethErcTokenAccounts, message.address)
+                if (doc) {
+                    logger.trace(`Address: ${message.address} window ${message.status}`)
+                    logger.info(`DB request status updated as ${message.status}`)
+                    // make timeout callback
+                    if (message.status === 'Timeout')
+                        makeTimeoutCallback(message.address)
                 }
-            } else {
-                removeElement(ethAccounts, message.address)
-            }
+            })
         }
     })
 })

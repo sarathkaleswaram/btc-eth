@@ -32,7 +32,6 @@ address
 token
 timestamp
 callback
-ercToken (optional)
 ```
 
 ### Create and Send Transactions

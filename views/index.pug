@@ -29,6 +29,7 @@ html
             span #{message}
         else
           p.text-center.lead Welcome! Scan QR Code
+          #note-message.text-center
           .card.mx-auto
             .card-body
               img.qrcode(alt='QR Code' src=src)
@@ -37,6 +38,7 @@ html
             strong Address: 
             span#copy-address #{account} 
             i.far.fa-copy.copied-popover#copy-clipboard(style='cursor: pointer')
+            #button-message.text-center
 
   script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js')
   script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')
