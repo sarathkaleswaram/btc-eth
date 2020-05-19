@@ -139,7 +139,7 @@ function getBtcTxRecurrsive(txid) {
                     // get unique address inputs
                     var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
                     // remove from arrays
-                        removeElement(server.btcAccounts, address)
+                    removeElement(server.btcAccounts, address)
                     // check transaction hash with db before making callback and save
                     checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
                 } else {
