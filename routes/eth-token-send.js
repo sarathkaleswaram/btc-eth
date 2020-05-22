@@ -32,7 +32,7 @@ var ethTokenSend = async function (req, res) {
 
         var index = server.ercTokens.findIndex(x => x.ercToken === ercToken.toLowerCase())
         if (index >= 0) {
-            ercToken = server.ercTokens[index].ercToken
+            ercToken = server.ercTokens[index].ercToken.toLowerCase()
             contractAddress = server.ercTokens[index].contractAddress
         }
         if (!contractAddress) {
@@ -80,80 +80,161 @@ var ethTokenSend = async function (req, res) {
             return
         }
 
-        if (ercToken === 'SHAR') {
+        if (ercToken === 'shar') {
             abi = sharABI
-        } else if (ercToken === 'JAN') {
+        } else if (ercToken === 'jan') {
             abi = janABI
-        } else if (ercToken === 'GRT') {
+        } else if (ercToken === 'grt') {
             abi = grtABI
-        } else if (ercToken === 'SATX') {
+        } else if (ercToken === 'satx') {
             abi = satxABI
         }
 
         var contract = new web3.eth.Contract(abi, contractAddress)
         // Get nonce
         var nonce = await web3.eth.getTransactionCount(sourceAddress)
-        // get balance        
-        contract.methods.balanceOf(sourceAddress).call().then(function (result) {
-            var balance = web3.utils.fromWei(result, 'ether')
-            logger.debug('Source Account Balance: ', balance + ' ' + ercToken)
-            logger.debug(balance, ' < ', amount)
-            if (parseFloat(balance) < amount) {
-                logger.error('Insufficient funds')
-                res.json({
-                    result: 'error',
-                    message: 'Insufficient funds',
-                })
-                return
-            }
-            // convert amount
-            var sendingAmount = web3.utils.toWei(amount.toString(), 'ether')
-            // tx
-            var rawTransaction = {
-                'from': sourceAddress,
-                'gasPrice': web3.utils.toHex(2 * 1e9),
-                'gasLimit': web3.utils.toHex(210000),
-                'to': contractAddress,
-                'value': '0x0',
-                'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
-                'nonce': nonce,
-                'chainId': getChainId()
-            }
-
-            const transaction = new EthereumTx(rawTransaction, { chain: server.ethNetwork })
-            var privateKeySplit = privateKey.split('0x')
-            try {
-                var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
-                transaction.sign(privateKeyHex)
-            } catch (error) {
-                logger.error('Failed to sign Transaction')
-                logger.error(error)
-                res.json({
-                    result: 'error',
-                    message: 'Failed to sign Transaction',
-                })
-                return
-            }
-
-            const serializedTransaction = transaction.serialize()
-            web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
-                if (err) {
-                    logger.error(err)
+        // Get ercToken balance
+        contract.methods.balanceOf(sourceAddress).call().then(function (amountResult) {
+            // get token decimals
+            contract.methods.decimals().call().then(function (decimalsResult) {
+                // calculate amount for custome token decimals
+                var value = parseInt(amountResult), decimals = parseInt(decimalsResult)
+                var balance = value / 10 ** decimals
+                logger.debug('Source Account Balance: ', balance + ' ' + ercToken.toUpperCase())
+                logger.debug(balance, ' < ', amount)
+                if (parseFloat(balance) < amount) {
+                    logger.error('Insufficient funds')
                     res.json({
                         result: 'error',
-                        message: err.toString(),
+                        message: 'Insufficient funds',
                     })
                     return
                 }
-                const url = `${server.etherscanExplorerUrl}/tx/${id}`
-                logger.debug({ transactionHash: id, link: url })
-                res.json({
-                    result: 'success',
-                    transactionHash: id,
-                    link: url
+                // convert amount
+                var sendingAmount = amount * (10 ** decimals)
+                logger.debug('Sending Amount in Wei: ', sendingAmount)
+                // tx
+                var rawTransaction = {
+                    'from': sourceAddress,
+                    'gasPrice': web3.utils.toHex(2 * 1e9),
+                    'gasLimit': web3.utils.toHex(210000),
+                    'to': contractAddress,
+                    'value': '0x0',
+                    'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
+                    'nonce': nonce,
+                    'chainId': getChainId()
+                }
+
+                const transaction = new EthereumTx(rawTransaction, { chain: server.ethNetwork })
+                var privateKeySplit = privateKey.split('0x')
+                try {
+                    var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
+                    transaction.sign(privateKeyHex)
+                } catch (error) {
+                    logger.error('Failed to sign Transaction')
+                    logger.error(error)
+                    res.json({
+                        result: 'error',
+                        message: 'Failed to sign Transaction',
+                    })
+                    return
+                }
+
+                const serializedTransaction = transaction.serialize()
+                web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
+                    if (err) {
+                        logger.error(err)
+                        res.json({
+                            result: 'error',
+                            message: err.toString(),
+                        })
+                        return
+                    }
+                    const url = `${server.etherscanExplorerUrl}/tx/${id}`
+                    logger.debug({ transactionHash: id, link: url })
+                    res.json({
+                        result: 'success',
+                        transactionHash: id,
+                        link: url
+                    })
                 })
+            }, error => {
+                logger.error(error)
+                res.json({
+                    result: 'error',
+                    message: error.toString(),
+                })
+                return
             })
+        }, error => {
+            logger.error(error)
+            res.json({
+                result: 'error',
+                message: error.toString(),
+            })
+            return
         })
+
+        // contract.methods.balanceOf(sourceAddress).call().then(function (result) {
+        //     var balance = web3.utils.fromWei(result, 'ether')
+        //     logger.debug('Source Account Balance: ', balance + ' ' + ercToken)
+        //     logger.debug(balance, ' < ', amount)
+        //     if (parseFloat(balance) < amount) {
+        //         logger.error('Insufficient funds')
+        //         res.json({
+        //             result: 'error',
+        //             message: 'Insufficient funds',
+        //         })
+        //         return
+        //     }
+        //     // convert amount
+        //     var sendingAmount = web3.utils.toWei(amount.toString(), 'ether')
+        //     // tx
+        //     var rawTransaction = {
+        //         'from': sourceAddress,
+        //         'gasPrice': web3.utils.toHex(2 * 1e9),
+        //         'gasLimit': web3.utils.toHex(210000),
+        //         'to': contractAddress,
+        //         'value': '0x0',
+        //         'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
+        //         'nonce': nonce,
+        //         'chainId': getChainId()
+        //     }
+
+        //     const transaction = new EthereumTx(rawTransaction, { chain: server.ethNetwork })
+        //     var privateKeySplit = privateKey.split('0x')
+        //     try {
+        //         var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
+        //         transaction.sign(privateKeyHex)
+        //     } catch (error) {
+        //         logger.error('Failed to sign Transaction')
+        //         logger.error(error)
+        //         res.json({
+        //             result: 'error',
+        //             message: 'Failed to sign Transaction',
+        //         })
+        //         return
+        //     }
+
+        //     const serializedTransaction = transaction.serialize()
+        //     web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
+        //         if (err) {
+        //             logger.error(err)
+        //             res.json({
+        //                 result: 'error',
+        //                 message: err.toString(),
+        //             })
+        //             return
+        //         }
+        //         const url = `${server.etherscanExplorerUrl}/tx/${id}`
+        //         logger.debug({ transactionHash: id, link: url })
+        //         res.json({
+        //             result: 'success',
+        //             transactionHash: id,
+        //             link: url
+        //         })
+        //     })
+        // })
     } catch (error) {
         logger.error('ethTokenSend catch Error:', error)
         res.json({
