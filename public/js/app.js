@@ -16,7 +16,7 @@ $(document).ready(function () {
                 <p id='countdown-timer'></p>
             </div>
         `)
-        startCountDown(3, $('#countdown-timer')) // 300 sec = 5 mins
+        startCountDown(300, $('#countdown-timer')) // 300 sec = 5 mins
         // if ETH or ERC tokens. Display message
         if (urlParams.get('type').toLowerCase() !== 'btc') {
             $('#note-message').append(`
