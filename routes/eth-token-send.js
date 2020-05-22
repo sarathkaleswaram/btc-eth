@@ -30,10 +30,10 @@ var ethTokenSend = async function (req, res) {
             return
         }
 
-        var index = server.ercToken.findIndex(x => x.ercToken === ercToken.toUpperCase())
+        var index = server.ercTokens.findIndex(x => x.ercToken === ercToken.toLowerCase())
         if (index >= 0) {
-            ercToken = server.ercToken[index].ercToken
-            contractAddress = server.ercToken[index].contractAddress
+            ercToken = server.ercTokens[index].ercToken
+            contractAddress = server.ercTokens[index].contractAddress
         }
         if (!contractAddress) {
             logger.error('Unknown ERC Token.')

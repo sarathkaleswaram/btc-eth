@@ -6,7 +6,7 @@ var { makeTimeoutCallback } = require('./callback')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
-logger.level = 'debug'
+logger.level = 'trace'
 
 var checkPendingRequests = function () {
     logger.trace('Checking transactions at time:', new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
@@ -14,11 +14,14 @@ var checkPendingRequests = function () {
         if (err) logger.error(err)
         if (docs.length) {
             logger.debug('Pending requests from DB length:', docs.length)
+            logger.trace('Pending requests for BTC from DB length:', docs.filter(x => x.type === 'btc').length)
+            logger.trace('Pending requests for ETH from DB length:', docs.filter(x => x.type === 'eth').length)
+            logger.trace('Pending requests for ERC from DB length:', docs.filter(x => x.type !== 'btc' && x.type !== 'eth').length)
             var offset = 0
             docs.forEach(doc => {
                 // 1 sec gap between api calls, to reduce limit
                 setTimeout(() => {
-                    logger.debug('Checking transaction for type:', doc.type, ', address:', doc.address)
+                    logger.debug('Checking transaction for type:', doc.type, ', address:', doc.address, ', api call count:', doc.apiCallCount)
                     // increase api's call count
                     requests.updateOne({ address: doc.address }, { $inc: { apiCallCount: 1 } }, (err, doc) => {
                         if (err) logger.error(err)
@@ -27,7 +30,7 @@ var checkPendingRequests = function () {
                         dbPendingBtcTx(doc.address, doc.blocknumber)
                     } else if (doc.type === 'eth') {
                         dbPendingEthTx(doc.address, doc.blocknumber)
-                    } else if (server.ercToken.some(x => x.ercToken === doc.type)) {
+                    } else if (server.ercTokens.some(x => x.ercToken === doc.type)) {
                         dbPendingEthTokenTx(doc.address, doc.blocknumber, doc.contractAddress)
                     } else {
                         logger.warn('Unknown type from DB', doc.type)

@@ -47,16 +47,16 @@ var pugPage = function (req, res) {
                     error = true
                     message += 'Invalid address. '
                 }
-            } else if (params.type === 'eth' || server.ercToken.some(x => x.ercToken === params.type)) {
+            } else if (params.type === 'eth' || server.ercTokens.some(x => x.ercToken === params.type)) {
                 if (!server.web3.utils.isAddress(params.address)) {
                     error = true
                     message += 'Invalid address. '
                 }
                 // Check ERC Token
-                if (server.ercToken.some(x => x.ercToken === params.type)) {
-                    var index = server.ercToken.findIndex(x => x.ercToken === params.type)
+                if (server.ercTokens.some(x => x.ercToken === params.type)) {
+                    var index = server.ercTokens.findIndex(x => x.ercToken === params.type)
                     if (index >= 0) {
-                        contractAddress = server.ercToken[index].contractAddress
+                        contractAddress = server.ercTokens[index].contractAddress
                     }
                     if (!contractAddress) {
                         error = true
@@ -116,7 +116,7 @@ var pugPage = function (req, res) {
                                 })
                             }
                             // ETH or ERC tokens
-                            if (params.type === 'eth' || server.ercToken.some(x => x.ercToken === params.type)) {
+                            if (params.type === 'eth' || server.ercTokens.some(x => x.ercToken === params.type)) {
                                 server.web3.eth.getBlockNumber().then((blocknumber) => {
                                     logger.debug('ETH current blocknumber:', blocknumber)
                                     // Save request

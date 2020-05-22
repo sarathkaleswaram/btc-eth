@@ -145,15 +145,13 @@ var wsSend = function (address, type, wsType, amount, txHash, callback, token, t
     logger.debug('WS send:', address, type, wsType, amount, txHash, callback, token, timestamp, sender, status, timeout)
     server.wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
-            var url, title, wsMessage, currency
+            var url, title, wsMessage
             var callbackUrl = callback + `?type=${type}&token=${token}&timestamp=${timestamp}&receiver=${address}&sender=${sender}&amount=${amount}&tid=${txHash}&status=${status}&timeout=${timeout}`
             if (type === 'btc') {
                 url = `${server.btcExplorerUrl}/tx/${txHash}`
-                currency = 'BTC'
             }
-            if (type === 'eth' || server.ercToken.some(x => x.ercToken === type)) {
+            if (type === 'eth' || server.ercTokens.some(x => x.ercToken === type)) {
                 url = `${server.etherscanExplorerUrl}/tx/${txHash}`
-                currency = type.toUpperCase()
             }
             if (wsType === 'submitted') {
                 title = 'Your transaction is submitted and pending.'
@@ -167,7 +165,7 @@ var wsSend = function (address, type, wsType, amount, txHash, callback, token, t
                 address: address,
                 type: wsType,
                 title: title,
-                template: `With amount ${amount} ${currency}. Transaction hash <a href='${url}' target='_blank'>${txHash}</a>`,
+                template: `With amount ${amount} ${type.toUpperCase()}. Transaction hash <a href='${url}' target='_blank'>${txHash}</a>`,
                 message: wsMessage,
                 callbackUrl: callbackUrl
             }

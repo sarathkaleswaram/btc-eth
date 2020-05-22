@@ -8,7 +8,7 @@ var ethTokenExchangeRates = function (req, res) {
     try {
         logger.debug('ethTokenExchangeRates: ', req.params)
 
-        var ercTokenId = getTokenId(req.params.ercToken.toUpperCase())
+        var ercTokenId = getTokenId(req.params.ercToken.toLowerCase())
 
         if (ercTokenId === 'unknown') {
             logger.error('Unknown ERC Token')
@@ -73,16 +73,18 @@ var ethTokenExchangeRates = function (req, res) {
 
 function getTokenId(ercToken) {
     switch (ercToken) {
-        case 'BTC':
+        case 'btc':
             return 'bitcoin'
-        case 'ETH':
+        case 'eth':
             return 'ethereum'
-        case 'JAN':
+        case 'jan':
             return 'coinjanitor'
-        case 'GRT':
+        case 'grt':
             return 'golden-ratio-token'
-        case 'SATX':
+        case 'satx':
             return 'satoexchange-token'
+        case 'shar':
+            return 'kaleswaram-token'
         default:
             return 'unknown'
     }

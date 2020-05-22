@@ -17,7 +17,7 @@ https://medium.com/@codetractio/inside-an-ethereum-transaction-fa94ffca912f
 ### Exchange Rate API
 https://min-api.cryptocompare.com/documentation
 
-https://api.ratesapi.io/api/latest
+https://www.coingecko.com/en/api
 
 ## Install and run
 ```sh

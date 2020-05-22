@@ -37,9 +37,9 @@ var ethTokenBalance = function (req, res) {
             })
             return
         }
-        var index = server.ercToken.findIndex(x => x.ercToken === ercToken.toUpperCase())
+        var index = server.ercTokens.findIndex(x => x.ercToken === ercToken.toLowerCase())
         if (index >= 0) {
-            contractAddress = server.ercToken[index].contractAddress
+            contractAddress = server.ercTokens[index].contractAddress
         }
         if (!contractAddress) {
             logger.error('Unknown ERC Token')
@@ -71,7 +71,7 @@ var ethTokenBalance = function (req, res) {
                 return
             }
             if (body.status === '1') {
-                var balance = web3.utils.fromWei(body.result, 'ether') + ' ' + server.ercToken[index].ercToken
+                var balance = web3.utils.fromWei(body.result, 'ether') + ' ' + server.ercTokens[index].ercToken.toUpperCase()
                 logger.debug('ETH - ERC Token Balance:', balance)
                 res.json({
                     result: 'success',

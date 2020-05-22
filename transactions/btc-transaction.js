@@ -10,7 +10,7 @@ logger.level = 'trace'
 
 var dbPendingBtcTx = function (address, blocknumber) {
     var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}`
-    logger.debug('Running Blockcypher API:', url)
+    logger.trace('Running Blockcypher API:', url)
     request({
         url: url,
         json: true
@@ -23,7 +23,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
             logger.error(body.error)
             logger.error(body.message)
         } else {
-            logger.debug('Txs length:', body.txs.length, 'for address:', address)
+            logger.debug('Txs BTC length:', body.txs.length, 'for address:', address)
             body.txs.forEach(tx => {
                 if (tx.block_height > 0) {
                     var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
@@ -79,7 +79,7 @@ var btcWsOnMessage = function () {
 
 function getBtcTxRecurrsive(txid) {
     var url = `${server.btcAPI}/txs/${txid}`
-    logger.debug('Running Blockcypher API:', url)
+    logger.trace('Running Blockcypher API:', url)
     request({
         url: url,
         json: true

@@ -78,7 +78,7 @@ var testERC20Tokens = [
     }
 ]
 
-var ercToken = isMainnet ? erc20Tokens : testERC20Tokens
+var ercTokens = isMainnet ? erc20Tokens : testERC20Tokens
 // Exports
 exports.network = network
 exports.ethNetwork = ethNetwork
@@ -88,7 +88,7 @@ exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
-exports.ercToken = ercToken
+exports.ercTokens = ercTokens
 exports.gameCallbackURL = gameCallbackURL
 
 // Mongodb
