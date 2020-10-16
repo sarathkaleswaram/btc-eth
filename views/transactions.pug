@@ -29,7 +29,15 @@ html
         input.form-control#searchInput(placeholder='Search..')
         br
         
-        h4 Total: #{transactions.length}
+        h4 Total Transactions: #{transactions.length}
+
+        h5
+          u Total Amounts
+        h6 BTC: #{totals.btc} 
+        h6 ETH: #{totals.eth}
+        h6 GRT: #{totals.grt}
+        h6 SATX: #{totals.satx}
+        h6 JAN: #{totals.jan}
 
         table.table.table-striped.table-hover
           thead
