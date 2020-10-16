@@ -2,6 +2,8 @@ var Routes = {}
 
 // Pug
 Routes.pugPage = require('./pug-page')
+Routes.pugRequests = require('./pug-requests')
+Routes.pugTransactions = require('./pug-transactions')
 // Bitcoin
 Routes.btcCreate = require('./btc-create-account')
 Routes.btcBalance = require('./btc-get-balance')

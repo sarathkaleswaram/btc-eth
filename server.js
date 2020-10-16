@@ -122,6 +122,8 @@ app.set('view engine', 'pug')
 
 // Pug Page
 app.get('/', routes.pugPage)
+app.get('/requests', routes.pugRequests)
+app.get('/transactions', routes.pugTransactions)
 
 // Bitcoin
 app.get('/btc/create', routes.btcCreate)

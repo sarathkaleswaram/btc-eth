@@ -1,0 +1,63 @@
+doctype html
+html
+  head
+    meta(charset='UTF-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    meta(name='description' content='')
+    meta(name='author' content='')
+    title='Payment Gateway'
+    link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css')
+    link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css')
+    link(rel='stylesheet' href='css/style.css')
+
+  body
+    nav.navbar.bg-brand.fixed-top
+      .container
+        span.navbar-brand
+          img(src='https://jackpotvilla.com/assets/images/logo_new.png?v=1.0.7' height='60' alt='')
+
+    .container
+      h1 Requests
+
+      if error
+        .alert.alert-danger 
+          strong Error occurred. 
+          span #{message}
+      else
+        br
+        input.form-control#searchInput(placeholder='Search..')
+        br
+
+        h4 Total: #{requests.length}
+
+        table.table.table-striped.table-hover
+          thead
+            tr
+              th Type
+              th Address
+              th Status
+              th Created Date
+              th API Call Count
+              th Token (Game)
+          tbody#tableData
+            each req in requests
+              tr
+                th= req.type.toUpperCase()
+                td= req.address
+                th= req.status
+                td= moment(req.createdDate).format('Do MMM, YYYY h:mm A')
+                td= req.apiCallCount
+                td= req.token
+
+  script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js')
+  script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')
+  script.
+    $(document).ready(function(){
+      $("#searchInput").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("#tableData tr").filter(function() {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+      });
+    });

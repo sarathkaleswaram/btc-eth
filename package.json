@@ -17,6 +17,7 @@
     "ethereumjs-tx": "^2.1.2",
     "express": "^4.17.1",
     "log4js": "^6.2.0",
+    "moment": "^2.29.1",
     "mongoose": "^5.9.9",
     "morgan": "^1.10.0",
     "pug": "^2.0.4",
