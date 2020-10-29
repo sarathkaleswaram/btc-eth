@@ -9,7 +9,7 @@ var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
 var dbPendingBtcTx = function (address, blocknumber) {
-    var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}`
+    var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}&txlimit=1000`
     logger.trace('Running Blockcypher API:', url)
     request({
         url: url,
