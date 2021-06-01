@@ -40,6 +40,7 @@ html
               th Created Date
               th API Call Count
               th Token (Game)
+              th Callback URL
           tbody#tableData
             each req in requests
               tr
@@ -49,6 +50,7 @@ html
                 td= moment(req.createdDate).format('Do MMM, YYYY h:mm A')
                 td= req.apiCallCount
                 td= req.token
+                td= req.callback
 
   script(src='https://code.jquery.com/jquery-3.2.1.slim.min.js')
   script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')
