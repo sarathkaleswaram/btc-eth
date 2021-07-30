@@ -8,6 +8,7 @@ const requestSchema = new Schema({
     token: { type: String, required: true },
     timestamp: { type: String, required: true },
     callback: { type: String, required: true },
+    postCallback: { type: String },
     blocknumber: { type: Number, required: true },
     status: { type: String, required: true },
     apiCallCount: { type: Number, required: true },

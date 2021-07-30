@@ -46,7 +46,8 @@ const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // Game Callback URL
-const gameCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
+const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
+const slotstitanCallbackURL = isMainnet ? 'http://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
 
 // Bitcoin ws connection
 var btcWebsocket = new WebSocket(btcWsAPI)
@@ -89,7 +90,8 @@ exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
 exports.ercTokens = ercTokens
-exports.gameCallbackURL = gameCallbackURL
+exports.jackpotCallbackURL = jackpotCallbackURL
+exports.slotstitanCallbackURL = slotstitanCallbackURL
 
 // Mongodb
 var mongoUrl = `mongodb://127.0.0.1:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}`

@@ -8,6 +8,19 @@ const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
 
+var getPostCallbackUrl = function (postCallback, callback) {
+    if (postCallback) {
+        return postCallback
+    } else {
+        if (callback.includes('jackpotvilla'))
+            return server.jackpotCallbackURL
+        else if (callback.includes('slotstitan'))
+            return server.slotstitanCallbackURL
+        else
+            return server.jackpotCallbackURL
+    }
+}
+
 var checkTxAndCallback = function (type, address, from, amount, timeStamp, transactionHash, blockHash, blockNumber, fee) {
     // check tx hash in db
     transactions.findOne({ transactionHash: transactionHash }, (err, doc) => {
@@ -40,7 +53,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
 }
 
 var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
-    logger.debug('Making callback:', type, sender, receiver, tid, amount)
+    logger.debug('Making Confirm callback:', type, sender, receiver, tid, amount)
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
@@ -57,7 +70,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
                 timeout: 0 // 0 = session not expired as per game
             }
             request({
-                url: server.gameCallbackURL,
+                url: getPostCallbackUrl(doc.postCallback, doc.callback),
                 method: 'POST',
                 json: true,
                 headers: { 'content-type': 'application/json' },
@@ -74,7 +87,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
 }
 
 var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
-    logger.debug('Making callback:', type, sender, receiver, tid, amount)
+    logger.debug('Making Submit callback:', type, sender, receiver, tid, amount)
     requests.findOne({ address: receiver }, (err, doc) => {
         if (err) logger.error(err)
         if (doc) {
@@ -91,7 +104,7 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
                 timeout: 0 // 0 = session not expired as per game
             }
             request({
-                url: server.gameCallbackURL,
+                url: getPostCallbackUrl(doc.postCallback, doc.callback),
                 method: 'POST',
                 json: true,
                 headers: { 'content-type': 'application/json' },
@@ -125,7 +138,7 @@ var makeTimeoutCallback = function (address) {
                 timeout: 1 // 1 = session expired as per game
             }
             request({
-                url: server.gameCallbackURL,
+                url: getPostCallbackUrl(doc.postCallback, doc.callback),
                 method: 'POST',
                 json: true,
                 headers: { 'content-type': 'application/json' },
