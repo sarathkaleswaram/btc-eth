@@ -17,7 +17,8 @@ var pugPage = function (req, res) {
         address: req.query.address,
         token: req.query.token,
         timestamp: req.query.timestamp,
-        callback: req.query.callback
+        callback: req.query.callback,
+        postCallback: req.query.postCallback,
     }
 
     if (!params.address) {
