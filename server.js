@@ -47,7 +47,7 @@ const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // Game Callback URL
 const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
-const slotstitanCallbackURL = isMainnet ? 'http://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
+const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
 
 // Bitcoin ws connection
 var btcWebsocket = new WebSocket(btcWsAPI)
