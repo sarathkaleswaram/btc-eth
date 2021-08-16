@@ -20,7 +20,7 @@ var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
 // mainnet or testnet
-const isMainnet = false // true, false
+const isMainnet = process.env.IN_MAIN_NET || false // true, false
 
 // Networks
 const network = isMainnet ? 'mainnet' : 'testnet'
@@ -98,7 +98,11 @@ exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
 // Mongodb
-var mongoUrl = `mongodb://127.0.0.1:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}`
+var mongoUser = process.env.MONGO_USER || 'root'
+var mongoPass = process.env.MONGO_PASS || 'hello123'
+
+var mongoUrl = `mongodb://${mongoUser}:${mongoPass}@127.0.0.1:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
+mongoose.set('debug', true);
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
