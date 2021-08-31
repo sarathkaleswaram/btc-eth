@@ -53,8 +53,8 @@ const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transactio
 var btcWebsocket = new WebSocket(btcWsAPI)
 btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
 btcWebsocket.on('open', function () {
-    logger.debug('BTC Websocket connected')
-    btcWsOnMessage()
+    //logger.debug('BTC Websocket connected')
+    //btcWsOnMessage()
 })
 
 // ETH Tokens
@@ -94,11 +94,12 @@ exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
 // Mongodb
-var mongoUser = process.env.MONGO_USER || 'root'
+var mongoUser = process.env.MONGO_USER
 var mongoPass = process.env.MONGO_PASS || 'hello123'
 var mongoHost = process.env.MONGO_HOST || '127.0.0.1'
+var mongoUserPass = mongoUser ? (mongoUser+":"+mongoPass+"@") : ''
 
-var mongoUrl = `mongodb://${mongoUser}:${mongoPass}@${mongoHost}:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
+var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
 mongoose.set('debug', true);
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
@@ -138,6 +139,7 @@ app.get('/btc/balance/:address', routes.btcBalance)
 app.post('/btc/privatekey-to-address', routes.btcPrivateKeyToAddress)
 app.post('/btc/send', routes.btcSend)
 app.get('/btc/rates', routes.btcExchangeRates)
+app.get('/btc/tx/:tx', routes.btcGetTx)
 
 // Ethereum
 app.get('/eth/create', routes.ethCreate)

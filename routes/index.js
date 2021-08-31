@@ -7,6 +7,7 @@ Routes.pugTransactions = require('./pug-transactions')
 // Bitcoin
 Routes.btcCreate = require('./btc-create-account')
 Routes.btcBalance = require('./btc-get-balance')
+Routes.btcGetTx = require('./btc-get-tx')
 Routes.btcPrivateKeyToAddress = require('./btc-privateKey-to-account')
 Routes.btcSend = require('./btc-send')
 Routes.btcExchangeRates = require('./btc-rates')
