@@ -83,6 +83,8 @@ function getTokenId(ercToken) {
             return 'golden-ratio-token'
         case 'satx':
             return 'satoexchange-token'
+        case 'usdt':
+            return 'tether'
         case 'shar':
             return 'kaleswaram-token'
         default:

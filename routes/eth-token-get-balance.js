@@ -4,6 +4,7 @@ var sharABI = require('../erc20-abi/shar')
 var janABI = require('../erc20-abi/jan')
 var grtABI = require('../erc20-abi/grt')
 var satxABI = require('../erc20-abi/satx')
+var usdtABI = require('../erc20-abi/usdt')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
@@ -63,6 +64,8 @@ var ethTokenBalance = function (req, res) {
             abi = grtABI
         } else if (ercToken === 'satx') {
             abi = satxABI
+        } else if (ercToken === 'usdt') {
+            abi = usdtABI
         }
 
         var contract = new web3.eth.Contract(abi, contractAddress)

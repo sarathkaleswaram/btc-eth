@@ -70,7 +70,11 @@ var erc20Tokens = [
     {
         ercToken: 'satx',
         contractAddress: '0xe96F2c381E267a96C29bbB8ab05AB7d3527b45Ab'
-    }
+    },
+    {
+        ercToken: 'usdt',
+        contractAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    },
 ]
 var testERC20Tokens = [
     {
