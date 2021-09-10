@@ -151,6 +151,7 @@ app.get('/eth/balance/:address', routes.ethBalance)
 app.post('/eth/privatekey-to-address', routes.ethPrivateKeyToAddress)
 app.post('/eth/send', routes.ethSend)
 app.get('/eth/rates', routes.ethExchangeRates)
+app.get('/eth/tx/:tx', routes.ethGetTx)
 // ERC20 Token
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
