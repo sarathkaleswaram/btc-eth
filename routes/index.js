@@ -14,6 +14,7 @@ Routes.btcExchangeRates = require('./btc-rates')
 // Ethereum
 Routes.ethCreate = require('./eth-create-account')
 Routes.ethBalance = require('./eth-get-balance')
+Routes.ethGetTx = require('./eth-get-tx')
 Routes.ethPrivateKeyToAddress = require('./eth-privateKey-to-account')
 Routes.ethSend = require('./eth-send')
 Routes.ethExchangeRates = require('./eth-rates')
