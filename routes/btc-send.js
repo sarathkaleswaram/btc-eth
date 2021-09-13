@@ -154,7 +154,7 @@ function getUTXO(address, chain, res, callback) {
     }, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             if (!body.txrefs) {
-                logger.error('Empty Unspend Transaction (Pending other Transaction)')
+                logger.error('Empty Unspend Transaction (Pending other Transaction) '+JSON.stringify(body))
                 res.json({
                     result: 'error',
                     message: 'Empty Unspend Transaction (Pending other Transaction)',

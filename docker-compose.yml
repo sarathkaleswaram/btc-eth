@@ -1,0 +1,9 @@
+version: '3.1'
+services:
+  btc-eth-api:
+    image: btc-eth-api
+    network_mode: host
+    environment:
+      MONGO_USER: root
+      MONGO_PASS: uytsdfasdf86asdf7
+      MONGO_HOST: localhost

@@ -20,7 +20,7 @@ var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
 // mainnet or testnet
-const isMainnet = false // true, false
+const isMainnet = process.env.IN_MAIN_NET || false // true, false
 
 // Networks
 const network = isMainnet ? 'mainnet' : 'testnet'
@@ -53,8 +53,8 @@ const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transactio
 var btcWebsocket = new WebSocket(btcWsAPI)
 btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
 btcWebsocket.on('open', function () {
-    logger.debug('BTC Websocket connected')
-    btcWsOnMessage()
+    //logger.debug('BTC Websocket connected')
+    //btcWsOnMessage()
 })
 
 // ETH Tokens
@@ -98,7 +98,13 @@ exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
 // Mongodb
-var mongoUrl = `mongodb://127.0.0.1:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}`
+var mongoUser = process.env.MONGO_USER
+var mongoPass = process.env.MONGO_PASS || 'hello123'
+var mongoHost = process.env.MONGO_HOST || '127.0.0.1'
+var mongoUserPass = mongoUser ? (mongoUser+":"+mongoPass+"@") : ''
+
+var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
+mongoose.set('debug', true);
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
@@ -137,6 +143,7 @@ app.get('/btc/balance/:address', routes.btcBalance)
 app.post('/btc/privatekey-to-address', routes.btcPrivateKeyToAddress)
 app.post('/btc/send', routes.btcSend)
 app.get('/btc/rates', routes.btcExchangeRates)
+app.get('/btc/tx/:tx', routes.btcGetTx)
 
 // Ethereum
 app.get('/eth/create', routes.ethCreate)
@@ -144,6 +151,7 @@ app.get('/eth/balance/:address', routes.ethBalance)
 app.post('/eth/privatekey-to-address', routes.ethPrivateKeyToAddress)
 app.post('/eth/send', routes.ethSend)
 app.get('/eth/rates', routes.ethExchangeRates)
+app.get('/eth/tx/:tx', routes.ethGetTx)
 // ERC20 Token
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
