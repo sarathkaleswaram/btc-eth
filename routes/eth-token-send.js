@@ -114,7 +114,7 @@ var ethTokenSend = async function (req, res) {
                     return
                 }
                 // convert amount
-                var sendingAmount = amount * (10 ** decimals)
+                var sendingAmount = (amount * (10 ** decimals)).toString()
                 logger.debug('Sending Amount in Wei: ', sendingAmount)
                 // tx
                 var rawTransaction = {
