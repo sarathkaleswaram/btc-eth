@@ -23,8 +23,13 @@
     "pug": "^2.0.4",
     "qrcode": "^1.4.4",
     "request": "^2.88.2",
+    "ripple-keypairs": "^1.0.3",
+    "ripple-lib": "^1.10.0",
     "satoshi-bitcoin": "^1.0.4",
     "web3": "^1.2.6",
     "ws": "^7.2.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.13"
   }
 }

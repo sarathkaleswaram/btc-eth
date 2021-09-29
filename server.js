@@ -9,6 +9,7 @@ const path = require('path')
 const log4js = require('log4js')
 const WebSocket = require('ws')
 const CronJob = require('cron').CronJob
+const RippleAPI = require('ripple-lib').RippleAPI
 var routes = require('./routes')
 var requests = require('./models/requests')
 var { checkPendingRequests } = require('./transactions')
@@ -45,6 +46,11 @@ const etherscanApiKey = '1R2ACZ69YGQQ4DVH8SPUEXAZTWV3G415IM'
 const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
+// ripple API
+const rippleRpcUrl = isMainnet ? 'https://s1.ripple.com:51234' : 'https://s.altnet.rippletest.net:51234'
+const rippleWsUrl = isMainnet ? 'wss://s1.ripple.com' : 'wss://s.altnet.rippletest.net'
+const xrpExplorerUrl = isMainnet ? 'https://livenet.xrpl.org' : 'https://testnet.xrpl.org'
+
 // Game Callback URL
 const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
 const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
@@ -56,6 +62,18 @@ btcWebsocket.on('open', function () {
     //logger.debug('BTC Websocket connected')
     //btcWsOnMessage()
 })
+
+// Ripple ws connection
+const rippleApi = new RippleAPI({
+    server: rippleWsUrl
+})
+rippleApi.on('connected', () => {
+    logger.debug('Ripple Websocket connected')
+})
+rippleApi.on('disconnected', (code) => {
+    logger.warn('Ripple Websocket disconnected, code:', code)
+})
+rippleApi.connect().then().catch(e => logger.error('Ripple websocket connection error:', e))
 
 // ETH Tokens
 var erc20Tokens = [
@@ -84,6 +102,7 @@ var testERC20Tokens = [
 ]
 
 var ercTokens = isMainnet ? erc20Tokens : testERC20Tokens
+
 // Exports
 exports.network = network
 exports.ethNetwork = ethNetwork
@@ -94,6 +113,10 @@ exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
 exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
 exports.ercTokens = ercTokens
+exports.rippleRpcUrl = rippleRpcUrl
+exports.rippleWsUrl = rippleWsUrl
+exports.rippleApi = rippleApi
+exports.xrpExplorerUrl = xrpExplorerUrl
 exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
@@ -102,10 +125,10 @@ var mongoUser = process.env.MONGO_USER
 var mongoPass = process.env.MONGO_PASS || 'hello123'
 var mongoHost = process.env.MONGO_HOST || '127.0.0.1'
 var mongoPort = process.env.MONGO_PORT || '27017'
-var mongoUserPass = mongoUser ? (mongoUser+":"+mongoPass+"@") : ''
+var mongoUserPass = mongoUser ? (mongoUser + ':' + mongoPass + '@') : ''
 
 var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:${mongoPort}/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
-mongoose.set('debug', true);
+mongoose.set('debug', true)
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
@@ -157,6 +180,14 @@ app.get('/eth/tx/:tx', routes.ethGetTx)
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
 app.get('/eth/ercToken/:ercToken/rates', routes.ethTokenExchangeRates)
+
+// Ripple
+app.get('/xrp/create', routes.xrpCreate)
+app.get('/xrp/balance/:address', routes.xrpBalance)
+app.post('/xrp/privatekey-to-address', routes.xrpPrivateKeyToAddress)
+app.post('/xrp/send', routes.xrpSend)
+app.get('/xrp/rates', routes.xrpExchangeRates)
+app.get('/xrp/tx/:tx', routes.xrpGetTx)
 
 // 404
 app.get('/*', (_, res) => {

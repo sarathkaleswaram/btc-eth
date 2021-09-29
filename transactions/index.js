@@ -9,7 +9,7 @@ var logger = log4js.getLogger('btc-eth')
 logger.level = 'trace'
 
 var checkPendingRequests = function () {
-    logger.trace('Checking transactions at time:', new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+    logger.trace('Checking transactions at time:', new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
     requests.find({ status: 'Pending' }, (err, docs) => {
         if (err) logger.error(err)
         if (docs.length) {
