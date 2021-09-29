@@ -5,7 +5,7 @@ var { dbPendingBtcTx } = require('./btc-transaction')
 var { makeTimeoutCallback } = require('./callback')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'trace'
 
 var checkPendingRequests = function () {

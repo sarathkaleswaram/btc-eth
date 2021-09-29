@@ -6,7 +6,7 @@ var requests = require('../../models/requests')
 var { btcWsSubscribeAddress } = require('../../transactions/btc-transaction')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var pugPage = function (req, res) {

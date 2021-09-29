@@ -1,7 +1,7 @@
 var transactions = require('../../models/transactions')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var pugTransactions = function (req, res) {

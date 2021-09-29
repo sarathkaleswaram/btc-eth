@@ -8,7 +8,7 @@ var satxABI = require('../../erc20-abi/satx')
 var usdtABI = require('../../erc20-abi/usdt')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var ethTokenSend = async function (req, res) {

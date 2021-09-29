@@ -4,7 +4,7 @@ var server = require('../server')
 var { checkTxAndCallback } = require('./callback')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'trace'
 
 var dbPendingEthTx = function (address, blocknumber) {

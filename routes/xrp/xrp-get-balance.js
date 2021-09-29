@@ -3,7 +3,7 @@ const addressCodec = require('ripple-address-codec')
 var server = require('../../server')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth-xrp')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var xrpBalance = function (req, res) {

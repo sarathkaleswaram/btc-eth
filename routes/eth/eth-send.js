@@ -3,7 +3,7 @@ const EthereumTx = require('ethereumjs-tx').Transaction
 var server = require('../../server')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var ethSend = async function (req, res) {

@@ -1,7 +1,7 @@
 const request = require('request')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var ethTokenExchangeRates = function (req, res) {

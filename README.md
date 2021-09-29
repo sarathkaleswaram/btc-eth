@@ -230,6 +230,74 @@ Response:
 }
 ```
 
+### Ripple
+```json
+GET: /xrp/create
+Response:
+{
+    "result": "success",
+    "address": "rJ3KHntGgiYjxFxesUbM1S4sWkMeeZ9V9x",
+    "privateKey": "shCtJaKdcV9Q6b9JjW1oj6gurvoJ3"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /xrp/balance/:address
+Response: 
+{
+    "result": "success",
+    "address": "rJYNf78FeT4XTtiv2DYmYWVjQGbtgT3JwW",
+    "balance": "21.999976 XRP"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /xrp/privatekey-to-address
+body: 
+{
+	"privateKey": "shCtJaKdcV9Q6b9JjW1oj6gurvoJ3"
+}
+Response:
+{
+    "result": "success",
+    "address": "rJ3KHntGgiYjxFxesUbM1S4sWkMeeZ9V9x",
+    "privateKey": "shCtJaKdcV9Q6b9JjW1oj6gurvoJ3"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /xrp/send
+body: 
+{
+	"sourceAddress": "r48A5QEjUfvwuLYRGPrZuTmtbfYNzJShjQ",
+	"privateKey": "ss3mpHJs2q8cudY9rbS8MgUBa8P88",
+	"destinationAddress": "rJ3KHntGgiYjxFxesUbM1S4sWkMeeZ9V9x",
+	"amount": 10
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "30635B5D3946DCE85A8B4748BB195D2A8CF7F8A8B53A47A14E0CE07433F59AF7",
+    "link": "https://testnet.xrpl.org/transactions/30635B5D3946DCE85A8B4748BB195D2A8CF7F8A8B53A47A14E0CE07433F59AF7"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /xrp/rates
+Response: 
+{
+    "result": "success",
+    "data": {
+        "AUD": 1.316,
+        "EUR": 0.8172,
+        "GBP": 0.706,
+        "BGN": 1.663,
+        "HRK": 6.948,
+        "CZK": 20.79,
+        "DKK": 4.868,
+        "HUF": 329.13,
+        "INR": 76.03,
+        "PLN": 3.802,
+        "RON": 4.279,
+        "SEK": 9.118,
+        "USD": 0.9491,
+        "CAD": 1.205
+    }
+}
+```
+
 ### API Error 
 ```json
 {

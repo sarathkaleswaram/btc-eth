@@ -4,7 +4,7 @@ const sb = require('satoshi-bitcoin')
 var server = require('../../server')
 
 const log4js = require('log4js')
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
 var btcBalance = function (req, res) {

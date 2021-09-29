@@ -11,13 +11,12 @@ const WebSocket = require('ws')
 const CronJob = require('cron').CronJob
 const RippleAPI = require('ripple-lib').RippleAPI
 var routes = require('./routes')
-var requests = require('./models/requests')
 var { checkPendingRequests } = require('./transactions')
-var { btcWsOnMessage } = require('./transactions/btc-transaction')
+// var { btcWsOnMessage } = require('./transactions/btc-transaction')
 var { makeTimeoutCallback } = require('./transactions/callback')
 
 // Logger
-var logger = log4js.getLogger('btc-eth')
+var logger = log4js.getLogger('crypto')
 logger.level = 'trace'
 
 // mainnet or testnet
@@ -59,8 +58,8 @@ const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transactio
 var btcWebsocket = new WebSocket(btcWsAPI)
 btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
 btcWebsocket.on('open', function () {
-    //logger.debug('BTC Websocket connected')
-    //btcWsOnMessage()
+    // logger.debug('BTC Websocket connected')
+    // btcWsOnMessage()
 })
 
 // Ripple ws connection
