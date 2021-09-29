@@ -101,9 +101,10 @@ exports.slotstitanCallbackURL = slotstitanCallbackURL
 var mongoUser = process.env.MONGO_USER
 var mongoPass = process.env.MONGO_PASS || 'hello123'
 var mongoHost = process.env.MONGO_HOST || '127.0.0.1'
+var mongoPort = process.env.MONGO_PORT || '27017'
 var mongoUserPass = mongoUser ? (mongoUser+":"+mongoPass+"@") : ''
 
-var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:27017/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
+var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:${mongoPort}/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
 mongoose.set('debug', true);
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
