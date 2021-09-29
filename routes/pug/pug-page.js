@@ -1,9 +1,9 @@
 const bitcore = require('bitcore-lib')
 const QRCode = require('qrcode')
 const request = require('request')
-var server = require('../server')
-var requests = require('../models/requests')
-var { btcWsSubscribeAddress } = require('../transactions/btc-transaction')
+var server = require('../../server')
+var requests = require('../../models/requests')
+var { btcWsSubscribeAddress } = require('../../transactions/btc-transaction')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')

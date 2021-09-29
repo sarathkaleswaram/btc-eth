@@ -1,36 +1,24 @@
-const bitcore = require('bitcore-lib')
 const request = require('request')
-const sb = require('satoshi-bitcoin')
-var server = require('../server')
+var server = require('../../server')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
 
-var btcBalance = function (req, res) {
+var ethGetTx = function (req, res) {
     try {
-        logger.debug('btcBalance params:', req.params)
-        var address = req.params.address
-        var chain = server.network === 'testnet' ? 'test3' : 'main'
-
-        if (!address) {
-            logger.error('Address is empty')
+        logger.debug('ethGetTx params:', req.params)
+        var tx = req.params.tx
+        if (!tx) {
+            logger.error('Tx is empty')
             res.json({
                 result: 'error',
-                message: 'Address is empty',
-            })
-            return
-        }
-        if (!bitcore.Address.isValid(address, server.network)) {
-            logger.error('Invalid address')
-            res.json({
-                result: 'error',
-                message: 'Invalid address',
+                message: 'Tx is empty',
             })
             return
         }
         request({
-            url: `${server.btcAPI}/addrs/${address}/balance`,
+            url: `${server.etherscanAPI}&module=transaction&action=getstatus&txhash=${tx}`,
             json: true
         }, function (error, response, body) {
             if (error) {
@@ -49,16 +37,14 @@ var btcBalance = function (req, res) {
                 })
                 return
             }
-            var balance = sb.toBitcoin(body.final_balance) + ' BTC'
-            logger.debug(balance)
+            logger.debug(body)
             res.json({
                 result: 'success',
-                address: address,
-                balance: balance
+                Tx: body
             })
         })
     } catch (error) {
-        logger.error('btcBalance catch Error:', error)
+        logger.error('ethGetTx catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -66,4 +52,4 @@ var btcBalance = function (req, res) {
     }
 }
 
-module.exports = btcBalance
+module.exports = ethGetTx

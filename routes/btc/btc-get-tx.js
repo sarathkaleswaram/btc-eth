@@ -1,14 +1,18 @@
+const bitcore = require('bitcore-lib')
 const request = require('request')
-var server = require('../server')
+const sb = require('satoshi-bitcoin')
+var server = require('../../server')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
 logger.level = 'debug'
 
-var ethGetTx = function (req, res) {
+var btcGetTx = function (req, res) {
     try {
-        logger.debug('ethGetTx params:', req.params)
+        logger.debug('btcGetTx params:', req.params)
         var tx = req.params.tx
+        var chain = server.network === 'testnet' ? 'test3' : 'main'
+
         if (!tx) {
             logger.error('Tx is empty')
             res.json({
@@ -18,7 +22,7 @@ var ethGetTx = function (req, res) {
             return
         }
         request({
-            url: `${server.etherscanAPI}&module=transaction&action=getstatus&txhash=${tx}`,
+            url: `${server.btcAPI}/txs/${tx}`,
             json: true
         }, function (error, response, body) {
             if (error) {
@@ -44,7 +48,7 @@ var ethGetTx = function (req, res) {
             })
         })
     } catch (error) {
-        logger.error('ethGetTx catch Error:', error)
+        logger.error('btcGetTx catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -52,4 +56,4 @@ var ethGetTx = function (req, res) {
     }
 }
 
-module.exports = ethGetTx
+module.exports = btcGetTx

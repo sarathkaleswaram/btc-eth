@@ -1,4 +1,4 @@
-var requests = require('../models/requests')
+var requests = require('../../models/requests')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')

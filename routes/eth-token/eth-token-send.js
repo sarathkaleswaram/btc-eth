@@ -1,11 +1,11 @@
 const request = require('request')
 const EthereumTx = require('ethereumjs-tx').Transaction
-var server = require('../server')
-var sharABI = require('../erc20-abi/shar')
-var janABI = require('../erc20-abi/jan')
-var grtABI = require('../erc20-abi/grt')
-var satxABI = require('../erc20-abi/satx')
-var usdtABI = require('../erc20-abi/usdt')
+var server = require('../../server')
+var sharABI = require('../../erc20-abi/shar')
+var janABI = require('../../erc20-abi/jan')
+var grtABI = require('../../erc20-abi/grt')
+var satxABI = require('../../erc20-abi/satx')
+var usdtABI = require('../../erc20-abi/usdt')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('btc-eth')
