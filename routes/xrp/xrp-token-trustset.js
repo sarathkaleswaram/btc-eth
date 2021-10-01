@@ -1,20 +1,22 @@
 const addressCodec = require('ripple-address-codec')
 const keypairs = require('ripple-keypairs')
 var server = require('../../server')
+var submit_and_verify = require('../../libs/submit-and-verify.js').submit_and_verify
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
-var xrpSend = async function (req, res) {
+var xrpTokenTrustSet = async function (req, res) {
     try {
-        logger.debug('xrpSend body:', req.body)
-        var sourceAddress = req.body.sourceAddress
+        logger.debug('xrpTokenTrustSet body:', req.body)
+        var address = req.body.address
         var privateKey = req.body.privateKey
-        var destinationAddress = req.body.destinationAddress
-        var amount = req.body.amount
+        var limitAmount = req.body.limitAmount
+        var xrpToken = req.params.xrpToken
+        var issuerAddress, currency
 
-        if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
+        if (!address || !privateKey || !limitAmount || !xrpToken) {
             logger.error('Invalid arguments')
             res.json({
                 result: 'error',
@@ -22,19 +24,25 @@ var xrpSend = async function (req, res) {
             })
             return
         }
-        if (!addressCodec.isValidClassicAddress(sourceAddress)) {
-            logger.error('Invalid sourceAddress')
+        var index = server.xrpTokens.findIndex(x => x.name === xrpToken.toLowerCase())
+        if (index >= 0) {
+            xrpToken = xrpToken.toLowerCase()
+            issuerAddress = server.xrpTokens[index].issuer
+            currency = server.xrpTokens[index].currency
+        }
+        if (!issuerAddress || !currency) {
+            logger.error('Unknown XRP Token')
             res.json({
                 result: 'error',
-                message: 'Invalid sourceAddress',
+                message: 'Unknown XRP Token',
             })
             return
         }
-        if (!addressCodec.isValidClassicAddress(destinationAddress)) {
-            logger.error('Invalid destinationAddress')
+        if (!addressCodec.isValidClassicAddress(address)) {
+            logger.error('Invalid address')
             res.json({
                 result: 'error',
-                message: 'Invalid destinationAddress',
+                message: 'Invalid address',
             })
             return
         }
@@ -49,21 +57,21 @@ var xrpSend = async function (req, res) {
             return
         }
         try {
-            amount = parseFloat(amount)
+            limitAmount = parseFloat(limitAmount)
         } catch (error) {
-            logger.error('Invalid amount')
+            logger.error('Invalid limitAmount')
             res.json({
                 result: 'error',
-                message: 'Invalid amount',
+                message: 'Invalid limitAmount',
             })
             return
         }
 
         if (server.rippleApi.isConnected()) {
-            send(sourceAddress, privateKey, destinationAddress, amount, res)
+            sendTrustSet(address, privateKey, limitAmount, issuerAddress, currency, res)
         } else {
             server.rippleApi.connect().then(() => {
-                send(sourceAddress, privateKey, destinationAddress, amount, res)
+                sendTrustSet(address, privateKey, limitAmount, issuerAddress, currency, res)
             }).catch(error => {
                 logger.debug(error)
                 res.json({
@@ -73,7 +81,7 @@ var xrpSend = async function (req, res) {
             })
         }
     } catch (error) {
-        logger.error('xrpSend catch Error:', error)
+        logger.error('xrpTokenTrustSet catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -81,29 +89,31 @@ var xrpSend = async function (req, res) {
     }
 }
 
-async function send(sourceAddress, privateKey, destinationAddress, amount, res) {
+async function sendTrustSet(address, privateKey, limitAmount, issuerAddress, currency, res) {
     try {
         var rippleApi = server.rippleApi
+
         const preparedTx = await rippleApi.prepareTransaction({
-            TransactionType: 'Payment',
-            Account: sourceAddress,
-            Amount: rippleApi.xrpToDrops(amount),
-            Destination: destinationAddress
+            TransactionType: 'TrustSet',
+            Account: address,
+            LimitAmount: {
+                currency: currency,
+                issuer: issuerAddress,
+                value: limitAmount.toString()
+            }
         }, {
-            // Expire this transaction if it doesn't execute within ~5 minutes:
-            maxLedgerVersionOffset: 75 // 5
+            maxLedgerVersionOffset: 10
         })
         logger.debug('Prepared Tx:', preparedTx)
-
         const { signedTransaction, id } = rippleApi.sign(preparedTx.txJSON, privateKey)
-        const result = await rippleApi.submit(signedTransaction)
-        logger.debug('Result:', result)
+        const resultCode = await submit_and_verify(rippleApi, signedTransaction)
+        logger.debug('Result:', resultCode)
 
-        if (result.resultCode !== 'tesSUCCESS') {
-            logger.error(result.resultMessage || result)
+        if (resultCode !== 'tesSUCCESS') {
+            logger.error(resultCode)
             res.json({
                 result: 'error',
-                message: result.resultMessage || result,
+                message: `Error sending TrustSet transaction with resultCode: ${resultCode}`
             })
             return
         }
@@ -116,7 +126,7 @@ async function send(sourceAddress, privateKey, destinationAddress, amount, res) 
             link: url
         })
     } catch (error) {
-        logger.error('send catch Error:', error)
+        logger.error('sendTrustSet catch Error:', error)
         res.json({
             result: 'error',
             message: error,
@@ -125,4 +135,4 @@ async function send(sourceAddress, privateKey, destinationAddress, amount, res) 
     }
 }
 
-module.exports = xrpSend
+module.exports = xrpTokenTrustSet

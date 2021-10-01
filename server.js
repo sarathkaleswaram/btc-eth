@@ -100,7 +100,30 @@ var testERC20Tokens = [
     }
 ]
 
+// XRP token
+var liveXrpTokens = [
+    {
+        name: 'inrte',
+        currency: '494E525465000000000000000000000000000000',
+        issuer: 'rLTiYszrPm2RCREw9hfLXbwivau9Bx35Ui'
+    },
+    {
+        name: 'csc',
+        currency: 'CSC',
+        issuer: 'rCSCManTZ8ME9EoLrSHHYKW8PPwWMgkwr'
+    },
+]
+var testXrpTokens = [
+    {
+        name: 'sha',
+        currency: 'SHA',
+        issuer: 'rJSd4PtTvmRsudjQF5E2wS3yhq1Vfu3Jk2'
+    },
+]
+
+// tokens
 var ercTokens = isMainnet ? erc20Tokens : testERC20Tokens
+var xrpTokens = isMainnet ? liveXrpTokens : testXrpTokens
 
 // Exports
 exports.network = network
@@ -116,6 +139,7 @@ exports.rippleRpcUrl = rippleRpcUrl
 exports.rippleWsUrl = rippleWsUrl
 exports.rippleApi = rippleApi
 exports.xrpExplorerUrl = xrpExplorerUrl
+exports.xrpTokens = xrpTokens
 exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
@@ -187,6 +211,11 @@ app.post('/xrp/privatekey-to-address', routes.xrpPrivateKeyToAddress)
 app.post('/xrp/send', routes.xrpSend)
 app.get('/xrp/rates', routes.xrpExchangeRates)
 app.get('/xrp/tx/:tx', routes.xrpGetTx)
+// Ripple Token
+app.post('/xrp/create-token', routes.createToken)
+app.get('/xrp/xrpToken/:xrpToken/balance/:address', routes.xrpTokenBalance)
+app.post('/xrp/xrpToken/:xrpToken/trustset', routes.xrpTokenTrustSet)
+app.post('/xrp/xrpToken/:xrpToken/send', routes.xrpTokenSend)
 
 // 404
 app.get('/*', (_, res) => {

@@ -32,5 +32,10 @@ Routes.xrpGetTx = require('./xrp/xrp-get-tx')
 Routes.xrpPrivateKeyToAddress = require('./xrp/xrp-privateKey-to-account')
 Routes.xrpSend = require('./xrp/xrp-send')
 Routes.xrpExchangeRates = require('./xrp/xrp-rates')
+// Ripple Token
+Routes.createToken = require('./xrp/create-token')
+Routes.xrpTokenBalance = require('./xrp/xrp-token-get-balance')
+Routes.xrpTokenTrustSet = require('./xrp/xrp-token-trustset')
+Routes.xrpTokenSend = require('./xrp/xrp-token-send')
 
 module.exports = Routes
