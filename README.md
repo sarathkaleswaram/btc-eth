@@ -298,6 +298,46 @@ Response:
 }
 ```
 
+### XRP Token API
+```json
+GET: /xrp/xrpToken/:token/balance/:address
+Response:
+{
+    "result": "success",
+    "address": "rhEW6Sy9m84jJaYS4MWUHtFD519BaB64ak",
+    "balance": "100 SHA"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /xrp/xrpToken/:token/trustset
+body:
+{
+	"address": "raS7ykHyH3QBS9SncHiZYc1dR5aS9mB9pD",
+	"privateKey": "spkGNWRJ3YkebS2LiFwxNeFieDvTq",
+	"limitAmount": 1000000
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "2E1A5BFDA7270F6CDCC00606509D1A91F5CC2E5E96EFFB29F9F1E61E7A7C857C",
+    "link": "https://testnet.xrpl.org/transactions/2E1A5BFDA7270F6CDCC00606509D1A91F5CC2E5E96EFFB29F9F1E61E7A7C857C"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /xrp/xrpToken/:token/send
+body:
+{
+	"sourceAddress": "rKwXKnSd8DfmMgzAASbDZP141cFmRkQ3cC",
+	"privateKey": "shsJcgAfwwQnPqDUKNScDnQdszzyW",
+	"destinationAddress": "raS7ykHyH3QBS9SncHiZYc1dR5aS9mB9pD",
+	"amount": 10
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "AAE9A792E66CB45966700C67C7C3075816F7C4F4D3E3BB907C8AE840293D5E21",
+    "link": "https://testnet.xrpl.org/transactions/AAE9A792E66CB45966700C67C7C3075816F7C4F4D3E3BB907C8AE840293D5E21"
+}
+```
+
 ### API Error 
 ```json
 {
