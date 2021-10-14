@@ -25,6 +25,18 @@ Routes.ethTokenBalance = require('./eth/eth-token-get-balance')
 Routes.ethTokenSend = require('./eth/eth-token-send')
 Routes.ethTokenExchangeRates = require('./eth/eth-token-rates')
 
+// Binance Smart Chain
+Routes.bnbCreate = require('./bnb/bnb-create-account')
+Routes.bnbBalance = require('./bnb/bnb-get-balance')
+Routes.bnbGetTx = require('./bnb/bnb-get-tx')
+Routes.bnbPrivateKeyToAddress = require('./bnb/bnb-privateKey-to-account')
+Routes.bnbSend = require('./bnb/bnb-send')
+Routes.bnbExchangeRates = require('./bnb/bnb-rates')
+// BSC BEP20 Token
+Routes.bnbTokenBalance = require('./bnb/bnb-token-get-balance')
+Routes.bnbTokenSend = require('./bnb/bnb-token-send')
+Routes.bnbTokenExchangeRates = require('./bnb/bnb-token-rates')
+
 // Ripple
 Routes.xrpCreate = require('./xrp/xrp-create-account')
 Routes.xrpBalance = require('./xrp/xrp-get-balance')

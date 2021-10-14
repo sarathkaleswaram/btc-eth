@@ -36,14 +36,18 @@ const btcAPI = `https://api.blockcypher.com/v1/btc/${btcChain}`
 const btcWsAPI = `wss://${btcWsNetwork}.smartbit.com.au/v1/blockchain`
 const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 
-// web3 API
+// ETH web3 API
 const ethInfuraApiKey = isMainnet ? '3c4d6cb30db54dd1b10bd5fc3cb422b8' : '605567f94946494a81e52ac8ca2784de'
-const web3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
+const ethWeb3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
 
 // etherscan API
 const etherscanApiKey = '1R2ACZ69YGQQ4DVH8SPUEXAZTWV3G415IM'
 const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
+
+// BSC 
+const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'
+const bscscanExplorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
 
 // ripple API
 const rippleRpcUrl = isMainnet ? 'https://s1.ripple.com:51234' : 'https://s.altnet.rippletest.net:51234'
@@ -100,6 +104,20 @@ var testERC20Tokens = [
     }
 ]
 
+// BSC - BEP20 Tokens
+var bep20Tokens = [
+    {
+        bepToken: 'busd',
+        contractAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
+    },
+]
+var testBEP20Tokens = [
+    {
+        bepToken: 'shar',
+        contractAddress: '0x90ED4BB7B18376D63175C93d4726Edd19Fd794Ce'
+    }
+]
+
 // XRP token
 var liveXrpTokens = [
     {
@@ -123,23 +141,32 @@ var testXrpTokens = [
 
 // tokens
 var ercTokens = isMainnet ? erc20Tokens : testERC20Tokens
+var bepTokens = isMainnet ? bep20Tokens : testBEP20Tokens
 var xrpTokens = isMainnet ? liveXrpTokens : testXrpTokens
 
 // Exports
+// btc
 exports.network = network
-exports.ethNetwork = ethNetwork
-exports.etherscanAPI = etherscanAPI
-exports.etherscanExplorerUrl = etherscanExplorerUrl
 exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
 exports.btcWebsocket = btcWebsocket
-exports.web3 = new Web3(new Web3.providers.HttpProvider(web3HttpUrl))
+// eth
+exports.ethNetwork = ethNetwork
+exports.etherscanAPI = etherscanAPI
+exports.etherscanExplorerUrl = etherscanExplorerUrl
+exports.web3 = new Web3(new Web3.providers.HttpProvider(ethWeb3HttpUrl))
 exports.ercTokens = ercTokens
+// bnb
+exports.bscWeb3 = new Web3(new Web3.providers.HttpProvider(bscWeb3HttpUrl))
+exports.bscscanExplorerUrl = bscscanExplorerUrl
+exports.bepTokens = bepTokens
+// xrp
 exports.rippleRpcUrl = rippleRpcUrl
 exports.rippleWsUrl = rippleWsUrl
 exports.rippleApi = rippleApi
 exports.xrpExplorerUrl = xrpExplorerUrl
 exports.xrpTokens = xrpTokens
+// game
 exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
 
@@ -203,6 +230,18 @@ app.get('/eth/tx/:tx', routes.ethGetTx)
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)
 app.get('/eth/ercToken/:ercToken/rates', routes.ethTokenExchangeRates)
+
+// Binance
+app.get('/bnb/create', routes.bnbCreate)
+app.get('/bnb/balance/:address', routes.bnbBalance)
+app.post('/bnb/privatekey-to-address', routes.bnbPrivateKeyToAddress)
+app.post('/bnb/send', routes.bnbSend)
+app.get('/bnb/rates', routes.bnbExchangeRates)
+app.get('/bnb/tx/:tx', routes.bnbGetTx)
+// BEP20 Token
+app.get('/bnb/bepToken/:bepToken/balance/:address', routes.bnbTokenBalance)
+app.post('/bnb/bepToken/:bepToken/send', routes.bnbTokenSend)
+app.get('/bnb/bepToken/:bepToken/rates', routes.bnbTokenExchangeRates)
 
 // Ripple
 app.get('/xrp/create', routes.xrpCreate)

@@ -14,6 +14,15 @@ https://web3js.readthedocs.io/en/v1.2.6/
 
 https://medium.com/@codetractio/inside-an-ethereum-transaction-fa94ffca912f
 
+### Binance Smart Chain
+https://docs.binance.org/smart-chain/wallet/metamask.html
+
+https://gist.github.com/sarathkaleswaram/a69c51df416e71d541062e5d9191d44e
+
+https://docs.binance.org/smart-chain/developer/BEP20.html
+
+https://vittominacori.github.io/bep20-generator/create-token/
+
 ### Ripple
 https://xrpl.org/docs.html
 
@@ -226,6 +235,119 @@ Response:
         "PLN": 0.00789246,
         "SEK": 0.01844144,
         "USD": 0.0018679
+    }
+}
+```
+
+### Binance
+```json
+GET: /bnb/create'
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /bnb/balance/:address
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "balance": "0 BNB"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /bnb/privatekey-to-address
+body:
+{
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /bnb/send
+body:
+{
+	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
+	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
+	"amount": 1.10
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "0xafa24d0ca326981113e1c4eaea3c5f24e6a510c863e9d5a37542ab62cd46fa3b",
+    "link": "https://testnet.bscscan.com/tx/0xafa24d0ca326981113e1c4eaea3c5f24e6a510c863e9d5a37542ab62cd46fa3b"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /bnb/rates
+Response: 
+{
+    "result": "success",
+    "data": {
+        "AUD": 640.22,
+        "EUR": 409.35,
+        "GBP": 346.68,
+        "BGN": 798.94,
+        "HRK": 3420.15,
+        "CZK": 10425.58,
+        "DKK": 3326.7,
+        "HUF": 171660.66,
+        "INR": 37800.08,
+        "PLN": 1863.9,
+        "RON": 1796.86,
+        "SEK": 4460.42,
+        "USD": 475.08,
+        "CAD": 587.31
+    }
+}
+```
+
+### BEP20 Token API
+```json
+GET: /bnb/bepToken/:token/balance/:address
+Response:
+{
+    "result": "success",
+    "address": "0xe75F5C9C9177fC3553Db4332F419b91d2A3D6Edc",
+    "balance": "1000 SHAR"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /bnb/bepToken/:token/send
+body:
+{
+	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
+	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
+	"amount": 10
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "0xd1db98fddf89e4e93d775ffbb67dec4e9ad4b5c183423574df3c6c3abbe409ab",
+    "link": "https://testnet.bscscan.com/tx/0xd1db98fddf89e4e93d775ffbb67dec4e9ad4b5c183423574df3c6c3abbe409ab"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /bnb/bepToken/:token/rates
+Response: 
+{
+    "result": "success",
+    "data": {
+        "AUD": 1.35,
+        "EUR": 0.863105,
+        "GBP": 0.73174,
+        "CZK": 21.92,
+        "DKK": 6.42,
+        "HUF": 310.41,
+        "INR": 75.44,
+        "PLN": 3.95,
+        "SEK": 8.65,
+        "USD": 1,
+        "CAD": 1.24
     }
 }
 ```
