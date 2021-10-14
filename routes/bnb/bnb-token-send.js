@@ -3,6 +3,7 @@ const EthereumTx = require('ethereumjs-tx').Transaction
 const Common = require('ethereumjs-common')
 var server = require('../../server')
 var sharABI = require('../../bep20-abi/shar')
+var inrtABI = require('../../bep20-abi/inrt')
 var busdABI = require('../../bep20-abi/busd')
 
 const log4js = require('log4js')
@@ -81,6 +82,8 @@ var bnbTokenSend = async function (req, res) {
 
         if (bepToken === 'shar') {
             abi = sharABI
+        } else if (bepToken === 'inrt') {
+            abi = inrtABI
         } else if (bepToken === 'busd') {
             abi = busdABI
         }

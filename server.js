@@ -107,6 +107,10 @@ var testERC20Tokens = [
 // BSC - BEP20 Tokens
 var bep20Tokens = [
     {
+        bepToken: 'inrt',
+        contractAddress: '0x90ED4BB7B18376D63175C93d4726Edd19Fd794Ce'
+    },
+    {
         bepToken: 'busd',
         contractAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
     },
