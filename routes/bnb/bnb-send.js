@@ -87,8 +87,9 @@ var bnbSend = async function (req, res) {
             let details = {
                 'to': destinationAddress,
                 'value': bscWeb3.utils.toHex(bscWeb3.utils.toWei(amount.toString(), 'ether')),
-                'gas': 5000000,
-                'gasPrice': 18e9,
+                // gas or gasLimit
+                'gas': 100000,
+                'gasPrice': getGasPrice(),
                 // gasLimit: bscWeb3.utils.toHex(100000),
                 // gasPrice: bscWeb3.utils.toHex(bscWeb3.utils.toWei('100', 'gwei')),
                 'nonce': nonce
@@ -166,6 +167,15 @@ function getChainId() {
             return 56
         default:
             return 97
+    }
+}
+
+function getGasPrice() {
+    switch (server.network) {
+        case 'mainnet':
+            return 5e9
+        default:
+            return 10e9
     }
 }
 

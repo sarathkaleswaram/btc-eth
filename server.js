@@ -27,6 +27,7 @@ const network = isMainnet ? 'mainnet' : 'testnet'
 const ethNetwork = isMainnet ? 'mainnet' : 'ropsten'
 const etherscanAPINetwork = isMainnet ? 'api' : 'api-ropsten'
 const etherscanSubdomain = isMainnet ? '' : ethNetwork + '.'
+const bscscanAPINetwork = isMainnet ? 'api' : 'api-testnet'
 const btcChain = isMainnet ? 'main' : 'test3'
 const btcWsNetwork = isMainnet ? 'ws' : 'testnet-ws'
 const btcExplorerPath = isMainnet ? 'btc' : 'btc-testnet'
@@ -47,6 +48,8 @@ const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // BSC 
 const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'
+const bscscanApiKey = 'DDSPTWP6UAQXSZEWPECWH5M8BJEMD1Q8AG'
+const bscscanAPI = `https://${bscscanAPINetwork}.bscscan.com/api?&apikey=${bscscanApiKey}`
 const bscscanExplorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
 
 // ripple API
@@ -162,6 +165,7 @@ exports.web3 = new Web3(new Web3.providers.HttpProvider(ethWeb3HttpUrl))
 exports.ercTokens = ercTokens
 // bnb
 exports.bscWeb3 = new Web3(new Web3.providers.HttpProvider(bscWeb3HttpUrl))
+exports.bscscanAPI = bscscanAPI
 exports.bscscanExplorerUrl = bscscanExplorerUrl
 exports.bepTokens = bepTokens
 // xrp
@@ -270,7 +274,7 @@ app.post('/*', (_, res) => {
 
 // Http
 var server = app.listen(port, () => {
-    logger.info(`Http Server running on port ${port}. update check`)
+    logger.info(`Http Server running on port ${port}`)
 })
 // Websocket
 var wss = new WebSocket.Server({ server })
