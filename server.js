@@ -270,7 +270,7 @@ app.post('/*', (_, res) => {
 
 // Http
 var server = app.listen(port, () => {
-    logger.info(`Http Server running on port ${port}`)
+    logger.info(`Http Server running on port ${port}. update check`)
 })
 // Websocket
 var wss = new WebSocket.Server({ server })
