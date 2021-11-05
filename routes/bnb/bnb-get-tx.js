@@ -18,7 +18,7 @@ var bnbGetTx = function (req, res) {
             return
         }
         request({
-            url: `${server.bscscanExplorerUrl}&module=transaction&action=getstatus&txhash=${tx}`,
+            url: `${server.bscscanExplorerUrl}/api?module=transaction&action=getstatus&txhash=${tx}`,
             json: true
         }, function (error, response, body) {
             if (error) {
