@@ -47,10 +47,10 @@ const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // BSC 
-const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'
 const bscscanApiKey = 'DDSPTWP6UAQXSZEWPECWH5M8BJEMD1Q8AG'
 const bscscanAPI = `https://${bscscanAPINetwork}.bscscan.com/api?&apikey=${bscscanApiKey}`
 const bscscanExplorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
+const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'
 
 // ripple API
 const rippleRpcUrl = isMainnet ? 'https://s1.ripple.com:51234' : 'https://s.altnet.rippletest.net:51234'
