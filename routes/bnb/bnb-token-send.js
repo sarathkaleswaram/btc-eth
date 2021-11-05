@@ -114,8 +114,10 @@ var bnbTokenSend = async function (req, res) {
                 // tx
                 var rawTransaction = {
                     'from': sourceAddress,
-                    'gas': 5000000,
-                    'gasPrice': 18e9,
+                    // 'gas': 5000000,
+                    // 'gasPrice': 18e9,
+                    gasLimit: bscWeb3.utils.toHex(100000),
+                    gasPrice: bscWeb3.utils.toHex(bscWeb3.utils.toWei('100', 'gwei')),
                     'to': contractAddress,
                     'value': '0x0',
                     'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
