@@ -21,27 +21,35 @@ var bnbGetTx = function (req, res) {
             url: `${server.bscscanAPI}&module=transaction&action=getstatus&txhash=${tx}`,
             json: true
         }, function (error, response, body) {
-            if (error) {
-                logger.error(error)
+            try {
+                if (error) {
+                    logger.error(error)
+                    res.json({
+                        result: 'error',
+                        message: error.toString(),
+                    })
+                    return
+                }
+                if (body.error) {
+                    logger.debug(body.error)
+                    res.json({
+                        result: 'error',
+                        message: body.error,
+                    })
+                    return
+                }
+                logger.debug(body)
+                res.json({
+                    result: 'success',
+                    Tx: body
+                })                
+            } catch (error) {
+                logger.error('bnbGetTx sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
-                })
-                return
+                })                
             }
-            if (body.error) {
-                logger.debug(body.error)
-                res.json({
-                    result: 'error',
-                    message: body.error,
-                })
-                return
-            }
-            logger.debug(body)
-            res.json({
-                result: 'success',
-                Tx: body
-            })
         })
     } catch (error) {
         logger.error('bnbGetTx catch Error:', error)

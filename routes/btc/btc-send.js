@@ -118,32 +118,40 @@ function getBalance(address, chain, res, callback) {
         url: `${server.btcAPI}/addrs/${address}/balance`,
         json: true
     }, function (error, response, body) {
-        if (error) {
+        try {
+            if (error) {
+                logger.error(error)
+                res.json({
+                    result: 'error',
+                    message: error.toString(),
+                })
+                return
+            }
+            if (body.error) {
+                logger.error(body.error)
+                res.json({
+                    result: 'error',
+                    message: body.error,
+                })
+                return
+            }
+            var balance = sb.toBitcoin(body.final_balance)
+            logger.debug('Source address balance is:', balance + ' BTC')
+            if (body.final_balance <= 0) {
+                res.json({
+                    result: 'error',
+                    message: 'Source address balance is: ' + balance + ' BTC',
+                })
+                return
+            }
+            callback(body.final_balance)
+        } catch (error) {
             logger.error(error)
             res.json({
                 result: 'error',
                 message: error.toString(),
             })
-            return
         }
-        if (body.error) {
-            logger.error(body.error)
-            res.json({
-                result: 'error',
-                message: body.error,
-            })
-            return
-        }
-        var balance = sb.toBitcoin(body.final_balance)
-        logger.debug('Source address balance is:', balance + ' BTC')
-        if (body.final_balance <= 0) {
-            res.json({
-                result: 'error',
-                message: 'Source address balance is: ' + balance + ' BTC',
-            })
-            return
-        }
-        callback(body.final_balance)
     })
 }
 
@@ -152,38 +160,46 @@ function getUTXO(address, chain, res, callback) {
         url: `${server.btcAPI}/addrs/${address}?unspentOnly=true&includeScript=true`,
         json: true
     }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            if (!body.txrefs) {
-                logger.error('Empty Unspend Transaction (Pending other Transaction) '+JSON.stringify(body))
+        try {
+            if (!error && response.statusCode == 200) {
+                if (!body.txrefs) {
+                    logger.error('Empty Unspend Transaction (Pending other Transaction) ' + JSON.stringify(body))
+                    res.json({
+                        result: 'error',
+                        message: 'Empty Unspend Transaction (Pending other Transaction)',
+                    })
+                    return
+                }
+                logger.debug('UTXO length: ', body.txrefs.length)
+                var utxos = []
+                var totalSats = 0
+                var txSize = 44
+                for (i = 0; i < body.txrefs.length; i++) {
+                    var utxo = {
+                        'txId': body.txrefs[i].tx_hash,
+                        'outputIndex': body.txrefs[i].tx_output_n,
+                        'address': address,
+                        'script': body.txrefs[i].script,
+                        'satoshis': body.txrefs[i].value
+                    }
+                    utxos.push(utxo)
+                }
+                callback(utxos)
+            } else {
+                logger.error(error)
+                logger.error('Unable to get UTXO')
                 res.json({
                     result: 'error',
-                    message: 'Empty Unspend Transaction (Pending other Transaction)',
+                    message: 'Unable to get UTXO',
                 })
                 return
             }
-            logger.debug('UTXO length: ', body.txrefs.length)
-            var utxos = []
-            var totalSats = 0
-            var txSize = 44
-            for (i = 0; i < body.txrefs.length; i++) {
-                var utxo = {
-                    'txId': body.txrefs[i].tx_hash,
-                    'outputIndex': body.txrefs[i].tx_output_n,
-                    'address': address,
-                    'script': body.txrefs[i].script,
-                    'satoshis': body.txrefs[i].value
-                }
-                utxos.push(utxo)
-            }
-            callback(utxos)
-        } else {
+        } catch (error) {
             logger.error(error)
-            logger.error('Unable to get UTXO')
             res.json({
                 result: 'error',
-                message: 'Unable to get UTXO',
+                message: error.toString(),
             })
-            return
         }
     })
 }
@@ -196,24 +212,32 @@ function pushTransaction(pload, chain, res, callback) {
         headers: { 'content-type': 'application/json' },
         body: pload
     }, function (err, response, body) {
-        if (err) {
-            logger.error(err)
-            logger.error('Broadcast failed. Please try later')
-            res.json({
-                result: 'error',
-                message: 'Broadcast failed. Please try later',
-            })
-            return
-        } else {
-            if (body.error) {
-                logger.error(body.error)
+        try {
+            if (err) {
+                logger.error(err)
+                logger.error('Broadcast failed. Please try later')
                 res.json({
                     result: 'error',
-                    message: body.error,
+                    message: 'Broadcast failed. Please try later',
                 })
                 return
+            } else {
+                if (body.error) {
+                    logger.error(body.error)
+                    res.json({
+                        result: 'error',
+                        message: body.error,
+                    })
+                    return
+                }
+                callback(body.tx.hash)
             }
-            callback(body.tx.hash)
+        } catch (error) {
+            logger.error(error)
+            res.json({
+                result: 'error',
+                message: error.toString(),
+            })
         }
     })
 }

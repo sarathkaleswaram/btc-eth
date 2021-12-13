@@ -105,7 +105,7 @@ var ethSend = async function (req, res) {
                         result: 'error',
                         message: 'Failed to sign Transaction',
                     })
-                    return                    
+                    return
                 }
 
                 const serializedTransaction = transaction.serialize()
@@ -142,20 +142,28 @@ function getCurrentGasPrices(res, callback) {
         url: 'https://ethgasstation.info/json/ethgasAPI.json',
         json: true
     }, function (error, response, body) {
-        if (error || !body.safeLow || !body.average || !body.fast) {
-            logger.error('Failed to get fees')
+        try {
+            if (error || !body.safeLow || !body.average || !body.fast) {
+                logger.error('Failed to get fees')
+                res.json({
+                    result: 'error',
+                    message: 'Failed to get fees',
+                })
+                return
+            }
+            let prices = {
+                low: body.safeLow / 10,
+                medium: body.average / 10,
+                high: body.fast / 10
+            }
+            callback(prices)
+        } catch (error) {
+            logger.error(error)
             res.json({
                 result: 'error',
-                message: 'Failed to get fees',
+                message: error.toString(),
             })
-            return
         }
-        let prices = {
-            low: body.safeLow / 10,
-            medium: body.average / 10,
-            high: body.fast / 10
-        }
-        callback(prices)
     })
 }
 

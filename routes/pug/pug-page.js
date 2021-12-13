@@ -88,33 +88,38 @@ var pugPage = function (req, res) {
                                     url: `${server.btcAPI}`,
                                     json: true
                                 }, function (error, response, body) {
-                                    if (error) {
+                                    try {
+                                        if (error) {
+                                            logger.error(error)
+                                            res.render('index', { error: true, message: error.toString() })
+                                            return
+                                        }
+                                        logger.debug('BTC current blocknumber:', body.height)
+                                        // subscibe address
+                                        btcWsSubscribeAddress(params.address)
+                                        // Save request
+                                        requests.create({
+                                            type: params.type,
+                                            address: params.address,
+                                            token: params.token,
+                                            timestamp: params.timestamp,
+                                            callback: params.callback,
+                                            postCallback: params.postCallback,
+                                            blocknumber: body.height,
+                                            status: 'Pending',
+                                            apiCallCount: 0,
+                                            createdDate: new Date()
+                                        }).then(() => {
+                                            logger.info('DB Request inserted')
+                                            res.render('index', { src: url, account: params.address })
+                                        }, error => {
+                                            logger.error(error)
+                                            res.render('index', { error: true, message: error.toString() })
+                                        })
+                                    } catch (error) {
                                         logger.error(error)
                                         res.render('index', { error: true, message: error.toString() })
-                                        return
                                     }
-                                    logger.debug('BTC current blocknumber:', body.height)
-                                    // subscibe address
-                                    btcWsSubscribeAddress(params.address)
-                                    // Save request
-                                    requests.create({
-                                        type: params.type,
-                                        address: params.address,
-                                        token: params.token,
-                                        timestamp: params.timestamp,
-                                        callback: params.callback,
-                                        postCallback: params.postCallback,
-                                        blocknumber: body.height,
-                                        status: 'Pending',
-                                        apiCallCount: 0,
-                                        createdDate: new Date()
-                                    }).then(() => {
-                                        logger.info('DB Request inserted')
-                                        res.render('index', { src: url, account: params.address })
-                                    }, error => {
-                                        logger.error(error)
-                                        res.render('index', { error: true, message: error.toString() })
-                                    })
                                 })
                             }
                             // ETH or ERC tokens

@@ -69,55 +69,62 @@ var xrpTokenBalance = function (req, res) {
             json: true,
             body: payload
         }, function (error, response, body) {
-            if (error) {
-                logger.error(error)
+            try {
+                if (error) {
+                    logger.error(error)
+                    res.json({
+                        result: 'error',
+                        message: error.toString(),
+                    })
+                    return
+                } else {
+                    if (body.error) {
+                        logger.error(body.error)
+                        res.json({
+                            result: 'error',
+                            message: body.error,
+                        })
+                        return
+                    }
+                    if (body.result.status !== 'success') {
+                        logger.error(body.result)
+                        res.json({
+                            result: 'error',
+                            message: body.result.error_message || body.result,
+                        })
+                        return
+                    }
+                    logger.debug('Token balance response:', JSON.stringify(body, null, 2))
+                    if (!body.result.balances) {
+                        logger.error('Selected token balance is not available on this address')
+                        res.json({
+                            result: 'error',
+                            message: 'Selected token balance is not available on this address',
+                        })
+                        return
+                    }
+                    var balanceIndex = body.result.balances[address].findIndex(x => x.currency === currency)
+                    if (balanceIndex < 0) {
+                        logger.error('Token is not available on this address')
+                        res.json({
+                            result: 'error',
+                            message: 'Token is not available on this address',
+                        })
+                        return
+                    }
+                    var balance = body.result.balances[address][balanceIndex].value + ' ' + xrpToken.toUpperCase()
+                    logger.debug('XRP Token Balance:', balance)
+                    res.json({
+                        result: 'success',
+                        address: address,
+                        balance: balance
+                    })
+                }
+            } catch (error) {
+                logger.error('xrpTokenBalance sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
-                })
-                return
-                return
-            } else {
-                if (body.error) {
-                    logger.error(body.error)
-                    res.json({
-                        result: 'error',
-                        message: body.error,
-                    })
-                    return
-                }
-                if (body.result.status !== 'success') {
-                    logger.error(body.result)
-                    res.json({
-                        result: 'error',
-                        message: body.result.error_message || body.result,
-                    })
-                    return
-                }
-                logger.debug('Token balance response:', JSON.stringify(body, null, 2))
-                if (!body.result.balances) {
-                    logger.error('Selected token balance is not available on this address')
-                    res.json({
-                        result: 'error',
-                        message: 'Selected token balance is not available on this address',
-                    })
-                    return
-                }
-                var balanceIndex = body.result.balances[address].findIndex(x => x.currency === currency)
-                if (balanceIndex < 0) {
-                    logger.error('Token is not available on this address')
-                    res.json({
-                        result: 'error',
-                        message: 'Token is not available on this address',
-                    })
-                    return
-                }
-                var balance = body.result.balances[address][balanceIndex].value + ' ' + xrpToken.toUpperCase()
-                logger.debug('XRP Token Balance:', balance)
-                res.json({
-                    result: 'success',
-                    address: address,
-                    balance: balance
                 })
             }
         })

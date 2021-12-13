@@ -46,37 +46,44 @@ var xrpBalance = function (req, res) {
             // headers: { 'Content-type': 'application/json' },
             body: payload
         }, function (error, response, body) {
-            if (error) {
-                logger.error(error)
+            try {
+                if (error) {
+                    logger.error(error)
+                    res.json({
+                        result: 'error',
+                        message: error.toString(),
+                    })
+                    return
+                } else {
+                    if (body.error) {
+                        logger.error(body.error)
+                        res.json({
+                            result: 'error',
+                            message: body.error,
+                        })
+                        return
+                    }
+                    if (body.result.status !== 'success') {
+                        logger.error(body.result)
+                        res.json({
+                            result: 'error',
+                            message: body.result.error_message || body.result,
+                        })
+                        return
+                    }
+                    var balance = server.rippleApi.dropsToXrp(body.result.account_data.Balance) + ' XRP'
+                    logger.debug(balance)
+                    res.json({
+                        result: 'success',
+                        address: address,
+                        balance: balance
+                    })
+                }
+            } catch (error) {
+                logger.error('xrpBalance sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
-                })
-                return
-                return
-            } else {
-                if (body.error) {
-                    logger.error(body.error)
-                    res.json({
-                        result: 'error',
-                        message: body.error,
-                    })
-                    return
-                }
-                if (body.result.status !== 'success') {
-                    logger.error(body.result)
-                    res.json({
-                        result: 'error',
-                        message: body.result.error_message || body.result,
-                    })
-                    return
-                }
-                var balance = server.rippleApi.dropsToXrp(body.result.account_data.Balance) + ' XRP'
-                logger.debug(balance)
-                res.json({
-                    result: 'success',
-                    address: address,
-                    balance: balance
                 })
             }
         })

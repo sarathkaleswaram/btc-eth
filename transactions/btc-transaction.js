@@ -15,27 +15,31 @@ var dbPendingBtcTx = function (address, blocknumber) {
         url: url,
         json: true
     }, function (error, response, body) {
-        if (error) {
-            logger.error(error)
-            return
-        }
-        if (body.error) {
-            logger.error(body.error)
-            logger.error(body.message)
-        } else {
-            logger.debug('Txs BTC length:', body.txs.length, 'for address:', address)
-            body.txs.forEach(tx => {
-                if (tx.block_height > 0) {
-                    var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
-                    if (outputIndex >= 0) {
-                        // get all input addresses - make unique - join to single string
-                        var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                        logger.info('Got BTC tx from:', inputAddresses, ', amount:', tx.outputs[outputIndex].value, ', hash:', tx.hash)
-                        // check transaction hash with db before making callback and save
-                        checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
+        try {
+            if (error) {
+                logger.error(error)
+                return
+            }
+            if (body.error) {
+                logger.error(body.error)
+                logger.error(body.message)
+            } else {
+                logger.debug('Txs BTC length:', body.txs.length, 'for address:', address)
+                body.txs.forEach(tx => {
+                    if (tx.block_height > 0) {
+                        var outputIndex = tx.outputs.findIndex(x => x.addresses.includes(address))
+                        if (outputIndex >= 0) {
+                            // get all input addresses - make unique - join to single string
+                            var inputAddresses = tx.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                            logger.info('Got BTC tx from:', inputAddresses, ', amount:', tx.outputs[outputIndex].value, ', hash:', tx.hash)
+                            // check transaction hash with db before making callback and save
+                            checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(tx.outputs[outputIndex].value), tx.confirmed, tx.hash, tx.block_hash, tx.block_height, sb.toBitcoin(tx.fees))
+                        }
                     }
-                }
-            })
+                })
+            }
+        } catch (error) {
+            logger.error(error)
         }
     })
 }
@@ -84,44 +88,48 @@ function getBtcTxRecurrsive(txid) {
         url: url,
         json: true
     }, function (error, response, body) {
-        if (error) {
-            logger.error(error)
-            return
-        }
-        if (body.error) {
-            logger.error(body.error)
-            logger.error(body.message)
-        } else {
-            if (body.block_height > 0) {
-                var addressFound = false
-                body.outputs.forEach((output, outputIndex) => {
-                    output.addresses.forEach((address, addressIndex) => {
-                        requests.findOne({ address: address }, (err, doc) => {
-                            if (err) {
-                                logger.error('DB Error:', err)
-                            } else {
-                                if (doc) {
-                                    addressFound = true
-                                    var address = body.outputs[outputIndex].addresses[addressIndex]
-                                    // unsubscribe to tx and address
-                                    server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: txid, unsubscribe: true }))
-                                    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
-                                    // get unique address inputs
-                                    var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
-                                    logger.info('Got BTC tx from:', inputAddresses, ', amount:', body.outputs[outputIndex].value, ', hash:', body.hash)
-                                    // check transaction hash with db before making callback and save
-                                    checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
+        try {
+            if (error) {
+                logger.error(error)
+                return
+            }
+            if (body.error) {
+                logger.error(body.error)
+                logger.error(body.message)
+            } else {
+                if (body.block_height > 0) {
+                    var addressFound = false
+                    body.outputs.forEach((output, outputIndex) => {
+                        output.addresses.forEach((address, addressIndex) => {
+                            requests.findOne({ address: address }, (err, doc) => {
+                                if (err) {
+                                    logger.error('DB Error:', err)
+                                } else {
+                                    if (doc) {
+                                        addressFound = true
+                                        var address = body.outputs[outputIndex].addresses[addressIndex]
+                                        // unsubscribe to tx and address
+                                        server.btcWebsocket.send(JSON.stringify({ type: 'transaction', txid: txid, unsubscribe: true }))
+                                        server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
+                                        // get unique address inputs
+                                        var inputAddresses = body.inputs.map(x => { return x.addresses.join() }).filter((item, i, ar) => ar.indexOf(item) === i).join()
+                                        logger.info('Got BTC tx from:', inputAddresses, ', amount:', body.outputs[outputIndex].value, ', hash:', body.hash)
+                                        // check transaction hash with db before making callback and save
+                                        checkTxAndCallback('btc', address, inputAddresses, sb.toBitcoin(body.outputs[outputIndex].value), body.confirmed, body.hash, body.block_hash, body.block_height, sb.toBitcoin(body.fees))
+                                    }
                                 }
-                            }
+                            })
                         })
                     })
-                })
-            } else {
-                setTimeout(() => {
-                    logger.debug('Getting BTC tx after 2 sec. Tx is confrimed by ws but not in http. TX:', txid)
-                    getBtcTxRecurrsive(txid)
-                }, 2000)
+                } else {
+                    setTimeout(() => {
+                        logger.debug('Getting BTC tx after 2 sec. Tx is confrimed by ws but not in http. TX:', txid)
+                        getBtcTxRecurrsive(txid)
+                    }, 2000)
+                }
             }
+        } catch (error) {
+            logger.error(error)
         }
     })
 }
