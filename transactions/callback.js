@@ -23,9 +23,9 @@ var getPostCallbackUrl = function (postCallback, callback) {
 
 var checkTxAndCallback = function (type, address, from, amount, timeStamp, transactionHash, blockHash, blockNumber, fee) {
     // check tx hash in db
-    transactions.findOne({ transactionHash: transactionHash }, (err, doc) => {
-        if (err) {
-            logger.error('DB Error:', err)
+    transactions.findOne({ transactionHash: transactionHash }, (error, doc) => {
+        if (error) {
+            logger.error('DB Error:', error)
         } else {
             if (!doc) {
                 // make callback
@@ -46,7 +46,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
                 transactions.create(saveTx).then(() => logger.info(`${type.toUpperCase()} Transaction inserted`)).catch(error => logger.error(error))
             } else {
                 logger.warn('Transaction hash already present in db. Got same tx again. Tx:', transactionHash)
-                requests.findOneAndUpdate({ address: address }, { status: 'Completed' }, (err, doc) => { })
+                requests.findOneAndUpdate({ address: address }, { status: 'Completed' }, (error, doc) => { })
             }
         }
     })
@@ -54,8 +54,8 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
 
 var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
     logger.debug('Making Confirm callback:', type, sender, receiver, tid, amount)
-    requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (err, doc) => {
-        if (err) logger.error(err)
+    requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (error, doc) => {
+        if (error) logger.error(error)
         if (doc) {
             wsSend(receiver, type, 'confirmed', amount, tid, doc.callback, doc.token, doc.timestamp, sender, 1, 0)
             var payload = {
@@ -75,9 +75,9 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
                 json: true,
                 headers: { 'content-type': 'application/json' },
                 body: payload
-            }, function (err, response, body) {
-                if (err) {
-                    logger.error(err)
+            }, function (error, response, body) {
+                if (error) {
+                    logger.error(error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }
@@ -88,8 +88,8 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
 
 var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
     logger.debug('Making Submit callback:', type, sender, receiver, tid, amount)
-    requests.findOne({ address: receiver }, (err, doc) => {
-        if (err) logger.error(err)
+    requests.findOne({ address: receiver }, (error, doc) => {
+        if (error) logger.error(error)
         if (doc) {
             wsSend(receiver, type, 'submitted', amount, tid, doc.callback, doc.token, doc.timestamp, sender, 0, 0)
             var payload = {
@@ -109,9 +109,9 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
                 json: true,
                 headers: { 'content-type': 'application/json' },
                 body: payload
-            }, function (err, response, body) {
-                if (err) {
-                    logger.error(err)
+            }, function (error, response, body) {
+                if (error) {
+                    logger.error(error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }
@@ -122,8 +122,8 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
 
 var makeTimeoutCallback = function (address) {
     logger.debug('Making Timeout callback:', address)
-    requests.findOne({ address: address }, (err, doc) => {
-        if (err) logger.error(err)
+    requests.findOne({ address: address }, (error, doc) => {
+        if (error) logger.error(error)
         if (doc) {
             wsSend(doc.address, doc.type, 'timeout', undefined, undefined, doc.callback, doc.token, doc.timestamp, undefined, 0, 1)
             var payload = {
@@ -143,9 +143,9 @@ var makeTimeoutCallback = function (address) {
                 json: true,
                 headers: { 'content-type': 'application/json' },
                 body: payload
-            }, function (err, response, body) {
-                if (err) {
-                    logger.error(err)
+            }, function (error, response, body) {
+                if (error) {
+                    logger.error(error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }

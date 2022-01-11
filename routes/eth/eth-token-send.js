@@ -144,12 +144,12 @@ var ethTokenSend = async function (req, res) {
                 }
 
                 const serializedTransaction = transaction.serialize()
-                web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
-                    if (err) {
-                        logger.error(err)
+                web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+                    if (error) {
+                        logger.error(error)
                         res.json({
                             result: 'error',
-                            message: err.toString(),
+                            message: error.toString(),
                         })
                         return
                     }
@@ -220,12 +220,12 @@ var ethTokenSend = async function (req, res) {
         //     }
 
         //     const serializedTransaction = transaction.serialize()
-        //     web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
-        //         if (err) {
-        //             logger.error(err)
+        //     web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+        //         if (error) {
+        //             logger.error(error)
         //             res.json({
         //                 result: 'error',
-        //                 message: err.toString(),
+        //                 message: error.toString(),
         //             })
         //             return
         //         }

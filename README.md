@@ -38,6 +38,11 @@ https://www.coingecko.com/en/api
 npm install
 npm start
 ```
+### Docker 
+```sh
+docker build . -t btc-eth-xrp-api
+docker-compose down; docker-compose up -d
+```
 
 Open link by passing params
 ```

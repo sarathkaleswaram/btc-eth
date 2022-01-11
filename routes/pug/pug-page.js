@@ -76,10 +76,13 @@ var pugPage = function (req, res) {
         res.render('index', { error: error, message: message })
     } else {
         try {
-            QRCode.toDataURL(params.address, function (err, url) {
-                requests.findOne({ address: params.address }, (err, doc) => {
-                    if (err) {
-                        res.render('index', { error: true, message: err.toString() })
+            QRCode.toDataURL(params.address, function (error, url) {
+                if (error) {
+                    res.render('index', { error: true, message: error.toString() })
+                }
+                requests.findOne({ address: params.address }, (error, doc) => {
+                    if (error) {
+                        res.render('index', { error: true, message: error.toString() })
                     } else {
                         if (!doc) {
                             // BTC

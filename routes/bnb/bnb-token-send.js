@@ -146,12 +146,12 @@ var bnbTokenSend = async function (req, res) {
                 }
 
                 const serializedTransaction = transaction.serialize()
-                bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
-                    if (err) {
-                        logger.error(err)
+                bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+                    if (error) {
+                        logger.error(error)
                         res.json({
                             result: 'error',
-                            message: err.toString(),
+                            message: error.toString(),
                         })
                         return
                     }

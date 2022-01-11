@@ -101,9 +101,9 @@ function getBtcTxRecurrsive(txid) {
                     var addressFound = false
                     body.outputs.forEach((output, outputIndex) => {
                         output.addresses.forEach((address, addressIndex) => {
-                            requests.findOne({ address: address }, (err, doc) => {
-                                if (err) {
-                                    logger.error('DB Error:', err)
+                            requests.findOne({ address: address }, (error, doc) => {
+                                if (error) {
+                                    logger.error('DB Error:', error)
                                 } else {
                                     if (doc) {
                                         addressFound = true

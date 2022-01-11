@@ -211,10 +211,10 @@ function pushTransaction(pload, chain, res, callback) {
         json: true,
         headers: { 'content-type': 'application/json' },
         body: pload
-    }, function (err, response, body) {
+    }, function (error, response, body) {
         try {
-            if (err) {
-                logger.error(err)
+            if (error) {
+                logger.error(error)
                 logger.error('Broadcast failed. Please try later')
                 res.json({
                     result: 'error',

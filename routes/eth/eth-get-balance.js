@@ -27,9 +27,9 @@ var ethBalance = function (req, res) {
             return
         }
 
-        web3.eth.getBalance(address, (err, result) => {
-            if (err) {
-                logger.error(err)
+        web3.eth.getBalance(address, (error, result) => {
+            if (error) {
+                logger.error(error)
                 res.json({
                     result: 'error',
                     message: error,

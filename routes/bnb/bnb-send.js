@@ -104,9 +104,9 @@ var bnbSend = async function (req, res) {
             //     value: '1000000000',
             //     gas: 5000000,
             //     gasPrice: 18e9,
-            // }, function(err, transactionHash) {
-            //   if (err) {
-            //     console.log(err);
+            // }, function(error, transactionHash) {
+            //   if (error) {
+            //     console.log(error);
             //     } else {
             //     console.log(transactionHash);
             //    }
@@ -134,12 +134,12 @@ var bnbSend = async function (req, res) {
             }
 
             const serializedTransaction = transaction.serialize()
-            bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (err, id) => {
-                if (err) {
-                    logger.error(err)
+            bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+                if (error) {
+                    logger.error(error)
                     res.json({
                         result: 'error',
-                        message: err.toString(),
+                        message: error.toString(),
                     })
                     return
                 }

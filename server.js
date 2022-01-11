@@ -62,12 +62,12 @@ const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction
 const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
 
 // Bitcoin ws connection
-var btcWebsocket = new WebSocket(btcWsAPI)
-btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
-btcWebsocket.on('open', function () {
-    // logger.debug('BTC Websocket connected')
-    // btcWsOnMessage()
-})
+// var btcWebsocket = new WebSocket(btcWsAPI)
+// btcWebsocket.on('error', e => logger.error('BTC websocket connection error:', e))
+// btcWebsocket.on('open', function () {
+//     logger.debug('BTC Websocket connected')
+//     btcWsOnMessage()
+// })
 
 // Ripple ws connection
 const rippleApi = new RippleAPI({
@@ -156,7 +156,7 @@ var xrpTokens = isMainnet ? liveXrpTokens : testXrpTokens
 exports.network = network
 exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
-exports.btcWebsocket = btcWebsocket
+exports.btcWebsocket = undefined// btcWebsocket
 // eth
 exports.ethNetwork = ethNetwork
 exports.etherscanAPI = etherscanAPI
@@ -192,7 +192,7 @@ mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFin
         logger.info('Mongodb Connected!')
         checkPendingRequests()
     })
-    .catch(err => logger.error(err))
+    .catch(error => logger.error(error))
 
 // Cron Job runs every 5 mins
 var job = new CronJob('*/5 * * * *', function () {
