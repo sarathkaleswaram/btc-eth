@@ -12,7 +12,6 @@ logger.level = 'debug'
 
 var bnbTokenSend = async function (req, res) {
     try {
-        logger.debug('bnbTokenSend params:', req.params, 'body:', req.body)
         var bscWeb3 = server.bscWeb3
         var bepToken = req.params.bepToken
         var sourceAddress = req.body.sourceAddress
@@ -20,6 +19,8 @@ var bnbTokenSend = async function (req, res) {
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
         var account, contractAddress, abi
+        
+        logger.debug('bnbTokenSend bepToken: ' + bepToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount || !bepToken) {
             logger.error('Invalid arguments')

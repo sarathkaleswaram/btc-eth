@@ -13,7 +13,7 @@ logger.level = 'debug'
 
 var ethTokenSend = async function (req, res) {
     try {
-        logger.debug('ethTokenSend params:', req.params, 'body:', req.body)
+        //logger.debug('ethTokenSend params:', req.params, 'body:', req.body)
         var web3 = server.web3
         var ercToken = req.params.ercToken
         var sourceAddress = req.body.sourceAddress
@@ -21,7 +21,9 @@ var ethTokenSend = async function (req, res) {
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
         var account, contractAddress, abi
-
+        
+        logger.debug('ethTokenSend ercToken: ' + ercToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
+        
         if (!sourceAddress || !privateKey || !destinationAddress || !amount || !ercToken) {
             logger.error('Invalid arguments')
             res.json({

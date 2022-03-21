@@ -6,7 +6,7 @@ logger.level = 'debug'
 
 var bnbPrivateKeyToAddress = function (req, res) {
     try {
-        logger.debug('bnbPrivateKeyToAddress body:', req.body)
+        //logger.debug('bnbPrivateKeyToAddress body:', req.body)
         var bscWeb3 = server.bscWeb3
         var privateKey = req.body.privateKey
         var account

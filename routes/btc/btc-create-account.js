@@ -11,7 +11,7 @@ var btcCreate = function (req, res) {
         var privateKey = new bitcore.PrivateKey(server.network)
         // var wif = privateKey.toWIF()
         var address = privateKey.toAddress()
-        logger.debug({ address: address.toString(), privateKey: privateKey.toString() })
+        logger.debug({ address: address.toString() })
 
         res.json({
             result: 'success',
