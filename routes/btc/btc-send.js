@@ -9,13 +9,15 @@ logger.level = 'debug'
 
 var btcSend = async function (req, res) {
     try {
-        logger.debug('btcSend body:', req.body)
+        //logger.debug('btcSend body:', req.body)
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
         var chain = server.network === 'testnet' ? 'test3' : 'main'
         var amountSatoshi
+
+        logger.debug('btcSend sourceAddress: '+ sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
             logger.error('Invalid arguments')

@@ -6,7 +6,7 @@ logger.level = 'debug'
 
 var xrpPrivateKeyToAddress = function (req, res) {
     try {
-        logger.debug('xrpPrivateKeyToAddress body:', req.body)
+        //logger.debug('xrpPrivateKeyToAddress body:', req.body)
         var seed = req.body.privateKey
 
         if (!seed) {
@@ -21,7 +21,7 @@ var xrpPrivateKeyToAddress = function (req, res) {
         const keypair = keypairs.deriveKeypair(seed)
         const address = keypairs.deriveAddress(keypair.publicKey)
 
-        logger.debug({ address: address, privateKey: seed })
+        logger.debug({ address: address })
 
         res.json({
             result: 'success',

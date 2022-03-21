@@ -36,7 +36,7 @@ var bnbBalance = function (req, res) {
                 })
             }
             var balance = bscWeb3.utils.fromWei(result, 'ether') + ' BNB'
-            logger.debug(balance)
+            //logger.debug(balance)
             res.json({
                 result: 'success',
                 address: address,

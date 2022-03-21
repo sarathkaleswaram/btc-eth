@@ -38,16 +38,16 @@ const btcWsAPI = `wss://${btcWsNetwork}.smartbit.com.au/v1/blockchain`
 const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 
 // ETH web3 API
-const ethInfuraApiKey = isMainnet ? '3c4d6cb30db54dd1b10bd5fc3cb422b8' : '605567f94946494a81e52ac8ca2784de'
+const ethInfuraApiKey = isMainnet ? process.env.ETH_INFURA_API_KEY  : '605567f94946494a81e52ac8ca2784de'
 const ethWeb3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
 
 // etherscan API
-const etherscanApiKey = '1R2ACZ69YGQQ4DVH8SPUEXAZTWV3G415IM'
+const etherscanApiKey = process.env.ETHER_SCAN_API_KEY
 const etherscanAPI = `https://${etherscanAPINetwork}.etherscan.io/api?&apikey=${etherscanApiKey}`
 const etherscanExplorerUrl = `https://${etherscanSubdomain}etherscan.io`
 
 // BSC 
-const bscscanApiKey = 'DDSPTWP6UAQXSZEWPECWH5M8BJEMD1Q8AG'
+const bscscanApiKey = process.env.BSC_SCAN_API_KEY
 const bscscanAPI = `https://${bscscanAPINetwork}.bscscan.com/api?&apikey=${bscscanApiKey}`
 const bscscanExplorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
 const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'

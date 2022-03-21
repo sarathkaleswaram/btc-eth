@@ -8,13 +8,14 @@ logger.level = 'debug'
 
 var xrpTokenSend = async function (req, res) {
     try {
-        logger.debug('xrpTokenSend body:', req.body)
+        //logger.debug('xrpTokenSend body:', req.body)
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
         var xrpToken = req.params.xrpToken
         var issuerAddress, currency
+        logger.debug('xrpTokenSend sourceAddress: '+ sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount + " xrpToken: " + xrpToken)
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount || !xrpToken) {
             logger.error('Invalid arguments')

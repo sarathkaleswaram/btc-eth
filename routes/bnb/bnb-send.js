@@ -9,13 +9,14 @@ logger.level = 'debug'
 
 var bnbSend = async function (req, res) {
     try {
-        logger.debug('bnbSend body:', req.body)
         var bscWeb3 = server.bscWeb3
         var sourceAddress = req.body.sourceAddress
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
         var account
+
+        logger.debug('bnbSend sourceAddress: '+ sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
             logger.error('Invalid arguments')
