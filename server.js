@@ -114,6 +114,10 @@ var bep20Tokens = [
         contractAddress: '0x90ED4BB7B18376D63175C93d4726Edd19Fd794Ce'
     },
     {
+        bepToken: 'zinr',
+        contractAddress: '0xC7dbd8876D1b2E2d5EFc091704dd25169A2d8d83'
+    },
+    {
         bepToken: 'busd',
         contractAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
     },

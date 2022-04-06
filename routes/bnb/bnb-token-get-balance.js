@@ -2,6 +2,7 @@ const request = require('request')
 var server = require('../../server')
 var sharABI = require('../../bep20-abi/shar')
 var inrtABI = require('../../bep20-abi/inrt')
+var zinrABI = require('../../bep20-abi/zinr')
 var busdABI = require('../../bep20-abi/busd')
 
 const log4js = require('log4js')
@@ -58,6 +59,8 @@ var bnbTokenBalance = function (req, res) {
             abi = sharABI
         } else if (bepToken === 'inrt') {
             abi = inrtABI
+        } else if (bepToken === 'zinr') {
+            abi = zinrABI
         } else if (bepToken === 'busd') {
             abi = busdABI
         }
