@@ -35,7 +35,7 @@ var ethBalance = function (req, res) {
                     message: error,
                 })
             }
-            var balance = web3.utils.fromWei(result, 'ether') + ' ETH'
+            var balance = web3.utils.fromWei(result.toString(), 'ether') + ' ETH'
             logger.debug(balance)
             res.json({
                 result: 'success',

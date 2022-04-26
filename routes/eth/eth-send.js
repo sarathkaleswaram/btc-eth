@@ -71,7 +71,7 @@ var ethSend = async function (req, res) {
                 })
                 return
             }
-            let balance = web3.utils.fromWei(result, 'ether')
+            let balance = web3.utils.fromWei(result.toString(), 'ether')
             logger.debug('Source Account Balance: ', balance + ' ETH')
             logger.debug(balance, ' < ', amount)
             if (parseFloat(balance) < amount) {
