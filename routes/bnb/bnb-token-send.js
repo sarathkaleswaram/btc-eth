@@ -5,6 +5,8 @@ var server = require('../../server')
 var sharABI = require('../../bep20-abi/shar')
 var inrtABI = require('../../bep20-abi/inrt')
 var zinrABI = require('../../bep20-abi/zinr')
+var dogeABI = require('../../bep20-abi/doge')
+var adaABI = require('../../bep20-abi/ada')
 var busdABI = require('../../bep20-abi/busd')
 
 const log4js = require('log4js')
@@ -88,6 +90,10 @@ var bnbTokenSend = async function (req, res) {
             abi = inrtABI
         } else if (bepToken === 'zinr') {
             abi = zinrABI
+        } else if (bepToken === 'doge') {
+            abi = dogeABI
+        } else if (bepToken === 'ada') {
+            abi = adaABI
         } else if (bepToken === 'busd') {
             abi = busdABI
         }
