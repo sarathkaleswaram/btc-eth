@@ -10,6 +10,7 @@ const log4js = require('log4js')
 const WebSocket = require('ws')
 const CronJob = require('cron').CronJob
 const RippleAPI = require('ripple-lib').RippleAPI
+require('dotenv').config()
 var routes = require('./routes')
 var { checkPendingRequests } = require('./transactions')
 // var { btcWsOnMessage } = require('./transactions/btc-transaction')
