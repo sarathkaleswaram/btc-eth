@@ -83,6 +83,12 @@ function getTokenId(bepToken) {
     switch (bepToken) {
         case 'busd':
             return 'binance-usd'
+        case 'ada':
+            return 'binance-peg-cardano'
+        case 'doge':
+            return 'binance-peg-dogecoin'
+        case 'zinr':
+            return 'zinr'
         case 'shar':
             return 'shar token'
         default:

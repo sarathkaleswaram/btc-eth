@@ -73,7 +73,7 @@ var bnbSend = async function (req, res) {
                 })
                 return
             }
-            let balance = bscWeb3.utils.fromWei(result.toString(), 'ether')
+            let balance = bscWeb3.utils.fromWei(result ? result.toString() : '', 'ether')
             logger.debug('Source Account Balance: ', balance + ' BNB')
             logger.debug(balance, ' < ', amount)
             if (parseFloat(balance) < amount) {
