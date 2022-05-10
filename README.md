@@ -201,6 +201,9 @@ Response:
 ```
 
 ### ERC20 Token API
+- Available tokens:
+    - Live: JAN, GRT, SATX, USDT, SHIB, MATIC, DAI
+    - Test: SHAR
 ```json
 GET: /eth/ercToken/:token/balance/:address
 Response:
@@ -313,6 +316,9 @@ Response:
 ```
 
 ### BEP20 Token API
+- Available tokens:
+    - Live: INRT, ZINR, DOGE, ADA, BUSD
+    - Test: SHAR
 ```json
 GET: /bnb/bepToken/:token/balance/:address
 Response:
@@ -426,6 +432,9 @@ Response:
 ```
 
 ### XRP Token API
+- Available tokens:
+    - Live: INRTE, CSC
+    - Test: SHA
 ```json
 GET: /xrp/xrpToken/:token/balance/:address
 Response:

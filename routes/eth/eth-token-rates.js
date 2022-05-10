@@ -93,6 +93,12 @@ function getTokenId(ercToken) {
             return 'satoexchange-token'
         case 'usdt':
             return 'tether'
+        case 'shib':
+            return 'shiba-inu'
+        case 'matic':
+            return 'matic-network'
+        case 'dai':
+            return 'dai'
         case 'shar':
             return 'kaleswaram-token'
         default:

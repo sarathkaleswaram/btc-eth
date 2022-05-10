@@ -21,7 +21,7 @@ var logger = log4js.getLogger('crypto')
 logger.level = 'trace'
 
 // mainnet or testnet
-const isMainnet = process.env.IN_MAIN_NET || false // true, false
+const isMainnet = process.env.IN_MAIN_NET === 'true' // true, false
 
 // Networks
 const network = isMainnet ? 'mainnet' : 'testnet'
@@ -100,6 +100,18 @@ var erc20Tokens = [
         ercToken: 'usdt',
         contractAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7'
     },
+    {
+        ercToken: 'shib', // Shiba-Inu
+        contractAddress: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE'
+    },
+    {
+        ercToken: 'matic', // Polygon
+        contractAddress: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0'
+    },
+    {
+        ercToken: 'dai', // Dai
+        contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+    },
 ]
 var testERC20Tokens = [
     {
@@ -127,7 +139,7 @@ var bep20Tokens = [
         contractAddress: '0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47'
     },
     {
-        bepToken: 'busd',
+        bepToken: 'busd', // Binance USD
         contractAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
     },
 ]
@@ -165,6 +177,7 @@ var bepTokens = isMainnet ? bep20Tokens : testBEP20Tokens
 var xrpTokens = isMainnet ? liveXrpTokens : testXrpTokens
 
 // Exports
+exports.isMainnet = isMainnet
 // btc
 exports.network = network
 exports.btcAPI = btcAPI

@@ -6,6 +6,8 @@ var janABI = require('../../erc20-abi/jan')
 var grtABI = require('../../erc20-abi/grt')
 var satxABI = require('../../erc20-abi/satx')
 var usdtABI = require('../../erc20-abi/usdt')
+var shibABI = require('../../erc20-abi/shib')
+var maticABI = require('../../erc20-abi/matic')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
@@ -93,6 +95,12 @@ var ethTokenSend = async function (req, res) {
             abi = satxABI
         } else if (ercToken === 'usdt') {
             abi = usdtABI
+        } else if (ercToken === 'shib') {
+            abi = shibABI
+        } else if (ercToken === 'matic') {
+            abi = shibABI
+        } else if (ercToken === 'dai') {
+            abi = daiABI
         }
 
         var contract = new web3.eth.Contract(abi, contractAddress)
