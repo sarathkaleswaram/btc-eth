@@ -50,4 +50,12 @@ Routes.xrpTokenBalance = require('./xrp/xrp-token-get-balance')
 Routes.xrpTokenTrustSet = require('./xrp/xrp-token-trustset')
 Routes.xrpTokenSend = require('./xrp/xrp-token-send')
 
+// Litecoin
+Routes.ltcCreate = require('./ltc/ltc-create-account')
+Routes.ltcBalance = require('./ltc/ltc-get-balance')
+Routes.ltcGetTx = require('./ltc/ltc-get-tx')
+Routes.ltcPrivateKeyToAddress = require('./ltc/ltc-privateKey-to-account')
+Routes.ltcSend = require('./ltc/ltc-send')
+Routes.ltcExchangeRates = require('./ltc/ltc-rates')
+
 module.exports = Routes

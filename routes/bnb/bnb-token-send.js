@@ -138,7 +138,7 @@ var bnbTokenSend = async function (req, res) {
                     name: 'bnb',
                     networkId: getChainId(),
                     chainId: getChainId()
-                }, 'petersburg');
+                }, 'petersburg')
 
                 const transaction = new EthereumTx(rawTransaction, { common })
                 var privateKeySplit = privateKey.split('0x')

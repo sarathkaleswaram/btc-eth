@@ -5,9 +5,9 @@ const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
 logger.level = 'debug'
 
-var btcGetTx = function (req, res) {
+var ltcGetTx = function (req, res) {
     try {
-        logger.debug('btcGetTx params:', req.params)
+        logger.debug('ltcGetTx params:', req.params)
         var tx = req.params.tx
         var chain = server.network === 'testnet' ? 'test3' : 'main'
 
@@ -20,7 +20,7 @@ var btcGetTx = function (req, res) {
             return
         }
         request({
-            url: `${server.btcAPI}/txs/${tx}`,
+            url: `${server.ltcAPI}/txs/${tx}`,
             json: true
         }, function (error, response, body) {
             try {
@@ -46,7 +46,7 @@ var btcGetTx = function (req, res) {
                     Tx: body
                 })                
             } catch (error) {
-                logger.error('btcGetTx sub catch Error:', error)
+                logger.error('ltcGetTx sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -54,7 +54,7 @@ var btcGetTx = function (req, res) {
             }
         })
     } catch (error) {
-        logger.error('btcGetTx catch Error:', error)
+        logger.error('ltcGetTx catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -62,4 +62,4 @@ var btcGetTx = function (req, res) {
     }
 }
 
-module.exports = btcGetTx
+module.exports = ltcGetTx

@@ -58,6 +58,11 @@ const rippleRpcUrl = isMainnet ? 'https://s1.ripple.com:51234' : 'https://s.altn
 const rippleWsUrl = isMainnet ? 'wss://s1.ripple.com' : 'wss://s.altnet.rippletest.net'
 const xrpExplorerUrl = isMainnet ? 'https://livenet.xrpl.org' : 'https://testnet.xrpl.org'
 
+// Litecoin Blockcypher URL
+const ltcAPI = `https://api.blockcypher.com/v1/ltc/main`
+const ltcTestAPI = `https://rest.cryptoapis.io/v2/blockchain-data/litecoin/testnet`
+const ltcExplorerUrl = `https://blockexplorer.one/litecoin/${network}/tx`
+
 // Game Callback URL
 const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
 const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
@@ -200,6 +205,11 @@ exports.rippleWsUrl = rippleWsUrl
 exports.rippleApi = rippleApi
 exports.xrpExplorerUrl = xrpExplorerUrl
 exports.xrpTokens = xrpTokens
+// ltc
+exports.ltcAPI = ltcAPI
+exports.ltcTestAPI = ltcTestAPI
+exports.ltcTestApiKey = process.env.LTC_CRYPTOAPIS_API_KEY
+exports.ltcExplorerUrl = ltcExplorerUrl
 // game
 exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
@@ -229,6 +239,7 @@ job.start()
 // Express
 const app = express()
 const port = isMainnet ? 8001 : 8000
+exports.port = port
 
 app.use(cors())
 app.use(compression())
@@ -289,6 +300,14 @@ app.post('/xrp/create-token', routes.createToken)
 app.get('/xrp/xrpToken/:xrpToken/balance/:address', routes.xrpTokenBalance)
 app.post('/xrp/xrpToken/:xrpToken/trustset', routes.xrpTokenTrustSet)
 app.post('/xrp/xrpToken/:xrpToken/send', routes.xrpTokenSend)
+
+// Litecoin
+app.get('/ltc/create', routes.ltcCreate)
+app.get('/ltc/balance/:address', routes.ltcBalance)
+app.post('/ltc/privatekey-to-address', routes.ltcPrivateKeyToAddress)
+app.post('/ltc/send', routes.ltcSend)
+app.get('/ltc/rates', routes.ltcExchangeRates)
+app.get('/ltc/tx/:tx', routes.ltcGetTx)
 
 // 404
 app.get('/*', (_, res) => {

@@ -96,9 +96,9 @@ var bnbSend = async function (req, res) {
                 'nonce': nonce
             }
 
-            // const privateKey = '';
-            // const account = bscWeb3.eth.accounts.privateKeyToAccount('0x' + privateKey);
-            // bscWeb3.eth.accounts.wallet.add(account);
+            // const privateKey = ''
+            // const account = bscWeb3.eth.accounts.privateKeyToAccount('0x' + privateKey)
+            // bscWeb3.eth.accounts.wallet.add(account)
             // bscWeb3.eth.sendTransaction({
             //     from: '',
             //     to: '',
@@ -107,17 +107,17 @@ var bnbSend = async function (req, res) {
             //     gasPrice: 18e9,
             // }, function(error, transactionHash) {
             //   if (error) {
-            //     console.log(error);
+            //     console.log(error)
             //     } else {
-            //     console.log(transactionHash);
+            //     console.log(transactionHash)
             //    }
-            // }); 
+            // })
 
             const common = Common.default.forCustomChain('mainnet', {
                 name: 'bnb',
                 networkId: getChainId(),
                 chainId: getChainId()
-            }, 'petersburg');
+            }, 'petersburg')
 
             const transaction = new EthereumTx(details, { common })
             var privateKeySplit = privateKey.split('0x')

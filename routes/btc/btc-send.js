@@ -174,8 +174,6 @@ function getUTXO(address, chain, res, callback) {
                 }
                 logger.debug('UTXO length: ', body.txrefs.length)
                 var utxos = []
-                var totalSats = 0
-                var txSize = 44
                 for (i = 0; i < body.txrefs.length; i++) {
                     var utxo = {
                         'txId': body.txrefs[i].tx_hash,
