@@ -87,6 +87,10 @@ function getTokenId(bepToken) {
             return 'binance-peg-cardano'
         case 'doge':
             return 'binance-peg-dogecoin'
+        case 'eos':
+            return 'binance-peg-eos'
+        case 'bch':
+            return 'binance-peg-bitcoin-cash'
         case 'zinr':
             return 'zinr'
         case 'shar':

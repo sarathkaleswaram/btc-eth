@@ -99,6 +99,13 @@ function getTokenId(ercToken) {
             return 'matic-network'
         case 'dai':
             return 'dai'
+        case 'sand':
+            return 'the-sandbox'
+        case 'link':
+            return 'chainlink'
+        case 'mkr':
+            return 'maker'
+
         case 'shar':
             return 'kaleswaram-token'
         default:

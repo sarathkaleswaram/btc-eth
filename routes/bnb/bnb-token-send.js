@@ -8,6 +8,8 @@ var zinrABI = require('../../bep20-abi/zinr')
 var dogeABI = require('../../bep20-abi/doge')
 var adaABI = require('../../bep20-abi/ada')
 var busdABI = require('../../bep20-abi/busd')
+var eosABI = require('../../bep20-abi/eos')
+var bchABI = require('../../bep20-abi/bch')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
@@ -96,6 +98,10 @@ var bnbTokenSend = async function (req, res) {
             abi = adaABI
         } else if (bepToken === 'busd') {
             abi = busdABI
+        } else if (bepToken === 'eos') {
+            abi = eosABI
+        } else if (bepToken === 'bch') {
+            abi = bchABI
         }
 
         var contract = new bscWeb3.eth.Contract(abi, contractAddress)

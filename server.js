@@ -117,6 +117,18 @@ var erc20Tokens = [
         ercToken: 'dai', // Dai
         contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
     },
+    {
+        ercToken: 'sand',
+        contractAddress: '0x3845badAde8e6dFF049820680d1F14bD3903a5d0'
+    },
+    {
+        ercToken: 'link', // ChainLink
+        contractAddress: '0x514910771AF9Ca656af840dff83E8264EcF986CA'
+    },
+    {
+        ercToken: 'mkr', // Maker Token
+        contractAddress: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2'
+    },
 ]
 var testERC20Tokens = [
     {
@@ -146,6 +158,14 @@ var bep20Tokens = [
     {
         bepToken: 'busd', // Binance USD
         contractAddress: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'
+    },
+    {
+        bepToken: 'eos',
+        contractAddress: '0x56b6fB708fC5732DEC1Afc8D8556423A2EDcCbD6'
+    },
+    {
+        bepToken: 'bch', // Bitcoin Cash
+        contractAddress: '0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf'
     },
 ]
 var testBEP20Tokens = [

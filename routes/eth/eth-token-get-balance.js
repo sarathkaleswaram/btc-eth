@@ -8,6 +8,9 @@ var usdtABI = require('../../erc20-abi/usdt')
 var shibABI = require('../../erc20-abi/shib')
 var maticABI = require('../../erc20-abi/matic')
 var daiABI = require('../../erc20-abi/dai')
+var sandABI = require('../../erc20-abi/sand')
+var linkABI = require('../../erc20-abi/link')
+var mkrABI = require('../../erc20-abi/mkr')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
@@ -75,6 +78,12 @@ var ethTokenBalance = function (req, res) {
             abi = maticABI
         } else if (ercToken === 'dai') {
             abi = daiABI
+        } else if (ercToken === 'sand') {
+            abi = sandABI
+        } else if (ercToken === 'link') {
+            abi = linkABI
+        } else if (ercToken === 'mkr') {
+            abi = mkrABI
         }
 
         var contract = new web3.eth.Contract(abi, contractAddress)
