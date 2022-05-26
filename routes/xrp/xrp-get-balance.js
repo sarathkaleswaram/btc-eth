@@ -63,6 +63,15 @@ var xrpBalance = function (req, res) {
                         })
                         return
                     }
+                    if (body.result.error === 'actNotFound') {
+                        logger.debug('Balance: 0 XRP.' + ' Response: ' + body.result.error)
+                        res.json({
+                            result: 'success',
+                            address: address,
+                            balance: '0 XRP'
+                        })
+                        return
+                    }
                     if (body.result.status !== 'success') {
                         logger.error(body.result)
                         res.json({
