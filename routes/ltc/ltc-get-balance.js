@@ -73,7 +73,7 @@ var ltcBalance = function (req, res) {
                 if (server.isMainnet) {
                     balance = sb.toBitcoin(body.final_balance) + ' LTC'
                 } else {
-                    if (body?.data?.item?.confirmedBalance?.amount)
+                    if (body && body.data && body.data.item && body.data.item.confirmedBalance && body.data.item.confirmedBalance.amount)
                         balance = body.data.item.confirmedBalance.amount + ' LTC'
                 }
 
