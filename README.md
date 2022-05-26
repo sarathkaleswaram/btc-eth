@@ -202,7 +202,7 @@ Response:
 
 ### ERC20 Token API
 - Available tokens:
-    - Live: JAN, GRT, SATX, USDT, SHIB, MATIC, DAI
+    - Live: JAN, GRT, SATX, USDT, SHIB, MATIC, DAI, SAND, LINK, MKR
     - Test: SHAR
 ```json
 GET: /eth/ercToken/:token/balance/:address
@@ -317,7 +317,7 @@ Response:
 
 ### BEP20 Token API
 - Available tokens:
-    - Live: INRT, ZINR, DOGE, ADA, BUSD
+    - Live: INRT, ZINR, DOGE, ADA, BUSD, EOS, BCH
     - Test: SHAR
 ```json
 GET: /bnb/bepToken/:token/balance/:address
