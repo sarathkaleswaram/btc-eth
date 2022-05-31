@@ -3,10 +3,7 @@ const bitcore = require('bitcore-lib')
 const request = require('request')
 const sb = require('satoshi-bitcoin')
 var server = require('../../server')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var ltcSend = async function (req, res) {
     try {
@@ -68,7 +65,7 @@ var ltcSend = async function (req, res) {
         }
 
         getBalance(sourceAddress, res, function (balance) {
-            logger.debug(balance, ' < ', amountSatoshi)
+            logger.verbose(balance, ' < ', amountSatoshi)
             if (balance < amountSatoshi) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -87,7 +84,7 @@ var ltcSend = async function (req, res) {
                         // .fee(fee)
                         .sign(privateKey)
                 } catch (error) {
-                    logger.debug('Failed to sign Transaction')
+                    logger.verbose('Failed to sign Transaction')
                     logger.error(error)
                     res.json({
                         result: 'error',
@@ -102,7 +99,7 @@ var ltcSend = async function (req, res) {
                 // broadcast transaction
                 pushTransaction(payload, res, function (txid) {
                     const url = `${server.ltcExplorerUrl}/tx/${txid}`
-                    logger.debug({ transactionHash: txid, link: url })
+                    logger.verbose({ transactionHash: txid, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: txid,
@@ -143,7 +140,7 @@ function getBalance(address, res, callback) {
                 return
             }
             var balance = parseFloat(body.balance.split(' ')[0])
-            logger.debug('Source address balance is:', balance + ' LTC')
+            logger.verbose('Source address balance is:', balance + ' LTC')
             if (balance <= 0) {
                 res.json({
                     result: 'error',
@@ -178,7 +175,7 @@ function getUTXO(address, res, callback) {
                         })
                         return
                     }
-                    logger.debug('UTXO length: ', body.txrefs.length)
+                    logger.verbose('UTXO length: ', body.txrefs.length)
                     var utxos = []
                     for (i = 0; i < body.txrefs.length; i++) {
                         var utxo = {
@@ -227,7 +224,7 @@ function getUTXO(address, res, callback) {
                         })
                         return
                     }
-                    logger.debug('UTXO length: ', body.data.items.length)
+                    logger.verbose('UTXO length: ', body.data.items.length)
                     var utxos = []
                     for (i = 0; i < body.data.items.length; i++) {
                         var utxo = {

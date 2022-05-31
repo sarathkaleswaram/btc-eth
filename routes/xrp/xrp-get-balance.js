@@ -1,10 +1,7 @@
 const request = require('request')
 const addressCodec = require('ripple-address-codec')
 var server = require('../../server')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var xrpBalance = function (req, res) {
     try {

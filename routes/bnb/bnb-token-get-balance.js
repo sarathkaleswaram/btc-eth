@@ -1,4 +1,5 @@
 const request = require('request')
+const { logger } = require('../../utils/logger')
 var server = require('../../server')
 var sharABI = require('../../bep20-abi/shar')
 var inrtABI = require('../../bep20-abi/inrt')
@@ -8,10 +9,6 @@ var adaABI = require('../../bep20-abi/ada')
 var busdABI = require('../../bep20-abi/busd')
 var eosABI = require('../../bep20-abi/eos')
 var bchABI = require('../../bep20-abi/bch')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var bnbTokenBalance = function (req, res) {
     try {

@@ -1,10 +1,7 @@
 const addressCodec = require('ripple-address-codec')
 const keypairs = require('ripple-keypairs')
 var server = require('../../server')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var xrpSend = async function (req, res) {
     try {
@@ -65,7 +62,7 @@ var xrpSend = async function (req, res) {
             server.rippleApi.connect().then(() => {
                 send(sourceAddress, privateKey, destinationAddress, amount, res)
             }).catch(error => {
-                logger.debug(error)
+                logger.error(error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -93,11 +90,11 @@ async function send(sourceAddress, privateKey, destinationAddress, amount, res) 
             // Expire this transaction if it doesn't execute within ~5 minutes:
             maxLedgerVersionOffset: 75 // 5
         })
-        logger.debug('Prepared Tx:', preparedTx)
+        logger.verbose('Prepared Tx:', preparedTx)
 
         const { signedTransaction, id } = rippleApi.sign(preparedTx.txJSON, privateKey)
         const result = await rippleApi.submit(signedTransaction)
-        logger.debug('Result:', result)
+        logger.verbose('Result:', result)
 
         if (result.resultCode !== 'tesSUCCESS') {
             logger.error(result.resultMessage || result)
@@ -109,7 +106,7 @@ async function send(sourceAddress, privateKey, destinationAddress, amount, res) 
         }
 
         const url = `${server.xrpExplorerUrl}/transactions/${id}`
-        logger.debug({ transactionHash: id, link: url })
+        logger.verbose({ transactionHash: id, link: url })
         res.json({
             result: 'success',
             transactionHash: id,

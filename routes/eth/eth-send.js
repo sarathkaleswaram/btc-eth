@@ -1,10 +1,7 @@
 const request = require('request')
 const EthereumTx = require('ethereumjs-tx').Transaction
 var server = require('../../server')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var ethSend = async function (req, res) {
     try {
@@ -72,8 +69,8 @@ var ethSend = async function (req, res) {
                 return
             }
             let balance = web3.utils.fromWei(result ? result.toString() : '', 'ether')
-            logger.debug('Source Account Balance: ', balance + ' ETH')
-            logger.debug(balance, ' < ', amount)
+            logger.verbose('Source Account Balance: ', balance + ' ETH')
+            logger.verbose(balance, ' < ', amount)
             if (parseFloat(balance) < amount) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -119,7 +116,7 @@ var ethSend = async function (req, res) {
                         return
                     }
                     const url = `${server.etherscanExplorerUrl}/tx/${id}`
-                    logger.debug({ transactionHash: id, link: url })
+                    logger.verbose({ transactionHash: id, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: id,

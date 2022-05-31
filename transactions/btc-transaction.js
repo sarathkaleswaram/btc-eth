@@ -2,15 +2,12 @@ const request = require('request')
 const sb = require('satoshi-bitcoin')
 var server = require('../server')
 var requests = require('../models/requests')
+const { logger } = require('../utils/logger')
 var { checkTxAndCallback, makeSubmittedCallback } = require('./callback')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'trace'
 
 var dbPendingBtcTx = function (address, blocknumber) {
     var url = `${server.btcAPI}/addrs/${address}/full?after=${blocknumber}&txlimit=1000`
-    logger.trace('Running Blockcypher API:', url)
+    logger.verbose('Running Blockcypher API:', url)
     request({
         url: url,
         json: true
@@ -56,9 +53,9 @@ var btcWsOnMessage = function () {
     server.btcWebsocket.on('message', function incoming(data) {
         data = JSON.parse(data)
         if (data.type === 'subscribe-response') {
-            logger.trace(data.payload.message)
+            logger.verbose(data.payload.message)
         } else if (data.type === 'heartbeat') {
-            // logger.trace(data)
+            // logger.verbose(data)
         } else if (data.type === 'address') {
             logger.debug('BTC ws address method for address:', data.payload.address, ', tx:', data.payload.transaction.txid)
             var outputIndex = data.payload.transaction.outputs.findIndex(x => x.addresses.includes(data.payload.address))
@@ -83,7 +80,7 @@ var btcWsOnMessage = function () {
 
 function getBtcTxRecurrsive(txid) {
     var url = `${server.btcAPI}/txs/${txid}`
-    logger.trace('Running Blockcypher API:', url)
+    logger.verbose('Running Blockcypher API:', url)
     request({
         url: url,
         json: true

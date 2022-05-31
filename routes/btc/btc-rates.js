@@ -1,8 +1,5 @@
 const request = require('request')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var btcExchangeRates = function (req, res) {
     try {
@@ -29,7 +26,7 @@ var btcExchangeRates = function (req, res) {
                     })
                     return
                 }
-                logger.debug(body)
+                logger.debug('Rates', body)
                 res.json({
                     result: 'success',
                     data: body

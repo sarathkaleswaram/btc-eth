@@ -1,4 +1,5 @@
 const request = require('request')
+const { logger } = require('../../utils/logger')
 var server = require('../../server')
 var sharABI = require('../../erc20-abi/shar')
 var janABI = require('../../erc20-abi/jan')
@@ -11,10 +12,6 @@ var daiABI = require('../../erc20-abi/dai')
 var sandABI = require('../../erc20-abi/sand')
 var linkABI = require('../../erc20-abi/link')
 var mkrABI = require('../../erc20-abi/mkr')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var ethTokenBalance = function (req, res) {
     try {

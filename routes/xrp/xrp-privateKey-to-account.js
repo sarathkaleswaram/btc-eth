@@ -1,8 +1,5 @@
 const keypairs = require('ripple-keypairs')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var xrpPrivateKeyToAddress = function (req, res) {
     try {

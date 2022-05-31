@@ -3,20 +3,17 @@ var requests = require('../models/requests')
 var { dbPendingEthTx, dbPendingEthTokenTx } = require('./eth-transaction')
 var { dbPendingBtcTx } = require('./btc-transaction')
 var { makeTimeoutCallback } = require('./callback')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'trace'
+const { logger } = require('../utils/logger')
 
 var checkPendingRequests = function () {
-    logger.trace('Checking transactions at time:', new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+    logger.verbose('Checking transactions at time: ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
     requests.find({ status: 'Pending' }, (error, docs) => {
         if (error) logger.error(error)
         if (docs.length) {
             logger.debug('Pending requests from DB length:', docs.length)
-            logger.trace('Pending requests for BTC from DB length:', docs.filter(x => x.type === 'btc').length)
-            logger.trace('Pending requests for ETH from DB length:', docs.filter(x => x.type === 'eth').length)
-            logger.trace('Pending requests for ERC from DB length:', docs.filter(x => x.type !== 'btc' && x.type !== 'eth').length)
+            logger.verbose('Pending requests for BTC from DB length:', docs.filter(x => x.type === 'btc').length)
+            logger.verbose('Pending requests for ETH from DB length:', docs.filter(x => x.type === 'eth').length)
+            logger.verbose('Pending requests for ERC from DB length:', docs.filter(x => x.type !== 'btc' && x.type !== 'eth').length)
             var offset = 0
             docs.forEach(doc => {
                 // 1 sec gap between api calls, to reduce limit

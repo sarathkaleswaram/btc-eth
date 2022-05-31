@@ -1,8 +1,5 @@
 var requests = require('../../models/requests')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var pugRequests = function (req, res) {
     logger.debug('pugRequests')

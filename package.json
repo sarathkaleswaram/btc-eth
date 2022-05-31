@@ -19,7 +19,6 @@
     "dotenv": "^16.0.0",
     "ethereumjs-tx": "^2.1.2",
     "express": "^4.17.1",
-    "log4js": "^6.2.0",
     "moment": "^2.29.1",
     "mongoose": "^5.9.9",
     "morgan": "^1.10.0",
@@ -30,6 +29,7 @@
     "ripple-lib": "^1.10.0",
     "satoshi-bitcoin": "^1.0.4",
     "web3": "^1.2.6",
+    "winston": "^3.7.2",
     "ws": "^7.2.3"
   },
   "devDependencies": {

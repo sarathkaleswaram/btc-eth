@@ -1,8 +1,5 @@
 var transactions = require('../../models/transactions')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var pugTransactions = function (req, res) {
     logger.debug('pugTransactions')

@@ -1,11 +1,8 @@
 const addressCodec = require('ripple-address-codec')
 const keypairs = require('ripple-keypairs')
 var server = require('../../server')
+const { logger } = require('../../utils/logger')
 var submit_and_verify = require('../../libs/submit-and-verify.js').submit_and_verify
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var createToken = async function (req, res) {
     try {

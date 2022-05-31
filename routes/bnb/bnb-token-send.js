@@ -2,6 +2,7 @@ const request = require('request')
 const EthereumTx = require('ethereumjs-tx').Transaction
 const Common = require('ethereumjs-common')
 var server = require('../../server')
+const { logger } = require('../../utils/logger')
 var sharABI = require('../../bep20-abi/shar')
 var inrtABI = require('../../bep20-abi/inrt')
 var zinrABI = require('../../bep20-abi/zinr')
@@ -10,10 +11,6 @@ var adaABI = require('../../bep20-abi/ada')
 var busdABI = require('../../bep20-abi/busd')
 var eosABI = require('../../bep20-abi/eos')
 var bchABI = require('../../bep20-abi/bch')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var bnbTokenSend = async function (req, res) {
     try {
@@ -114,8 +111,8 @@ var bnbTokenSend = async function (req, res) {
                 // calculate amount for custome token decimals
                 var value = parseInt(amountResult), decimals = parseInt(decimalsResult)
                 var balance = value / 10 ** decimals
-                logger.debug('Source Account Balance: ', balance + ' ' + bepToken.toUpperCase())
-                logger.debug(balance, ' < ', amount)
+                logger.verbose('Source Account Balance: ', balance + ' ' + bepToken.toUpperCase())
+                logger.verbose(balance, ' < ', amount)
                 if (parseFloat(balance) < amount) {
                     logger.error('Insufficient funds')
                     res.json({
@@ -126,7 +123,7 @@ var bnbTokenSend = async function (req, res) {
                 }
                 // convert amount
                 var sendingAmount = (amount * (10 ** decimals)).toString()
-                logger.debug('Sending Amount in Wei: ', sendingAmount)
+                logger.verbose('Sending Amount in Wei: ', sendingAmount)
                 // tx
                 var rawTransaction = {
                     'from': sourceAddress,
@@ -172,7 +169,7 @@ var bnbTokenSend = async function (req, res) {
                         return
                     }
                     const url = `${server.bscscanExplorerUrl}/tx/${id}`
-                    logger.debug({ transactionHash: id, link: url })
+                    logger.verbose({ transactionHash: id, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: id,

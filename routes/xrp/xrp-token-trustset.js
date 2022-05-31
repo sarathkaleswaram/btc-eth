@@ -1,11 +1,8 @@
 const addressCodec = require('ripple-address-codec')
 const keypairs = require('ripple-keypairs')
 var server = require('../../server')
+const { logger } = require('../../utils/logger')
 var submit_and_verify = require('../../libs/submit-and-verify.js').submit_and_verify
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var xrpTokenTrustSet = async function (req, res) {
     try {
@@ -73,7 +70,7 @@ var xrpTokenTrustSet = async function (req, res) {
             server.rippleApi.connect().then(() => {
                 sendTrustSet(address, privateKey, limitAmount, issuerAddress, currency, res)
             }).catch(error => {
-                logger.debug(error)
+                logger.error(error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -104,10 +101,10 @@ async function sendTrustSet(address, privateKey, limitAmount, issuerAddress, cur
         }, {
             maxLedgerVersionOffset: 10
         })
-        logger.debug('Prepared Tx:', preparedTx)
+        logger.verbose('Prepared Tx:', preparedTx)
         const { signedTransaction, id } = rippleApi.sign(preparedTx.txJSON, privateKey)
         const resultCode = await submit_and_verify(rippleApi, signedTransaction)
-        logger.debug('Result:', resultCode)
+        logger.verbose('Result:', resultCode)
 
         if (resultCode !== 'tesSUCCESS') {
             logger.error(resultCode)
@@ -119,7 +116,7 @@ async function sendTrustSet(address, privateKey, limitAmount, issuerAddress, cur
         }
 
         const url = `${server.xrpExplorerUrl}/transactions/${id}`
-        logger.debug({ transactionHash: id, link: url })
+        logger.verbose({ transactionHash: id, link: url })
         res.json({
             result: 'success',
             transactionHash: id,

@@ -1,4 +1,5 @@
 const request = require('request')
+const { logger } = require('../../utils/logger')
 const EthereumTx = require('ethereumjs-tx').Transaction
 var server = require('../../server')
 var sharABI = require('../../erc20-abi/shar')
@@ -12,10 +13,6 @@ var daiABI = require('../../erc20-abi/dai')
 var sandABI = require('../../erc20-abi/sand')
 var linkABI = require('../../erc20-abi/link')
 var mkrABI = require('../../erc20-abi/mkr')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var ethTokenSend = async function (req, res) {
     try {
@@ -123,8 +120,8 @@ var ethTokenSend = async function (req, res) {
                 // calculate amount for custome token decimals
                 var value = parseInt(amountResult), decimals = parseInt(decimalsResult)
                 var balance = value / 10 ** decimals
-                logger.debug('Source Account Balance: ', balance + ' ' + ercToken.toUpperCase())
-                logger.debug(balance, ' < ', amount)
+                logger.verbose('Source Account Balance: ', balance + ' ' + ercToken.toUpperCase())
+                logger.verbose(balance, ' < ', amount)
                 if (parseFloat(balance) < amount) {
                     logger.error('Insufficient funds')
                     res.json({
@@ -135,7 +132,7 @@ var ethTokenSend = async function (req, res) {
                 }
                 // convert amount
                 var sendingAmount = (amount * (10 ** decimals)).toString()
-                logger.debug('Sending Amount in Wei: ', sendingAmount)
+                logger.verbose('Sending Amount in Wei: ', sendingAmount)
                 // tx
                 var rawTransaction = {
                     'from': sourceAddress,
@@ -174,7 +171,7 @@ var ethTokenSend = async function (req, res) {
                         return
                     }
                     const url = `${server.etherscanExplorerUrl}/tx/${id}`
-                    logger.debug({ transactionHash: id, link: url })
+                    logger.verbose({ transactionHash: id, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: id,

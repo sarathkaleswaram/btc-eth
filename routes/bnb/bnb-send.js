@@ -2,10 +2,7 @@ const request = require('request')
 const EthereumTx = require('ethereumjs-tx').Transaction
 const Common = require('ethereumjs-common')
 var server = require('../../server')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var bnbSend = async function (req, res) {
     try {
@@ -74,8 +71,8 @@ var bnbSend = async function (req, res) {
                 return
             }
             let balance = bscWeb3.utils.fromWei(result ? result.toString() : '', 'ether')
-            logger.debug('Source Account Balance: ', balance + ' BNB')
-            logger.debug(balance, ' < ', amount)
+            logger.verbose('Source Account Balance: ', balance + ' BNB')
+            logger.verbose(balance, ' < ', amount)
             if (parseFloat(balance) < amount) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -145,7 +142,7 @@ var bnbSend = async function (req, res) {
                     return
                 }
                 const url = `${server.bscscanExplorerUrl}/tx/${id}`
-                logger.debug({ transactionHash: id, link: url })
+                logger.verbose({ transactionHash: id, link: url })
                 res.json({
                     result: 'success',
                     transactionHash: id,

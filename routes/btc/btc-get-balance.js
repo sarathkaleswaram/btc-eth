@@ -3,11 +3,8 @@ const request = require('request')
 const sb = require('satoshi-bitcoin')
 var balances = require('../../models/balances')
 var server = require('../../server')
+const { logger } = require('../../utils/logger')
 const { saveBalanceToDb } = require('../../utils/balance')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
 
 var btcBalance = function (req, res) {
     try {

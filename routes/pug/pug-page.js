@@ -4,10 +4,7 @@ const request = require('request')
 var server = require('../../server')
 var requests = require('../../models/requests')
 var { btcWsSubscribeAddress } = require('../../transactions/btc-transaction')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../../utils/logger')
 
 var pugPage = function (req, res) {
     logger.debug('pugPage query params:', req.query)

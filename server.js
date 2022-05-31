@@ -6,19 +6,15 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const Web3 = require('web3')
 const path = require('path')
-const log4js = require('log4js')
 const WebSocket = require('ws')
-const CronJob = require('cron').CronJob
+// const CronJob = require('cron').CronJob
 const RippleAPI = require('ripple-lib').RippleAPI
+const { logger, accessStream } = require('./utils/logger')
 require('dotenv').config()
 var routes = require('./routes')
-var { checkPendingRequests } = require('./transactions')
+// var { checkPendingRequests } = require('./transactions')
 // var { btcWsOnMessage } = require('./transactions/btc-transaction')
 var { makeTimeoutCallback } = require('./transactions/callback')
-
-// Logger
-var logger = log4js.getLogger('crypto')
-logger.level = 'trace'
 
 // mainnet or testnet
 const isMainnet = process.env.IN_MAIN_NET === 'true' // true, false
@@ -39,7 +35,7 @@ const btcWsAPI = `wss://${btcWsNetwork}.smartbit.com.au/v1/blockchain`
 const btcExplorerUrl = `https://live.blockcypher.com/${btcExplorerPath}`
 
 // ETH web3 API
-const ethInfuraApiKey = isMainnet ? process.env.ETH_INFURA_API_KEY  : '605567f94946494a81e52ac8ca2784de'
+const ethInfuraApiKey = isMainnet ? process.env.ETH_INFURA_API_KEY : '605567f94946494a81e52ac8ca2784de'
 const ethWeb3HttpUrl = `https://${ethNetwork}.infura.io/v3/${ethInfuraApiKey}`
 
 // etherscan API
@@ -80,7 +76,7 @@ const rippleApi = new RippleAPI({
     server: rippleWsUrl
 })
 rippleApi.on('connected', () => {
-    logger.debug('Ripple Websocket connected')
+    logger.silly('Ripple Websocket connected')
 })
 rippleApi.on('disconnected', (code) => {
     logger.warn('Ripple Websocket disconnected, code:', code)
@@ -242,19 +238,12 @@ var mongoPort = process.env.MONGO_PORT || '27017'
 var mongoUserPass = mongoUser ? (mongoUser + ':' + mongoPass + '@') : ''
 
 var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:${mongoPort}/${isMainnet ? 'btc_eth_live' : 'btc_eth_test'}?authSource=admin&w=1`
-mongoose.set('debug', true)
+// mongoose.set('debug', true)
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
-        checkPendingRequests()
     })
     .catch(error => logger.error(error))
-
-// Cron Job runs every 5 mins
-var job = new CronJob('*/5 * * * *', function () {
-    checkPendingRequests()
-})
-job.start()
 
 // Express
 const app = express()
@@ -263,7 +252,7 @@ exports.port = port
 
 app.use(cors())
 app.use(compression())
-app.use(morgan('dev'))
+app.use(morgan('dev', { stream: accessStream }))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 // Public files
@@ -339,7 +328,7 @@ app.post('/*', (_, res) => {
 
 // Http
 var server = app.listen(port, () => {
-    logger.info(`Http Server running on port ${port}`)
+    logger.http(`Http Server running on port ${port}`)
 })
 // Websocket
 var wss = new WebSocket.Server({ server })
@@ -347,18 +336,18 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         message = JSON.parse(message)
         if (message.status === 'Connected') {
-            logger.trace(`Address: ${message.address} is connected through Websocket`)
+            logger.verbose(`Address: ${message.address} is connected through Websocket`)
         }
         // user QR window timeout
         if (message.status === 'Timeout') {
-            logger.trace(`Address: ${message.address} window timeout`)
+            logger.verbose(`Address: ${message.address} window timeout`)
             // make timeout callback
             makeTimeoutCallback(message.address)
         }
     })
 })
 wss.on('listening', function listen() {
-    logger.info(`Websocket server running on port ${port}`)
+    logger.http(`Websocket server running on port ${port}`)
 })
 // export wss
 exports.wss = wss

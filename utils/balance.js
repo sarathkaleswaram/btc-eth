@@ -1,9 +1,6 @@
 
 var balances = require('../models/balances')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'debug'
+const { logger } = require('../utils/logger')
 
 function saveBalanceToDb(currency, address, balance, platform, contractAddress) {
     balances.findOne({ address: address }, (error, doc) => {
@@ -15,7 +12,7 @@ function saveBalanceToDb(currency, address, balance, platform, contractAddress) 
                     { address: address },
                     { balance: balance, updatedDate: new Date() })
                     .then(() => {
-                        logger.trace('DB Balances updated')
+                        logger.verbose('DB Balances updated')
                     }, error => {
                         logger.error(error)
                     })
@@ -28,7 +25,7 @@ function saveBalanceToDb(currency, address, balance, platform, contractAddress) 
                     balance: balance,
                     updatedDate: new Date()
                 }).then(() => {
-                    logger.trace('DB Balances inserted')
+                    logger.verbose('DB Balances inserted')
                 }, error => {
                     logger.error(error)
                 })

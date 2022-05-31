@@ -1,16 +1,13 @@
 const request = require('request')
 var transactions = require('../models/transactions')
 var server = require('../server')
+const { logger } = require('../utils/logger')
 var { checkTxAndCallback } = require('./callback')
-
-const log4js = require('log4js')
-var logger = log4js.getLogger('crypto')
-logger.level = 'trace'
 
 var dbPendingEthTx = function (address, blocknumber) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=txlist&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.trace('Running Etherscan API:', url)
+    logger.verbose('Running Etherscan API:', url)
     request({
         url: url,
         json: true
@@ -43,7 +40,7 @@ var dbPendingEthTx = function (address, blocknumber) {
 var dbPendingEthTokenTx = function (address, blocknumber, contractAddress) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=tokentx&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.trace('Running Etherscan API: ', url)
+    logger.verbose('Running Etherscan API: ', url)
     request({
         url: url,
         json: true
