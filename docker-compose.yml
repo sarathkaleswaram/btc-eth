@@ -3,6 +3,8 @@ services:
   btc-eth-xrp-api:
     image: btc-eth-xrp-api
     network_mode: host
+    volumes:
+      - ./logs:/app/logs
     environment:
       MONGO_USER: root
       MONGO_PASS: uytsdfasdf86asdf7
