@@ -9,7 +9,6 @@ var btcGetTx = function (req, res) {
     try {
         logger.debug('btcGetTx params:', req.params)
         var tx = req.params.tx
-        var chain = server.network === 'testnet' ? 'test3' : 'main'
 
         if (!tx) {
             logger.error('Tx is empty')
@@ -33,7 +32,7 @@ var btcGetTx = function (req, res) {
                     return
                 }
                 if (body.error) {
-                    logger.debug(body.error)
+                    logger.error(body.error)
                     res.json({
                         result: 'error',
                         message: body.error,

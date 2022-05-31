@@ -117,7 +117,8 @@ var btcSend = async function (req, res) {
 
 function getBalance(address, chain, res, callback) {
     request({
-        url: `${server.btcAPI}/addrs/${address}/balance`,
+        // url: `${server.btcAPI}/addrs/${address}/balance`,
+        url: `http://localhost:${server.port}/btc/balance/${address}`,
         json: true
     }, function (error, response, body) {
         try {
@@ -137,16 +138,18 @@ function getBalance(address, chain, res, callback) {
                 })
                 return
             }
-            var balance = sb.toBitcoin(body.final_balance)
+            // var balance = sb.toBitcoin(body.final_balance)
+            var balance = parseFloat(body.balance.split(' ')[0])
             logger.debug('Source address balance is:', balance + ' BTC')
-            if (body.final_balance <= 0) {
+            if (balance <= 0) {
                 res.json({
                     result: 'error',
                     message: 'Source address balance is: ' + balance + ' BTC',
                 })
                 return
             }
-            callback(body.final_balance)
+            // callback(body.final_balance)
+            callback(sb.toSatoshi(balance))
         } catch (error) {
             logger.error(error)
             res.json({

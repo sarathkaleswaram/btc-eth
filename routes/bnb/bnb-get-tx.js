@@ -31,7 +31,7 @@ var bnbGetTx = function (req, res) {
                     return
                 }
                 if (body.error) {
-                    logger.debug(body.error)
+                    logger.error(body.error)
                     res.json({
                         result: 'error',
                         message: body.error,

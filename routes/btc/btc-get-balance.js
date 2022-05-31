@@ -1,7 +1,9 @@
 const bitcore = require('bitcore-lib')
 const request = require('request')
 const sb = require('satoshi-bitcoin')
+var balances = require('../../models/balances')
 var server = require('../../server')
+const { saveBalanceToDb } = require('../../utils/balance')
 
 const log4js = require('log4js')
 var logger = log4js.getLogger('crypto')
@@ -11,7 +13,6 @@ var btcBalance = function (req, res) {
     try {
         logger.debug('btcBalance params:', req.params)
         var address = req.params.address
-        var chain = server.network === 'testnet' ? 'test3' : 'main'
 
         if (!address) {
             logger.error('Address is empty')
@@ -36,18 +37,12 @@ var btcBalance = function (req, res) {
             try {
                 if (error) {
                     logger.error(error)
-                    res.json({
-                        result: 'error',
-                        message: error.toString(),
-                    })
+                    getBalanceFromDb(address, res, error)
                     return
                 }
                 if (body.error) {
-                    logger.debug(body.error)
-                    res.json({
-                        result: 'error',
-                        message: body.error,
-                    })
+                    logger.error(body.error)
+                    getBalanceFromDb(address, res, body.error)
                     return
                 }
                 var balance = sb.toBitcoin(body.final_balance) + ' BTC'
@@ -57,6 +52,7 @@ var btcBalance = function (req, res) {
                     address: address,
                     balance: balance
                 })
+                saveBalanceToDb('BTC', address, balance.split(' ')[0])
             } catch (error) {
                 logger.error('btcBalance sub catch Error:', error)
                 res.json({
@@ -72,6 +68,29 @@ var btcBalance = function (req, res) {
             message: error.toString(),
         })
     }
+}
+
+function getBalanceFromDb(address, res, error) {
+    balances.findOne({ address: address }, (error, doc) => {
+        if (error) {
+            logger.error('DB Error:', error)
+        } else {
+            if (doc) {
+                var balance = doc.balance + ' BTC'
+                logger.debug('Got from db balance: ' + balance)
+                res.json({
+                    result: 'success',
+                    address: address,
+                    balance: balance
+                })
+            }
+        }
+    })
+    res.json({
+        result: 'error',
+        message: error.toString(),
+    })
+    return
 }
 
 module.exports = btcBalance

@@ -34,6 +34,7 @@ var bnbBalance = function (req, res) {
                     result: 'error',
                     message: error,
                 })
+                return
             }
             var balance = bscWeb3.utils.fromWei(result ? result.toString() : '', 'ether') + ' BNB'
             //logger.debug(balance)
