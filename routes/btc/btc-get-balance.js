@@ -33,7 +33,7 @@ var btcBalance = function (req, res) {
         }, function (error, response, body) {
             try {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     getBalanceFromDb(address, res, error)
                     return
                 }

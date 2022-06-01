@@ -91,7 +91,7 @@ var bnbTokenBalance = function (req, res) {
                     balance: balance
                 })
             }, error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -99,7 +99,7 @@ var bnbTokenBalance = function (req, res) {
                 return
             })
         }, error => {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),

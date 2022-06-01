@@ -111,8 +111,8 @@ var bnbTokenSend = async function (req, res) {
                 // calculate amount for custome token decimals
                 var value = parseInt(amountResult), decimals = parseInt(decimalsResult)
                 var balance = value / 10 ** decimals
-                logger.verbose('Source Account Balance: ', balance + ' ' + bepToken.toUpperCase())
-                logger.verbose(balance, ' < ', amount)
+                logger.verbose('Source Account Balance: ' + balance + ' ' + bepToken.toUpperCase())
+                logger.verbose(balance + ' < ' + amount)
                 if (parseFloat(balance) < amount) {
                     logger.error('Insufficient funds')
                     res.json({
@@ -123,7 +123,7 @@ var bnbTokenSend = async function (req, res) {
                 }
                 // convert amount
                 var sendingAmount = (amount * (10 ** decimals)).toString()
-                logger.verbose('Sending Amount in Wei: ', sendingAmount)
+                logger.verbose('Sending Amount in Wei: ' + sendingAmount)
                 // tx
                 var rawTransaction = {
                     'from': sourceAddress,
@@ -150,7 +150,7 @@ var bnbTokenSend = async function (req, res) {
                     transaction.sign(privateKeyHex)
                 } catch (error) {
                     logger.error('Failed to sign Transaction')
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: 'Failed to sign Transaction',
@@ -161,7 +161,7 @@ var bnbTokenSend = async function (req, res) {
                 const serializedTransaction = transaction.serialize()
                 bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
                     if (error) {
-                        logger.error(error)
+                        logger.error('Error: ' + error)
                         res.json({
                             result: 'error',
                             message: error.toString(),
@@ -169,7 +169,7 @@ var bnbTokenSend = async function (req, res) {
                         return
                     }
                     const url = `${server.bscscanExplorerUrl}/tx/${id}`
-                    logger.verbose({ transactionHash: id, link: url })
+                    logger.verbose('Send Tx', { transactionHash: id, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: id,
@@ -177,7 +177,7 @@ var bnbTokenSend = async function (req, res) {
                     })
                 })
             }, error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -185,7 +185,7 @@ var bnbTokenSend = async function (req, res) {
                 return
             })
         }, error => {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),

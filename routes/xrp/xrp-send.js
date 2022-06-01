@@ -62,7 +62,7 @@ var xrpSend = async function (req, res) {
             server.rippleApi.connect().then(() => {
                 send(sourceAddress, privateKey, destinationAddress, amount, res)
             }).catch(error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -106,7 +106,7 @@ async function send(sourceAddress, privateKey, destinationAddress, amount, res) 
         }
 
         const url = `${server.xrpExplorerUrl}/transactions/${id}`
-        logger.verbose({ transactionHash: id, link: url })
+        logger.verbose('Send Tx', { transactionHash: id, link: url })
         res.json({
             result: 'success',
             transactionHash: id,

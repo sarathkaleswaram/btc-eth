@@ -111,10 +111,10 @@ async function sendToken(sourceAddress, privateKey, destinationAddress, amount, 
         }, {
             maxLedgerVersionOffset: 10
         })
-        logger.debug('Prepared Tx:', preparedTx)
+        logger.verbose('Prepared Tx:', preparedTx)
         const { signedTransaction, id } = rippleApi.sign(preparedTx.txJSON, privateKey)
         const result = await rippleApi.submit(signedTransaction)
-        logger.debug('Result:', result)
+        logger.verbose('Result:', result)
 
         if (result.resultCode !== 'tesSUCCESS') {
             logger.error(result.resultMessage || result)
@@ -127,7 +127,7 @@ async function sendToken(sourceAddress, privateKey, destinationAddress, amount, 
         }
 
         const url = `${server.xrpExplorerUrl}/transactions/${id}`
-        logger.debug({ transactionHash: id, link: url })
+        logger.verbose('Send Tx', { transactionHash: id, link: url })
         res.json({
             result: 'success',
             transactionHash: id,

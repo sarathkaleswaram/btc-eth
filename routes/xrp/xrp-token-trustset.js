@@ -70,7 +70,7 @@ var xrpTokenTrustSet = async function (req, res) {
             server.rippleApi.connect().then(() => {
                 sendTrustSet(address, privateKey, limitAmount, issuerAddress, currency, res)
             }).catch(error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -116,7 +116,7 @@ async function sendTrustSet(address, privateKey, limitAmount, issuerAddress, cur
         }
 
         const url = `${server.xrpExplorerUrl}/transactions/${id}`
-        logger.verbose({ transactionHash: id, link: url })
+        logger.verbose('Send Tx', { transactionHash: id, link: url })
         res.json({
             result: 'success',
             transactionHash: id,

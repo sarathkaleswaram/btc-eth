@@ -90,7 +90,7 @@ var pugPage = function (req, res) {
                                 }, function (error, response, body) {
                                     try {
                                         if (error) {
-                                            logger.error(error)
+                                            logger.error('Error: ' + error)
                                             res.render('index', { error: true, message: error.toString() })
                                             return
                                         }
@@ -113,11 +113,11 @@ var pugPage = function (req, res) {
                                             logger.info('DB Request inserted')
                                             res.render('index', { src: url, account: params.address })
                                         }, error => {
-                                            logger.error(error)
+                                            logger.error('Error: ' + error)
                                             res.render('index', { error: true, message: error.toString() })
                                         })
                                     } catch (error) {
-                                        logger.error(error)
+                                        logger.error('Error: ' + error)
                                         res.render('index', { error: true, message: error.toString() })
                                     }
                                 })
@@ -145,11 +145,11 @@ var pugPage = function (req, res) {
                                         logger.info('DB Request inserted')
                                         res.render('index', { src: url, account: params.address })
                                     }, error => {
-                                        logger.error(error)
+                                        logger.error('Error: ' + error)
                                         res.render('index', { error: true, message: error.toString() })
                                     })
                                 }, error => {
-                                    logger.error(error)
+                                    logger.error('Error: ' + error)
                                     res.render('index', { error: true, message: error.toString() })
                                 })
                             }
@@ -168,7 +168,7 @@ var pugPage = function (req, res) {
                 })
             })
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.render('index', { error: true, message: error.toString() })
         }
     }

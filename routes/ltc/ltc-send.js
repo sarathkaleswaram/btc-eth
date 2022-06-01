@@ -65,7 +65,7 @@ var ltcSend = async function (req, res) {
         }
 
         getBalance(sourceAddress, res, function (balance) {
-            logger.verbose(balance, ' < ', amountSatoshi)
+            logger.verbose(balance + ' < ' + amountSatoshi)
             if (balance < amountSatoshi) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -85,7 +85,7 @@ var ltcSend = async function (req, res) {
                         .sign(privateKey)
                 } catch (error) {
                     logger.verbose('Failed to sign Transaction')
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: 'Failed to sign Transaction',
@@ -99,7 +99,7 @@ var ltcSend = async function (req, res) {
                 // broadcast transaction
                 pushTransaction(payload, res, function (txid) {
                     const url = `${server.ltcExplorerUrl}/tx/${txid}`
-                    logger.verbose({ transactionHash: txid, link: url })
+                    logger.verbose('Send Tx', { transactionHash: txid, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: txid,
@@ -124,7 +124,7 @@ function getBalance(address, res, callback) {
     }, function (error, response, body) {
         try {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -140,7 +140,7 @@ function getBalance(address, res, callback) {
                 return
             }
             var balance = parseFloat(body.balance.split(' ')[0])
-            logger.verbose('Source address balance is:', balance + ' LTC')
+            logger.verbose('Source address balance is: ' + balance + ' LTC')
             if (balance <= 0) {
                 res.json({
                     result: 'error',
@@ -150,7 +150,7 @@ function getBalance(address, res, callback) {
             }
             callback(sb.toSatoshi(balance))
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),
@@ -175,7 +175,7 @@ function getUTXO(address, res, callback) {
                         })
                         return
                     }
-                    logger.verbose('UTXO length: ', body.txrefs.length)
+                    logger.verbose('UTXO length: ' + body.txrefs.length)
                     var utxos = []
                     for (i = 0; i < body.txrefs.length; i++) {
                         var utxo = {
@@ -189,7 +189,7 @@ function getUTXO(address, res, callback) {
                     }
                     callback(utxos)
                 } else {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     logger.error('Unable to get UTXO')
                     res.json({
                         result: 'error',
@@ -198,7 +198,7 @@ function getUTXO(address, res, callback) {
                     return
                 }
             } catch (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -224,7 +224,7 @@ function getUTXO(address, res, callback) {
                         })
                         return
                     }
-                    logger.verbose('UTXO length: ', body.data.items.length)
+                    logger.verbose('UTXO length: ' + body.data.items.length)
                     var utxos = []
                     for (i = 0; i < body.data.items.length; i++) {
                         var utxo = {
@@ -239,7 +239,7 @@ function getUTXO(address, res, callback) {
                     }
                     callback(utxos)
                 } else {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     logger.error('Unable to get UTXO')
                     res.json({
                         result: 'error',
@@ -248,7 +248,7 @@ function getUTXO(address, res, callback) {
                     return
                 }
             } catch (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -269,7 +269,7 @@ function pushTransaction(pload, res, callback) {
         }, function (error, response, body) {
             try {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     logger.error('Broadcast failed. Please try later')
                     res.json({
                         result: 'error',
@@ -288,7 +288,7 @@ function pushTransaction(pload, res, callback) {
                     callback(body.tx.hash)
                 }
             } catch (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -323,7 +323,7 @@ function pushTransaction(pload, res, callback) {
         }, function (error, response, body) {
             try {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     logger.error('Broadcast failed. Please try later')
                     res.json({
                         result: 'error',
@@ -342,7 +342,7 @@ function pushTransaction(pload, res, callback) {
                     callback(body.tx.hash)
                 }
             } catch (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),

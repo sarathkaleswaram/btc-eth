@@ -226,6 +226,8 @@ exports.ltcAPI = ltcAPI
 exports.ltcTestAPI = ltcTestAPI
 exports.ltcTestApiKey = process.env.LTC_CRYPTOAPIS_API_KEY
 exports.ltcExplorerUrl = ltcExplorerUrl
+// common
+exports.defaultFees = 'low'
 // game
 exports.jackpotCallbackURL = jackpotCallbackURL
 exports.slotstitanCallbackURL = slotstitanCallbackURL
@@ -243,7 +245,7 @@ mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFin
     .then(() => {
         logger.info('Mongodb Connected!')
     })
-    .catch(error => logger.error(error))
+    .catch(error => logger.error('Error: ' + error))
 
 // Express
 const app = express()
@@ -270,16 +272,18 @@ app.get('/btc/create', routes.btcCreate)
 app.get('/btc/balance/:address', routes.btcBalance)
 app.post('/btc/privatekey-to-address', routes.btcPrivateKeyToAddress)
 app.post('/btc/send', routes.btcSend)
-app.get('/btc/rates', routes.btcExchangeRates)
 app.get('/btc/tx/:tx', routes.btcGetTx)
+app.get('/btc/fees', routes.btcTxFees)
+app.get('/btc/rates', routes.btcExchangeRates)
 
 // Ethereum
 app.get('/eth/create', routes.ethCreate)
 app.get('/eth/balance/:address', routes.ethBalance)
 app.post('/eth/privatekey-to-address', routes.ethPrivateKeyToAddress)
 app.post('/eth/send', routes.ethSend)
-app.get('/eth/rates', routes.ethExchangeRates)
 app.get('/eth/tx/:tx', routes.ethGetTx)
+app.get('/eth/fees', routes.ethTxFees)
+app.get('/eth/rates', routes.ethExchangeRates)
 // ERC20 Token
 app.get('/eth/ercToken/:ercToken/balance/:address', routes.ethTokenBalance)
 app.post('/eth/ercToken/:ercToken/send', routes.ethTokenSend)

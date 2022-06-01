@@ -8,7 +8,7 @@ const { logger } = require('../utils/logger')
 var checkPendingRequests = function () {
     logger.verbose('Checking transactions at time: ' + new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
     requests.find({ status: 'Pending' }, (error, docs) => {
-        if (error) logger.error(error)
+        if (error) logger.error('Error: ' + error)
         if (docs.length) {
             logger.debug('Pending requests from DB length:', docs.length)
             logger.verbose('Pending requests for BTC from DB length:', docs.filter(x => x.type === 'btc').length)
@@ -21,7 +21,7 @@ var checkPendingRequests = function () {
                     logger.debug('Checking transaction for type:', doc.type, ', address:', doc.address, ', api call count:', doc.apiCallCount)
                     // increase api's call count
                     requests.updateOne({ address: doc.address }, { $inc: { apiCallCount: 1 } }, (error, doc) => {
-                        if (error) logger.error(error)
+                        if (error) logger.error('Error: ' + error)
                     })
                     if (doc.type === 'btc') {
                         dbPendingBtcTx(doc.address, doc.blocknumber)
@@ -35,7 +35,7 @@ var checkPendingRequests = function () {
                     // 1151 calls ie., 4 days after if no transaction found for address will be timeout
                     if (doc.apiCallCount >= 1151) {
                         requests.findOneAndUpdate({ address: doc.address }, { status: 'Timeout' }, (error, doc) => {
-                            if (error) logger.error(error)
+                            if (error) logger.error('Error: ' + error)
                             if (doc) {
                                 logger.info('DB request status updated as Timeout')
                                 // make timeout callback
@@ -55,7 +55,7 @@ var checkPendingRequests = function () {
 //     setTimeout(() => {
 //         // update db
 //         requests.findOneAndUpdate({ address: address, status: 'Pending' }, { status: 'Timeout' }, (error, doc) => {
-//             if (error) logger.error(error)
+//             if (error) logger.error('Error: ' + error)
 //             // make timeout callback
 //             if (doc) {
 //                 logger.warn(`Address: ${address} session timeout`)

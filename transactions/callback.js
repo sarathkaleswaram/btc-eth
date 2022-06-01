@@ -40,7 +40,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
                     fee: fee,
                     createdDate: new Date()
                 }
-                transactions.create(saveTx).then(() => logger.info(`${type.toUpperCase()} Transaction inserted`)).catch(error => logger.error(error))
+                transactions.create(saveTx).then(() => logger.info(`${type.toUpperCase()} Transaction inserted`)).catch(error => logger.error('Error: ' + error))
             } else {
                 logger.warn('Transaction hash already present in db. Got same tx again. Tx:', transactionHash)
                 requests.findOneAndUpdate({ address: address }, { status: 'Completed' }, (error, doc) => { })
@@ -52,7 +52,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
 var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
     logger.debug('Making Confirm callback:', type, sender, receiver, tid, amount)
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (error, doc) => {
-        if (error) logger.error(error)
+        if (error) logger.error('Error: ' + error)
         if (doc) {
             wsSend(receiver, type, 'confirmed', amount, tid, doc.callback, doc.token, doc.timestamp, sender, 1, 0)
             var payload = {
@@ -74,7 +74,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
                 body: payload
             }, function (error, response, body) {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }
@@ -86,7 +86,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
 var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
     logger.debug('Making Submit callback:', type, sender, receiver, tid, amount)
     requests.findOne({ address: receiver }, (error, doc) => {
-        if (error) logger.error(error)
+        if (error) logger.error('Error: ' + error)
         if (doc) {
             wsSend(receiver, type, 'submitted', amount, tid, doc.callback, doc.token, doc.timestamp, sender, 0, 0)
             var payload = {
@@ -108,7 +108,7 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
                 body: payload
             }, function (error, response, body) {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }
@@ -120,7 +120,7 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
 var makeTimeoutCallback = function (address) {
     logger.debug('Making Timeout callback:', address)
     requests.findOne({ address: address }, (error, doc) => {
-        if (error) logger.error(error)
+        if (error) logger.error('Error: ' + error)
         if (doc) {
             wsSend(doc.address, doc.type, 'timeout', undefined, undefined, doc.callback, doc.token, doc.timestamp, undefined, 0, 1)
             var payload = {
@@ -142,7 +142,7 @@ var makeTimeoutCallback = function (address) {
                 body: payload
             }, function (error, response, body) {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                 } else {
                     logger.debug('Game Callback response:', body)
                 }

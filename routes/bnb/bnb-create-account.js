@@ -6,7 +6,7 @@ var bnbCreate = function (req, res) {
         logger.debug('bnbCreate')
         var bscWeb3 = server.bscWeb3
         var account = bscWeb3.eth.accounts.create()
-        logger.debug({ address: account.address })
+        logger.debug('Address', { address: account.address })
         res.json({
             result: 'success',
             address: account.address,

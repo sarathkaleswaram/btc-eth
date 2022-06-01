@@ -49,7 +49,7 @@ var ltcBalance = function (req, res) {
         request(reqData, function (error, response, body) {
             try {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: error.toString(),

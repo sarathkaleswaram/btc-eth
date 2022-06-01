@@ -29,7 +29,7 @@ var btcPrivateKeyToAddress = function (req, res) {
         var wif = privateKey.toWIF()
         var address = privateKey.toAddress()
 
-        logger.debug({ address: address.toString() })
+        logger.debug('Address', { address: address.toString() })
 
         res.json({
             result: 'success',

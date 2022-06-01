@@ -12,9 +12,9 @@ function saveBalanceToDb(currency, address, balance, platform, contractAddress) 
                     { address: address },
                     { balance: balance, updatedDate: new Date() })
                     .then(() => {
-                        logger.verbose('DB Balances updated')
+                        logger.silly('DB Balances updated')
                     }, error => {
-                        logger.error(error)
+                        logger.error('Error: ' + error)
                     })
             } else {
                 balances.create({
@@ -25,9 +25,9 @@ function saveBalanceToDb(currency, address, balance, platform, contractAddress) 
                     balance: balance,
                     updatedDate: new Date()
                 }).then(() => {
-                    logger.verbose('DB Balances inserted')
+                    logger.silly('DB Balances inserted')
                 }, error => {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                 })
             }
         }

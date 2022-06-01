@@ -11,6 +11,7 @@ Routes.btcBalance = require('./btc/btc-get-balance')
 Routes.btcGetTx = require('./btc/btc-get-tx')
 Routes.btcPrivateKeyToAddress = require('./btc/btc-privateKey-to-account')
 Routes.btcSend = require('./btc/btc-send')
+Routes.btcTxFees = require('./btc/btc-fees')
 Routes.btcExchangeRates = require('./btc/btc-rates')
 
 // Ethereum
@@ -19,6 +20,7 @@ Routes.ethBalance = require('./eth/eth-get-balance')
 Routes.ethGetTx = require('./eth/eth-get-tx')
 Routes.ethPrivateKeyToAddress = require('./eth/eth-privateKey-to-account')
 Routes.ethSend = require('./eth/eth-send')
+Routes.ethTxFees = require('./eth/eth-fees')
 Routes.ethExchangeRates = require('./eth/eth-rates')
 // Ethereum ERC20 Token
 Routes.ethTokenBalance = require('./eth/eth-token-get-balance')

@@ -100,7 +100,7 @@ var ethTokenBalance = function (req, res) {
                     balance: balance
                 })
             }, error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -108,7 +108,7 @@ var ethTokenBalance = function (req, res) {
                 return
             })
         }, error => {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),
@@ -120,7 +120,7 @@ var ethTokenBalance = function (req, res) {
         //     json: true
         // }, function (error, response, body) {
         //     if (error) {
-        //         logger.error(error)
+        //         logger.error('Error: ' + error)
         //         res.json({
         //             result: 'error',
         //             message: error.toString(),

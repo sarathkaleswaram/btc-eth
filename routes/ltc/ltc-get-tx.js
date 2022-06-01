@@ -22,7 +22,7 @@ var ltcGetTx = function (req, res) {
         }, function (error, response, body) {
             try {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: error.toString(),

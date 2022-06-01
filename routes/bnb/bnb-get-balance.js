@@ -26,7 +26,7 @@ var bnbBalance = function (req, res) {
 
         bscWeb3.eth.getBalance(address, (error, result) => {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error,

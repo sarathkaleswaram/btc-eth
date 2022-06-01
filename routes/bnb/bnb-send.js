@@ -63,7 +63,7 @@ var bnbSend = async function (req, res) {
         var nonce = await bscWeb3.eth.getTransactionCount(sourceAddress)
         bscWeb3.eth.getBalance(sourceAddress, async (error, result) => {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -71,8 +71,8 @@ var bnbSend = async function (req, res) {
                 return
             }
             let balance = bscWeb3.utils.fromWei(result ? result.toString() : '', 'ether')
-            logger.verbose('Source Account Balance: ', balance + ' BNB')
-            logger.verbose(balance, ' < ', amount)
+            logger.verbose('Source Account Balance: ' + balance + ' BNB')
+            logger.verbose(balance + ' < ' + amount)
             if (parseFloat(balance) < amount) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -123,7 +123,7 @@ var bnbSend = async function (req, res) {
                 transaction.sign(privateKeyHex)
             } catch (error) {
                 logger.error('Failed to sign Transaction')
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: 'Failed to sign Transaction',
@@ -134,7 +134,7 @@ var bnbSend = async function (req, res) {
             const serializedTransaction = transaction.serialize()
             bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
                 if (error) {
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: error.toString(),
@@ -142,7 +142,7 @@ var bnbSend = async function (req, res) {
                     return
                 }
                 const url = `${server.bscscanExplorerUrl}/tx/${id}`
-                logger.verbose({ transactionHash: id, link: url })
+                logger.verbose('Send Tx', { transactionHash: id, link: url })
                 res.json({
                     result: 'success',
                     transactionHash: id,

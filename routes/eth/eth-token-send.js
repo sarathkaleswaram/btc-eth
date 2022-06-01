@@ -23,10 +23,11 @@ var ethTokenSend = async function (req, res) {
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
+        var gas = req.body.gas
         var account, contractAddress, abi
-        
-        logger.debug('ethTokenSend ercToken: ' + ercToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
-        
+
+        logger.debug('ethTokenSend ercToken: ' + ercToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount + " gas: " + gas)
+
         if (!sourceAddress || !privateKey || !destinationAddress || !amount || !ercToken) {
             logger.error('Invalid arguments')
             res.json({
@@ -85,6 +86,14 @@ var ethTokenSend = async function (req, res) {
             })
             return
         }
+        if (gas && typeof gas !== 'string') {
+            logger.error('Invalid gas value')
+            res.json({
+                result: 'error',
+                message: 'Invalid gas value. Pass as string',
+            })
+            return
+        }
 
         if (ercToken === 'shar') {
             abi = sharABI
@@ -120,8 +129,8 @@ var ethTokenSend = async function (req, res) {
                 // calculate amount for custome token decimals
                 var value = parseInt(amountResult), decimals = parseInt(decimalsResult)
                 var balance = value / 10 ** decimals
-                logger.verbose('Source Account Balance: ', balance + ' ' + ercToken.toUpperCase())
-                logger.verbose(balance, ' < ', amount)
+                logger.verbose('Source Account Balance: ' + balance + ' ' + ercToken.toUpperCase())
+                logger.verbose(balance + ' < ' + amount)
                 if (parseFloat(balance) < amount) {
                     logger.error('Insufficient funds')
                     res.json({
@@ -132,54 +141,58 @@ var ethTokenSend = async function (req, res) {
                 }
                 // convert amount
                 var sendingAmount = (amount * (10 ** decimals)).toString()
-                logger.verbose('Sending Amount in Wei: ', sendingAmount)
-                // tx
-                var rawTransaction = {
-                    'from': sourceAddress,
-                    'gasPrice': web3.utils.toHex(2 * 1e9),
-                    'gasLimit': web3.utils.toHex(210000),
-                    'to': contractAddress,
-                    'value': '0x0',
-                    'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
-                    'nonce': nonce,
-                    'chainId': getChainId()
-                }
+                logger.verbose('Sending Amount in Wei: ' + sendingAmount)
+                getCurrentGasPrices(res, gas, function (gasPrice) {
+                    // tx
+                    var rawTransaction = {
+                        'from': sourceAddress,
+                        // 'gasPrice': web3.utils.toHex(2 * 1e9),
+                        // 'gasLimit': web3.utils.toHex(210000),
+                        'gas': 210000,
+                        'gasPrice': web3.utils.toHex(web3.utils.toWei(gasPrice, 'ether')),
+                        'to': contractAddress,
+                        'value': '0x0',
+                        'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
+                        'nonce': nonce,
+                        'chainId': getChainId()
+                    }
 
-                const transaction = new EthereumTx(rawTransaction, { chain: server.ethNetwork })
-                var privateKeySplit = privateKey.split('0x')
-                try {
-                    var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
-                    transaction.sign(privateKeyHex)
-                } catch (error) {
-                    logger.error('Failed to sign Transaction')
-                    logger.error(error)
-                    res.json({
-                        result: 'error',
-                        message: 'Failed to sign Transaction',
-                    })
-                    return
-                }
-
-                const serializedTransaction = transaction.serialize()
-                web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
-                    if (error) {
-                        logger.error(error)
+                    const transaction = new EthereumTx(rawTransaction, { chain: server.ethNetwork })
+                    var privateKeySplit = privateKey.split('0x')
+                    try {
+                        var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
+                        transaction.sign(privateKeyHex)
+                    } catch (error) {
+                        logger.error('Failed to sign Transaction')
+                        logger.error('Error: ' + error)
                         res.json({
                             result: 'error',
-                            message: error.toString(),
+                            message: 'Failed to sign Transaction',
                         })
                         return
                     }
-                    const url = `${server.etherscanExplorerUrl}/tx/${id}`
-                    logger.verbose({ transactionHash: id, link: url })
-                    res.json({
-                        result: 'success',
-                        transactionHash: id,
-                        link: url
+
+                    const serializedTransaction = transaction.serialize()
+                    web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+                        if (error) {
+                            logger.error('Error: ' + error)
+                            res.json({
+                                result: 'error',
+                                message: error.toString(),
+                            })
+                            return
+                        }
+                        const url = `${server.etherscanExplorerUrl}/tx/${id}`
+                        logger.verbose('Send Tx', { transactionHash: id, link: url })
+                        res.json({
+                            result: 'success',
+                            transactionHash: id,
+                            link: url
+                        })
                     })
                 })
             }, error => {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -187,7 +200,7 @@ var ethTokenSend = async function (req, res) {
                 return
             })
         }, error => {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),
@@ -197,8 +210,8 @@ var ethTokenSend = async function (req, res) {
 
         // contract.methods.balanceOf(sourceAddress).call().then(function (result) {
         //     var balance = web3.utils.fromWei(result, 'ether')
-        //     logger.debug('Source Account Balance: ', balance + ' ' + ercToken)
-        //     logger.debug(balance, ' < ', amount)
+        //     logger.debug('Source Account Balance: ' + balance + ' ' + ercToken)
+        //     logger.debug(balance + ' < ' + amount)
         //     if (parseFloat(balance) < amount) {
         //         logger.error('Insufficient funds')
         //         res.json({
@@ -228,7 +241,7 @@ var ethTokenSend = async function (req, res) {
         //         transaction.sign(privateKeyHex)
         //     } catch (error) {
         //         logger.error('Failed to sign Transaction')
-        //         logger.error(error)
+        //         logger.error('Error: ' + error)
         //         res.json({
         //             result: 'error',
         //             message: 'Failed to sign Transaction',
@@ -239,7 +252,7 @@ var ethTokenSend = async function (req, res) {
         //     const serializedTransaction = transaction.serialize()
         //     web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
         //         if (error) {
-        //             logger.error(error)
+        //             logger.error('Error: ' + error)
         //             res.json({
         //                 result: 'error',
         //                 message: error.toString(),
@@ -247,7 +260,7 @@ var ethTokenSend = async function (req, res) {
         //             return
         //         }
         //         const url = `${server.etherscanExplorerUrl}/tx/${id}`
-        //         logger.debug({ transactionHash: id, link: url })
+        //         logger.debug('Address', { transactionHash: id, link: url })
         //         res.json({
         //             result: 'success',
         //             transactionHash: id,
@@ -262,6 +275,35 @@ var ethTokenSend = async function (req, res) {
             message: error.toString(),
         })
     }
+}
+
+function getCurrentGasPrices(res, gas, callback) {
+    if (gas) {
+        callback(gas.toString())
+        return
+    }
+    request({
+        url: `http://localhost:${server.port}/eth/fees`,
+        json: true
+    }, function (error, response, body) {
+        try {
+            if (error || body.result === 'error') {
+                logger.error('Failed to get fees')
+                res.json({
+                    result: 'error',
+                    message: 'Failed to get fees',
+                })
+                return
+            }
+            callback(body.fees[server.defaultFees])
+        } catch (error) {
+            logger.error('Error: ' + error)
+            res.json({
+                result: 'error',
+                message: error.toString(),
+            })
+        }
+    })
 }
 
 function getChainId() {

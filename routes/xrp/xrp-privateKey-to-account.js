@@ -18,7 +18,7 @@ var xrpPrivateKeyToAddress = function (req, res) {
         const keypair = keypairs.deriveKeypair(seed)
         const address = keypairs.deriveAddress(keypair.publicKey)
 
-        logger.debug({ address: address })
+        logger.debug('Address', { address: address })
 
         res.json({
             result: 'success',

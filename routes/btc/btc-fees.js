@@ -1,12 +1,13 @@
 const request = require('request')
+const sb = require('satoshi-bitcoin')
+var server = require('../../server')
 const { logger } = require('../../utils/logger')
 
-var ltcExchangeRates = function (req, res) {
+var btcTxFees = function (req, res) {
     try {
-        logger.debug('ltcExchangeRates')
-
+        logger.debug('btcTxFees')
         request({
-            url: 'https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD',
+            url: `${server.btcAPI}`,
             json: true
         }, function (error, response, body) {
             try {
@@ -18,21 +19,28 @@ var ltcExchangeRates = function (req, res) {
                     })
                     return
                 }
-                if (body.Message) {
-                    logger.error(body.Message)
+                if (body.error) {
+                    logger.error(body.error)
                     res.json({
                         result: 'error',
-                        message: body.Message,
+                        message: body.error,
                     })
                     return
                 }
-                logger.debug('Rates', body)
+                console.log(server.btcAPI)
+                console.dir(body, { depth: null })
+                var fees = {
+                    low: sb.toBitcoin(body.low_fee_per_kb).toString(),
+                    medium: sb.toBitcoin(body.medium_fee_per_kb).toString(),
+                    high: sb.toBitcoin(body.high_fee_per_kb).toString(),
+                }
+                logger.debug('Fees', fees)
                 res.json({
                     result: 'success',
-                    data: body
+                    fees
                 })
             } catch (error) {
-                logger.error('ltcExchangeRates sub catch Error:', error)
+                logger.error('btcTxFees sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -40,7 +48,7 @@ var ltcExchangeRates = function (req, res) {
             }
         })
     } catch (error) {
-        logger.error('ltcExchangeRates catch Error:', error)
+        logger.error('btcTxFees catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -48,4 +56,4 @@ var ltcExchangeRates = function (req, res) {
     }
 }
 
-module.exports = ltcExchangeRates
+module.exports = btcTxFees

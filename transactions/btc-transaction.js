@@ -14,7 +14,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
     }, function (error, response, body) {
         try {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 return
             }
             if (body.error) {
@@ -36,7 +36,7 @@ var dbPendingBtcTx = function (address, blocknumber) {
                 })
             }
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
         }
     })
 }
@@ -87,7 +87,7 @@ function getBtcTxRecurrsive(txid) {
     }, function (error, response, body) {
         try {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 return
             }
             if (body.error) {
@@ -126,7 +126,7 @@ function getBtcTxRecurrsive(txid) {
                 }
             }
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
         }
     })
 }

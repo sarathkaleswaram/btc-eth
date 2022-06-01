@@ -17,7 +17,7 @@ var ltcCreate = function (req, res) {
             privateKey = new bitcore.PrivateKey(server.network)
             address = privateKey.toAddress()
         }
-        logger.debug({ address: address.toString() })
+        logger.debug('Address', { address: address.toString() })
 
         res.json({
             result: 'success',

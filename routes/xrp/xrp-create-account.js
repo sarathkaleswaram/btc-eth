@@ -7,7 +7,7 @@ var xrpCreate = function (req, res) {
         const seed = keypairs.generateSeed()
         const keypair = keypairs.deriveKeypair(seed)
         const address = keypairs.deriveAddress(keypair.publicKey)
-        logger.debug({ address: address, privateKey: seed })
+        logger.debug('Address', { address: address, privateKey: seed })
 
         res.json({
             result: 'success',

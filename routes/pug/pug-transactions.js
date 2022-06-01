@@ -16,7 +16,7 @@ var pugTransactions = function (req, res) {
         logger.debug('Totals', totals)
         res.render('transactions', { transactions: transactions, totals: totals, moment: require('moment') })
     }, error => {
-        logger.error(error)
+        logger.error('Error: ' + error)
         res.render('transactions', { error: true, message: error.toString() })
     })
 

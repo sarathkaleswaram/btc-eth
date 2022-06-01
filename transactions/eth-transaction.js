@@ -14,7 +14,7 @@ var dbPendingEthTx = function (address, blocknumber) {
     }, function (error, response, body) {
         try {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 return
             }
             if (body.status === '0') logger.error(body.message)
@@ -32,7 +32,7 @@ var dbPendingEthTx = function (address, blocknumber) {
                 })
             }
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
         }
     })
 }
@@ -40,14 +40,14 @@ var dbPendingEthTx = function (address, blocknumber) {
 var dbPendingEthTokenTx = function (address, blocknumber, contractAddress) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=tokentx&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.verbose('Running Etherscan API: ', url)
+    logger.verbose('Running Etherscan API: ' + url)
     request({
         url: url,
         json: true
     }, function (error, response, body) {
         try {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 return
             }
             if (body.status === '0') logger.error(body.message)
@@ -70,7 +70,7 @@ var dbPendingEthTokenTx = function (address, blocknumber, contractAddress) {
                 })
             }
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
         }
     })
 }

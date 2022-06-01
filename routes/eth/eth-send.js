@@ -11,6 +11,7 @@ var ethSend = async function (req, res) {
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
+        var gas = req.body.gas
         var account
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount) {
@@ -57,11 +58,19 @@ var ethSend = async function (req, res) {
             })
             return
         }
+        if (gas && typeof gas !== 'string') {
+            logger.error('Invalid gas value')
+            res.json({
+                result: 'error',
+                message: 'Invalid gas value. Pass as string',
+            })
+            return
+        }
 
         var nonce = await web3.eth.getTransactionCount(sourceAddress)
         web3.eth.getBalance(sourceAddress, async (error, result) => {
             if (error) {
-                logger.error(error)
+                logger.error('Error: ' + error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -69,8 +78,8 @@ var ethSend = async function (req, res) {
                 return
             }
             let balance = web3.utils.fromWei(result ? result.toString() : '', 'ether')
-            logger.verbose('Source Account Balance: ', balance + ' ETH')
-            logger.verbose(balance, ' < ', amount)
+            logger.verbose('Source Account Balance: ' + balance + ' ETH')
+            logger.verbose(balance + ' < ' + amount)
             if (parseFloat(balance) < amount) {
                 logger.error('Insufficient funds')
                 res.json({
@@ -80,12 +89,13 @@ var ethSend = async function (req, res) {
                 return
             }
 
-            getCurrentGasPrices(res, function (gasPrices) {
+            getCurrentGasPrices(res, gas, function (gasPrice) {
                 let details = {
                     'to': destinationAddress,
                     'value': web3.utils.toHex(web3.utils.toWei(amount.toString(), 'ether')),
                     'gas': 21000,
-                    'gasPrice': gasPrices.low * 1000000000,
+                    // 'gasPrice': gasPrices.low * 1000000000,
+                    'gasPrice': web3.utils.toHex(web3.utils.toWei(gasPrice, 'ether')),
                     'nonce': nonce,
                     'chainId': getChainId()
                 }
@@ -97,7 +107,7 @@ var ethSend = async function (req, res) {
                     transaction.sign(privateKeyHex)
                 } catch (error) {
                     logger.error('Failed to sign Transaction')
-                    logger.error(error)
+                    logger.error('Error: ' + error)
                     res.json({
                         result: 'error',
                         message: 'Failed to sign Transaction',
@@ -108,7 +118,7 @@ var ethSend = async function (req, res) {
                 const serializedTransaction = transaction.serialize()
                 web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
                     if (error) {
-                        logger.error(error)
+                        logger.error('Error: ' + error)
                         res.json({
                             result: 'error',
                             message: error.toString(),
@@ -116,7 +126,7 @@ var ethSend = async function (req, res) {
                         return
                     }
                     const url = `${server.etherscanExplorerUrl}/tx/${id}`
-                    logger.verbose({ transactionHash: id, link: url })
+                    logger.verbose('Send Tx', { transactionHash: id, link: url })
                     res.json({
                         result: 'success',
                         transactionHash: id,
@@ -134,13 +144,17 @@ var ethSend = async function (req, res) {
     }
 }
 
-function getCurrentGasPrices(res, callback) {
+function getCurrentGasPrices(res, gas, callback) {
+    if (gas) {
+        callback(gas.toString())
+        return
+    }
     request({
-        url: 'https://ethgasstation.info/json/ethgasAPI.json',
+        url: `http://localhost:${server.port}/eth/fees`,
         json: true
     }, function (error, response, body) {
         try {
-            if (error || !body.safeLow || !body.average || !body.fast) {
+            if (error || body.result === 'error') {
                 logger.error('Failed to get fees')
                 res.json({
                     result: 'error',
@@ -148,14 +162,9 @@ function getCurrentGasPrices(res, callback) {
                 })
                 return
             }
-            let prices = {
-                low: body.safeLow / 10,
-                medium: body.average / 10,
-                high: body.fast / 10
-            }
-            callback(prices)
+            callback(body.fees[server.defaultFees])
         } catch (error) {
-            logger.error(error)
+            logger.error('Error: ' + error)
             res.json({
                 result: 'error',
                 message: error.toString(),
@@ -163,6 +172,36 @@ function getCurrentGasPrices(res, callback) {
         }
     })
 }
+
+// function getCurrentGasPrices(res, callback) {
+//     request({
+//         url: 'https://ethgasstation.info/json/ethgasAPI.json',
+//         json: true
+//     }, function (error, response, body) {
+//         try {
+//             if (error || !body.safeLow || !body.average || !body.fast) {
+//                 logger.error('Failed to get fees')
+//                 res.json({
+//                     result: 'error',
+//                     message: 'Failed to get fees',
+//                 })
+//                 return
+//             }
+//             let prices = {
+//                 low: body.safeLow / 10,
+//                 medium: body.average / 10,
+//                 high: body.fast / 10
+//             }
+//             callback(prices)
+//         } catch (error) {
+//             logger.error('Error: ' + error)
+//             res.json({
+//                 result: 'error',
+//                 message: error.toString(),
+//             })
+//         }
+//     })
+// }
 
 function getChainId() {
     switch (server.network) {
