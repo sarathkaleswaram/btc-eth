@@ -96,13 +96,25 @@ Response:
     "privateKey": "5cfc0b8079885d2f14928617e1dcaf465536adc085440bcc72e591c4ae286408"
 }
 -------------------------------------------------------------------------------------------------------------------------------------
+GET: /btc/fees
+Response: 
+{
+  "result": "success",
+  "fees": {
+    "low": "0.00026781",
+    "medium": "0.00055314",
+    "high": "0.00084804"
+  }
+}
+-------------------------------------------------------------------------------------------------------------------------------------
 POST: /btc/send
 body: 
 {
 	"sourceAddress": "mvTCUx2LZFqnAao1xhK8U6coyJQPSpUbm6",
 	"privateKey": "cd546366333e84fa4e8e1fb922b328ef5c5a310358b3b5658d4e2634ae637bdd",
 	"destinationAddress": "n3fT9kMiLBXWGWDuGgCwyqe12jk2zTuq1b",
-	"amount": 0.010
+	"amount": 0.010,
+    "gas": "0.00055314"
 }
 Response:
 {
@@ -163,13 +175,25 @@ Response:
     "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
 }
 -------------------------------------------------------------------------------------------------------------------------------------
+GET: /eth/fees
+Response: 
+{
+  "result": "success",
+  "fees": {
+    "low": "0.000000039",
+    "medium": "0.00000004",
+    "high": "0.000000041"
+  }
+}
+-------------------------------------------------------------------------------------------------------------------------------------
 POST: /eth/send
 body:
 {
 	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
 	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
 	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
-	"amount": 1.10
+	"amount": 1.10,
+    "gas": "0.00000004"
 }
 Response:
 {
@@ -219,7 +243,8 @@ body:
 	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
 	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
 	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
-	"amount": 10
+	"amount": 10,
+    "gas": "0.00000004"
 }
 Response:
 {
@@ -277,13 +302,25 @@ Response:
     "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
 }
 -------------------------------------------------------------------------------------------------------------------------------------
+GET: /bnb/fees
+Response: 
+{
+  "result": "success",
+  "fees": {
+    "low": "0.000000005",
+    "medium": "0.000000005",
+    "high": "0.000000005"
+  }
+}
+-------------------------------------------------------------------------------------------------------------------------------------
 POST: /bnb/send
 body:
 {
 	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
 	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
 	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
-	"amount": 1.10
+	"amount": 1.10,
+    "gas": "0.000000005"
 }
 Response:
 {
@@ -334,7 +371,8 @@ body:
 	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
 	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
 	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
-	"amount": 10
+	"amount": 10,
+    "gas": "0.000000005"
 }
 Response:
 {
@@ -393,13 +431,25 @@ Response:
     "privateKey": "shCtJaKdcV9Q6b9JjW1oj6gurvoJ3"
 }
 -------------------------------------------------------------------------------------------------------------------------------------
+GET: /xrp/fees
+Response: 
+{
+  "result": "success",
+  "fees": {
+    "low": "0.00001",
+    "medium": "0.00001",
+    "high": "0.00001"
+  }
+}
+-------------------------------------------------------------------------------------------------------------------------------------
 POST: /xrp/send
 body: 
 {
 	"sourceAddress": "r48A5QEjUfvwuLYRGPrZuTmtbfYNzJShjQ",
 	"privateKey": "ss3mpHJs2q8cudY9rbS8MgUBa8P88",
 	"destinationAddress": "rJ3KHntGgiYjxFxesUbM1S4sWkMeeZ9V9x",
-	"amount": 10
+	"amount": 10,
+    "gas": "0.00001"
 }
 Response:
 {
@@ -464,7 +514,8 @@ body:
 	"sourceAddress": "rKwXKnSd8DfmMgzAASbDZP141cFmRkQ3cC",
 	"privateKey": "shsJcgAfwwQnPqDUKNScDnQdszzyW",
 	"destinationAddress": "raS7ykHyH3QBS9SncHiZYc1dR5aS9mB9pD",
-	"amount": 10
+	"amount": 10,
+    "gas": "0.00001"
 }
 Response:
 {

@@ -3,11 +3,11 @@ const sb = require('satoshi-bitcoin')
 var server = require('../../server')
 const { logger } = require('../../utils/logger')
 
-var btcTxFees = function (req, res) {
+var ltcTxFees = function (req, res) {
     try {
-        logger.debug('btcTxFees')
+        logger.debug('ltcTxFees')
         request({
-            url: `${server.btcAPI}`,
+            url: `${server.ltcAPI}`,
             json: true
         }, function (error, response, body) {
             try {
@@ -38,7 +38,7 @@ var btcTxFees = function (req, res) {
                     fees
                 })
             } catch (error) {
-                logger.error('btcTxFees sub catch Error:', error)
+                logger.error('ltcTxFees sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -46,7 +46,7 @@ var btcTxFees = function (req, res) {
             }
         })
     } catch (error) {
-        logger.error('btcTxFees catch Error:', error)
+        logger.error('ltcTxFees catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -54,4 +54,4 @@ var btcTxFees = function (req, res) {
     }
 }
 
-module.exports = btcTxFees
+module.exports = ltcTxFees

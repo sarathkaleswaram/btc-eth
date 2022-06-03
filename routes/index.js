@@ -33,6 +33,7 @@ Routes.bnbBalance = require('./bnb/bnb-get-balance')
 Routes.bnbGetTx = require('./bnb/bnb-get-tx')
 Routes.bnbPrivateKeyToAddress = require('./bnb/bnb-privateKey-to-account')
 Routes.bnbSend = require('./bnb/bnb-send')
+Routes.bnbTxFees = require('./bnb/bnb-fees')
 Routes.bnbExchangeRates = require('./bnb/bnb-rates')
 // BSC BEP20 Token
 Routes.bnbTokenBalance = require('./bnb/bnb-token-get-balance')
@@ -45,6 +46,7 @@ Routes.xrpBalance = require('./xrp/xrp-get-balance')
 Routes.xrpGetTx = require('./xrp/xrp-get-tx')
 Routes.xrpPrivateKeyToAddress = require('./xrp/xrp-privateKey-to-account')
 Routes.xrpSend = require('./xrp/xrp-send')
+Routes.xrpTxFees = require('./xrp/xrp-fees')
 Routes.xrpExchangeRates = require('./xrp/xrp-rates')
 // Ripple Token
 Routes.createToken = require('./xrp/create-token')
@@ -58,6 +60,7 @@ Routes.ltcBalance = require('./ltc/ltc-get-balance')
 Routes.ltcGetTx = require('./ltc/ltc-get-tx')
 Routes.ltcPrivateKeyToAddress = require('./ltc/ltc-privateKey-to-account')
 Routes.ltcSend = require('./ltc/ltc-send')
+Routes.ltcTxFees = require('./ltc/ltc-fees')
 Routes.ltcExchangeRates = require('./ltc/ltc-rates')
 
 module.exports = Routes

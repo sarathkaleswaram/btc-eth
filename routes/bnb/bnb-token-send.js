@@ -20,9 +20,10 @@ var bnbTokenSend = async function (req, res) {
         var privateKey = req.body.privateKey
         var destinationAddress = req.body.destinationAddress
         var amount = req.body.amount
+        var gas = req.body.gas
         var account, contractAddress, abi
-        
-        logger.debug('bnbTokenSend bepToken: ' + bepToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount)
+
+        logger.debug('bnbTokenSend bepToken: ' + bepToken + " sourceAddress: " + sourceAddress + " destinationAddress: " + destinationAddress + " amount: " + amount + " gas: " + gas)
 
         if (!sourceAddress || !privateKey || !destinationAddress || !amount || !bepToken) {
             logger.error('Invalid arguments')
@@ -82,6 +83,14 @@ var bnbTokenSend = async function (req, res) {
             })
             return
         }
+        if (gas && typeof gas !== 'string') {
+            logger.error('Invalid gas value')
+            res.json({
+                result: 'error',
+                message: 'Invalid gas value. Pass as string',
+            })
+            return
+        }
 
         if (bepToken === 'shar') {
             abi = sharABI
@@ -124,57 +133,67 @@ var bnbTokenSend = async function (req, res) {
                 // convert amount
                 var sendingAmount = (amount * (10 ** decimals)).toString()
                 logger.verbose('Sending Amount in Wei: ' + sendingAmount)
-                // tx
-                var rawTransaction = {
-                    'from': sourceAddress,
-                    // gas or gasLimit
-                    'gas': 100000,
-                    'gasPrice': getGasPrice(),
-                    'to': contractAddress,
-                    'value': '0x0',
-                    'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
-                    'nonce': nonce,
-                    'chainId': getChainId()
-                }
+                getCurrentGasPrices(res, gas, function (gasPrice) {
+                    // tx
+                    var rawTransaction = {
+                        'from': sourceAddress,
+                        // gas or gasLimit
+                        'gas': 100000,
+                        // 'gasPrice': getGasPrice(),
+                        'gasPrice': bscWeb3.utils.toHex(bscWeb3.utils.toWei(gasPrice, 'ether')),
+                        'to': contractAddress,
+                        'value': '0x0',
+                        'data': contract.methods.transfer(destinationAddress, sendingAmount).encodeABI(),
+                        'nonce': nonce,
+                        'chainId': getChainId()
+                    }
 
-                const common = Common.default.forCustomChain('mainnet', {
-                    name: 'bnb',
-                    networkId: getChainId(),
-                    chainId: getChainId()
-                }, 'petersburg')
+                    const common = Common.default.forCustomChain('mainnet', {
+                        name: 'bnb',
+                        networkId: getChainId(),
+                        chainId: getChainId()
+                    }, 'petersburg')
 
-                const transaction = new EthereumTx(rawTransaction, { common })
-                var privateKeySplit = privateKey.split('0x')
-                try {
-                    var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
-                    transaction.sign(privateKeyHex)
-                } catch (error) {
-                    logger.error('Failed to sign Transaction')
-                    logger.error('Error: ' + error)
-                    res.json({
-                        result: 'error',
-                        message: 'Failed to sign Transaction',
-                    })
-                    return
-                }
-
-                const serializedTransaction = transaction.serialize()
-                bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
-                    if (error) {
+                    const transaction = new EthereumTx(rawTransaction, { common })
+                    var privateKeySplit = privateKey.split('0x')
+                    try {
+                        var privateKeyHex = Buffer.from(privateKeySplit[1], 'hex')
+                        transaction.sign(privateKeyHex)
+                    } catch (error) {
+                        logger.error('Failed to sign Transaction')
                         logger.error('Error: ' + error)
                         res.json({
                             result: 'error',
-                            message: error.toString(),
+                            message: 'Failed to sign Transaction',
                         })
                         return
                     }
-                    const url = `${server.bscscanExplorerUrl}/tx/${id}`
-                    logger.verbose('Send Tx', { transactionHash: id, link: url })
-                    res.json({
-                        result: 'success',
-                        transactionHash: id,
-                        link: url
+
+                    const serializedTransaction = transaction.serialize()
+                    bscWeb3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex'), (error, id) => {
+                        if (error) {
+                            logger.error('Error: ' + error)
+                            res.json({
+                                result: 'error',
+                                message: error.toString(),
+                            })
+                            return
+                        }
+                        const url = `${server.bscscanExplorerUrl}/tx/${id}`
+                        logger.verbose('Send Tx', { transactionHash: id, link: url })
+                        res.json({
+                            result: 'success',
+                            transactionHash: id,
+                            link: url
+                        })
                     })
+                }, error => {
+                    logger.error('Error: ' + error)
+                    res.json({
+                        result: 'error',
+                        message: error.toString(),
+                    })
+                    return
                 })
             }, error => {
                 logger.error('Error: ' + error)
@@ -184,13 +203,6 @@ var bnbTokenSend = async function (req, res) {
                 })
                 return
             })
-        }, error => {
-            logger.error('Error: ' + error)
-            res.json({
-                result: 'error',
-                message: error.toString(),
-            })
-            return
         })
     } catch (error) {
         logger.error('bnbTokenSend catch Error:', error)
@@ -199,6 +211,40 @@ var bnbTokenSend = async function (req, res) {
             message: error.toString(),
         })
     }
+}
+
+function getCurrentGasPrices(res, gas, callback) {
+    if (gas) {
+        callback(gas.toString())
+        return
+    }
+    if (server.network !== 'mainnet') {
+        // testnet need 10 Gwei minimum
+        callback('0.00000001')
+        return
+    }
+    request({
+        url: `http://localhost:${server.port}/bnb/fees`,
+        json: true
+    }, function (error, response, body) {
+        try {
+            if (error || body.result === 'error') {
+                logger.error('Failed to get fees')
+                res.json({
+                    result: 'error',
+                    message: 'Failed to get fees',
+                })
+                return
+            }
+            callback(body.fees[server.defaultFees])
+        } catch (error) {
+            logger.error('Error: ' + error)
+            res.json({
+                result: 'error',
+                message: error.toString(),
+            })
+        }
+    })
 }
 
 function getChainId() {
