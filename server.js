@@ -25,6 +25,8 @@ const ethNetwork = isMainnet ? 'mainnet' : 'ropsten'
 const etherscanAPINetwork = isMainnet ? 'api' : 'api-ropsten'
 const etherscanSubdomain = isMainnet ? '' : ethNetwork + '.'
 const bscscanAPINetwork = isMainnet ? 'api' : 'api-testnet'
+const polygonNetwork = isMainnet ? 'mainnet' : 'testnet'
+const polygonscanAPINetwork = isMainnet ? 'api' : 'api-testnet'
 const btcChain = isMainnet ? 'main' : 'test3'
 const btcWsNetwork = isMainnet ? 'ws' : 'testnet-ws'
 const btcExplorerPath = isMainnet ? 'btc' : 'btc-testnet'
@@ -48,6 +50,12 @@ const bscscanApiKey = process.env.BSC_SCAN_API_KEY
 const bscscanAPI = `https://${bscscanAPINetwork}.bscscan.com/api?&apikey=${bscscanApiKey}`
 const bscscanExplorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
 const bscWeb3HttpUrl = isMainnet ? 'https://bsc-dataseed1.binance.org:443' : 'https://data-seed-prebsc-1-s1.binance.org:8545'
+
+// Polygon
+const polygonscanApiKey = process.env.POLYGON_SCAN_API_KEY
+const polygonscanAPI = `https://${polygonscanAPINetwork}.polygonscan.com/api?&apikey=${polygonscanApiKey}`
+const polygonscanExplorerUrl = isMainnet ? 'https://polygonscan.com' : 'https://mumbai.polygonscan.com'
+const polygonWeb3HttpUrl = isMainnet ? 'https://polygon-rpc.com' : 'https://rpc-mumbai.matic.today'
 
 // ripple API
 const rippleRpcUrl = isMainnet ? 'https://s1.ripple.com:51234' : 'https://s.altnet.rippletest.net:51234'
@@ -215,6 +223,11 @@ exports.bscWeb3 = new Web3(new Web3.providers.HttpProvider(bscWeb3HttpUrl))
 exports.bscscanAPI = bscscanAPI
 exports.bscscanExplorerUrl = bscscanExplorerUrl
 exports.bepTokens = bepTokens
+// matic
+exports.polygonNetwork = polygonNetwork
+exports.polygonWeb3 = new Web3(new Web3.providers.HttpProvider(polygonWeb3HttpUrl))
+exports.polygonscanAPI = polygonscanAPI
+exports.polygonscanExplorerUrl = polygonscanExplorerUrl
 // xrp
 exports.rippleRpcUrl = rippleRpcUrl
 exports.rippleWsUrl = rippleWsUrl
@@ -301,6 +314,15 @@ app.get('/bnb/rates', routes.bnbExchangeRates)
 app.get('/bnb/bepToken/:bepToken/balance/:address', routes.bnbTokenBalance)
 app.post('/bnb/bepToken/:bepToken/send', routes.bnbTokenSend)
 app.get('/bnb/bepToken/:bepToken/rates', routes.bnbTokenExchangeRates)
+
+// Polygon
+app.get('/matic/create', routes.maticCreate)
+app.get('/matic/balance/:address', routes.maticBalance)
+app.post('/matic/privatekey-to-address', routes.maticPrivateKeyToAddress)
+app.post('/matic/send', routes.maticSend)
+app.get('/matic/tx/:tx', routes.maticGetTx)
+app.get('/matic/fees', routes.maticTxFees)
+app.get('/matic/rates', routes.maticExchangeRates)
 
 // Ripple
 app.get('/xrp/create', routes.xrpCreate)

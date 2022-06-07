@@ -1,12 +1,12 @@
 const request = require('request')
 const { logger } = require('../../utils/logger')
 
-var ltcExchangeRates = function (req, res) {
+var maticExchangeRates = function (req, res) {
     try {
-        logger.debug('ltcExchangeRates')
+        logger.debug('maticExchangeRates')
 
         request({
-            url: 'https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD',
+            url: 'https://min-api.cryptocompare.com/data/price?fsym=MATIC&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD',
             json: true
         }, function (error, response, body) {
             try {
@@ -32,7 +32,7 @@ var ltcExchangeRates = function (req, res) {
                     data: body
                 })
             } catch (error) {
-                logger.error('ltcExchangeRates sub catch Error:', error)
+                logger.error('maticExchangeRates sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
@@ -40,7 +40,7 @@ var ltcExchangeRates = function (req, res) {
             }
         })
     } catch (error) {
-        logger.error('ltcExchangeRates catch Error:', error)
+        logger.error('maticExchangeRates catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -48,4 +48,4 @@ var ltcExchangeRates = function (req, res) {
     }
 }
 
-module.exports = ltcExchangeRates
+module.exports = maticExchangeRates

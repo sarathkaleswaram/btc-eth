@@ -1,12 +1,21 @@
 const request = require('request')
+var server = require('../../server')
 const { logger } = require('../../utils/logger')
 
-var ltcExchangeRates = function (req, res) {
+var maticGetTx = function (req, res) {
     try {
-        logger.debug('ltcExchangeRates')
-
+        logger.debug('maticGetTx params:', req.params)
+        var tx = req.params.tx
+        if (!tx) {
+            logger.error('Tx is empty')
+            res.json({
+                result: 'error',
+                message: 'Tx is empty',
+            })
+            return
+        }
         request({
-            url: 'https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=AUD,EUR,GBP,BGN,HRK,CZK,DKK,HUF,INR,LTL,PLN,RON,SEK,USD,CAD',
+            url: `${server.polygonscanAPI}&module=transaction&action=getstatus&txhash=${tx}`,
             json: true
         }, function (error, response, body) {
             try {
@@ -18,29 +27,29 @@ var ltcExchangeRates = function (req, res) {
                     })
                     return
                 }
-                if (body.Message) {
-                    logger.error(body.Message)
+                if (body.error) {
+                    logger.error(body.error)
                     res.json({
                         result: 'error',
-                        message: body.Message,
+                        message: body.error,
                     })
                     return
                 }
-                logger.debug('Rates', body)
+                logger.debug('Tx', body)
                 res.json({
                     result: 'success',
-                    data: body
-                })
+                    Tx: body
+                })                
             } catch (error) {
-                logger.error('ltcExchangeRates sub catch Error:', error)
+                logger.error('maticGetTx sub catch Error:', error)
                 res.json({
                     result: 'error',
                     message: error.toString(),
-                })
+                })                
             }
         })
     } catch (error) {
-        logger.error('ltcExchangeRates catch Error:', error)
+        logger.error('maticGetTx catch Error:', error)
         res.json({
             result: 'error',
             message: error.toString(),
@@ -48,4 +57,4 @@ var ltcExchangeRates = function (req, res) {
     }
 }
 
-module.exports = ltcExchangeRates
+module.exports = maticGetTx

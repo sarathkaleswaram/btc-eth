@@ -40,6 +40,15 @@ Routes.bnbTokenBalance = require('./bnb/bnb-token-get-balance')
 Routes.bnbTokenSend = require('./bnb/bnb-token-send')
 Routes.bnbTokenExchangeRates = require('./bnb/bnb-token-rates')
 
+// Polygon
+Routes.maticCreate = require('./matic/matic-create-account')
+Routes.maticBalance = require('./matic/matic-get-balance')
+Routes.maticGetTx = require('./matic/matic-get-tx')
+Routes.maticPrivateKeyToAddress = require('./matic/matic-privateKey-to-account')
+Routes.maticSend = require('./matic/matic-send')
+Routes.maticTxFees = require('./matic/matic-fees')
+Routes.maticExchangeRates = require('./matic/matic-rates')
+
 // Ripple
 Routes.xrpCreate = require('./xrp/xrp-create-account')
 Routes.xrpBalance = require('./xrp/xrp-get-balance')
