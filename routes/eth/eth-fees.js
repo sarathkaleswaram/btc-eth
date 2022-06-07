@@ -20,9 +20,9 @@ var ethTxFees = function (req, res) {
                     return
                 }
                 var fees = {
-                    low: server.web3.utils.fromWei(body.result.SafeGasPrice, 'gwei'),
-                    medium: server.web3.utils.fromWei(body.result.ProposeGasPrice, 'gwei'),
-                    high: server.web3.utils.fromWei(body.result.FastGasPrice, 'gwei'),
+                    low: server.web3.utils.fromWei(body.result.SafeGasPrice.split('.')[0], 'gwei'),
+                    medium: server.web3.utils.fromWei(body.result.ProposeGasPrice.split('.')[0], 'gwei'),
+                    high: server.web3.utils.fromWei(body.result.FastGasPrice.split('.')[0], 'gwei'),
                 }
                 logger.debug('Fees', fees)
                 res.json({

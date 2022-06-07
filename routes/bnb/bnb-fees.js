@@ -21,9 +21,9 @@ var bnbTxFees = function (req, res) {
                     return
                 }
                 var fees = {
-                    low: bscWeb3.utils.fromWei(body.result.SafeGasPrice, 'gwei'),
-                    medium: bscWeb3.utils.fromWei(body.result.ProposeGasPrice, 'gwei'),
-                    high: bscWeb3.utils.fromWei(body.result.FastGasPrice, 'gwei'),
+                    low: bscWeb3.utils.fromWei(body.result.SafeGasPrice.split('.')[0], 'gwei'),
+                    medium: bscWeb3.utils.fromWei(body.result.ProposeGasPrice.split('.')[0], 'gwei'),
+                    high: bscWeb3.utils.fromWei(body.result.FastGasPrice.split('.')[0], 'gwei'),
                 }
                 logger.debug('Fees', fees)
                 res.json({
