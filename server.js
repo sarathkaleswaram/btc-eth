@@ -67,6 +67,10 @@ const ltcAPI = `https://api.blockcypher.com/v1/ltc/main`
 const ltcTestAPI = `https://rest.cryptoapis.io/v2/blockchain-data/litecoin/testnet`
 const ltcExplorerUrl = `https://blockexplorer.one/litecoin/${network}/tx`
 
+// Phoenix
+const phoenixExplorerUrl = 'https://phoenixplorer.com'
+const phoenixWeb3HttpUrl = 'https://rpc.phoenixplorer.com'
+
 // Game Callback URL
 const jackpotCallbackURL = isMainnet ? 'https://api.jackpotvilla.com/transaction/crypto' : 'http://testapi.jackpotvilla.com/transaction/crypto'
 const slotstitanCallbackURL = isMainnet ? 'https://api.slotstitan.com/transaction/crypto' : 'http://testapi.slotstitan.com/transaction/crypto'
@@ -239,6 +243,9 @@ exports.ltcAPI = ltcAPI
 exports.ltcTestAPI = ltcTestAPI
 exports.ltcTestApiKey = process.env.LTC_CRYPTOAPIS_API_KEY
 exports.ltcExplorerUrl = ltcExplorerUrl
+// phoenix
+exports.phoenixWeb3 = new Web3(new Web3.providers.HttpProvider(phoenixWeb3HttpUrl))
+exports.phoenixExplorerUrl = phoenixExplorerUrl
 // common
 exports.defaultFees = 'low'
 // game
@@ -346,6 +353,15 @@ app.post('/ltc/send', routes.ltcSend)
 app.get('/ltc/tx/:tx', routes.ltcGetTx)
 app.get('/ltc/fees', routes.ltcTxFees)
 app.get('/ltc/rates', routes.ltcExchangeRates)
+
+// Phoenix
+app.get('/phoenix/create', routes.phoenixCreate)
+app.get('/phoenix/balance/:address', routes.phoenixBalance)
+app.post('/phoenix/privatekey-to-address', routes.phoenixPrivateKeyToAddress)
+app.post('/phoenix/send', routes.phoenixSend)
+app.get('/phoenix/tx/:tx', routes.phoenixGetTx)
+app.get('/phoenix/fees', routes.phoenixTxFees)
+app.get('/phoenix/rates', routes.phoenixExchangeRates)
 
 // 404
 app.get('/*', (_, res) => {

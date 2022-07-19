@@ -72,4 +72,13 @@ Routes.ltcSend = require('./ltc/ltc-send')
 Routes.ltcTxFees = require('./ltc/ltc-fees')
 Routes.ltcExchangeRates = require('./ltc/ltc-rates')
 
+// Phoenix
+Routes.phoenixCreate = require('./phoenix/phoenix-create-account')
+Routes.phoenixBalance = require('./phoenix/phoenix-get-balance')
+Routes.phoenixGetTx = require('./phoenix/phoenix-get-tx')
+Routes.phoenixPrivateKeyToAddress = require('./phoenix/phoenix-privateKey-to-account')
+Routes.phoenixSend = require('./phoenix/phoenix-send')
+Routes.phoenixTxFees = require('./phoenix/phoenix-fees')
+Routes.phoenixExchangeRates = require('./phoenix/phoenix-rates')
+
 module.exports = Routes
