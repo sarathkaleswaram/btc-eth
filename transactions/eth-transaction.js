@@ -1,5 +1,4 @@
 const request = require('request')
-var transactions = require('../models/transactions')
 var server = require('../server')
 const { logger } = require('../utils/logger')
 var { checkTxAndCallback } = require('./callback')
@@ -19,10 +18,10 @@ var dbPendingEthTx = function (address, blocknumber) {
             }
             if (body.status === '0') logger.error(body.message)
             if (body.status === '1') {
-                logger.debug('Txs ETH length:', body.result.length, ', for address:', address)
+                logger.debug(`Txs ETH length: ${body.result.length}, for address: ${address}`)
                 body.result.forEach(tx => {
                     if (tx.to === address.toLowerCase()) {
-                        logger.info('Got ETH tx from:', tx.from, ', amount:', tx.value, ', hash:', tx.hash)
+                        logger.info(`Got ETH tx from: ${tx.from}, amount: ${tx.value}, hash: ${tx.hash}`)
                         // calculate transaction fees = gas used * gas price
                         var gasUsed = parseInt(tx.gasUsed), gasPrice = parseInt(tx.gasPrice)
                         var fees = gasUsed * gasPrice
@@ -52,11 +51,11 @@ var dbPendingEthTokenTx = function (address, blocknumber, contractAddress) {
             }
             if (body.status === '0') logger.error(body.message)
             if (body.status === '1') {
-                logger.debug('Txs ERC length:', body.result.length, ' for address:', address)
+                logger.debug(`Txs ERC length: ${body.result.length}, for address: ${address}`)
                 body.result.forEach(tx => {
                     if (tx.contractAddress === contractAddress.toLowerCase()) {
                         if (tx.to.toLowerCase() === address.toLowerCase()) {
-                            logger.info('Got ERC token tx type:', tx.tokenSymbol.toLowerCase(), ', from:', tx.from, ', amount:', tx.value, ', hash:', tx.hash)
+                            logger.info(`Got ERC token tx type: ${tx.tokenSymbol.toLowerCase()}, from: ${tx.from}, amount: ${tx.value}, hash: ${tx.hash}`)
                             // calculate amount for custome token decimals
                             var value = parseInt(tx.value), decimals = parseInt(tx.tokenDecimal)
                             var amount = value / 10 ** decimals

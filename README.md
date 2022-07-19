@@ -525,6 +525,85 @@ Response:
 }
 ```
 
+### Phoenix
+```json
+GET: /phoenix/create'
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /phoenix/balance/:address
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "balance": "0 PHOENIX"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /phoenix/privatekey-to-address
+body:
+{
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+Response:
+{
+    "result": "success",
+    "address": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+    "privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /phoenix/fees
+Response: 
+{
+  "result": "success",
+  "fees": {
+    "low": "0.000000039",
+    "medium": "0.00000004",
+    "high": "0.000000041"
+  }
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+POST: /phoenix/send
+body:
+{
+	"sourceAddress": "0x7405e4BeD34470647E8012DE5677FB99330Bd726",
+	"privateKey": "0x4611fb35ed2de79f8c480b670ed714f5f5ee111cf026a5e3ad2c412801b7a7b9",
+	"destinationAddress": "0x1bdE485751FC4552e9d727f22038945D3D2ddaD9",
+	"amount": 1.10,
+    	"gas": "0.00000004"
+}
+Response:
+{
+    "result": "success",
+    "transactionHash": "0x1c6bb1070a06a9c8dc0fa404a9b2f0b095da4ddfc7f161e1fda04823e11be9f4",
+    "link": "https://phoenixplorer.com//tx/0x1c6bb1070a06a9c8dc0fa404a9b2f0b095da4ddfc7f161e1fda04823e11be9f4"
+}
+-------------------------------------------------------------------------------------------------------------------------------------
+GET: /phoenix/rates
+Response: 
+{
+    "result": "success",
+    "data": {
+        "AUD": 293.74,
+        "EUR": 174.56,
+        "GBP": 153.23,
+        "BGN": 571.94,
+        "HRK": 1261.77,
+        "CZK": 4838.84,
+        "DKK": 1167,
+        "HUF": 67944.04,
+        "INR": 14746.67,
+        "PLN": 808.72,
+        "RON": 868.77,
+        "SEK": 2565.42,
+        "USD": 188.48
+    }
+}
+```
+
 ### API Error 
 ```json
 {

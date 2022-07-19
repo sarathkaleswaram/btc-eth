@@ -22,7 +22,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
     // check tx hash in db
     transactions.findOne({ transactionHash: transactionHash }, (error, doc) => {
         if (error) {
-            logger.error('DB Error:', error)
+            logger.error('DB Error: ' + error)
         } else {
             if (!doc) {
                 // make callback
@@ -42,7 +42,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
                 }
                 transactions.create(saveTx).then(() => logger.info(`${type.toUpperCase()} Transaction inserted`)).catch(error => logger.error('Error: ' + error))
             } else {
-                logger.warn('Transaction hash already present in db. Got same tx again. Tx:', transactionHash)
+                logger.warn('Transaction hash already present in db. Got same tx again. Tx: ' + transactionHash)
                 requests.findOneAndUpdate({ address: address }, { status: 'Completed' }, (error, doc) => { })
             }
         }
@@ -50,7 +50,7 @@ var checkTxAndCallback = function (type, address, from, amount, timeStamp, trans
 }
 
 var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
-    logger.debug('Making Confirm callback:', type, sender, receiver, tid, amount)
+    logger.debug('Making Confirm callback:', { type, sender, receiver, tid, amount })
     requests.findOneAndUpdate({ address: receiver }, { status: 'Completed' }, (error, doc) => {
         if (error) logger.error('Error: ' + error)
         if (doc) {
@@ -84,7 +84,7 @@ var makeConfirmedCallback = function (type, sender, receiver, tid, amount) {
 }
 
 var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
-    logger.debug('Making Submit callback:', type, sender, receiver, tid, amount)
+    logger.debug('Making Submit callback:', { type, sender, receiver, tid, amount })
     requests.findOne({ address: receiver }, (error, doc) => {
         if (error) logger.error('Error: ' + error)
         if (doc) {
@@ -118,7 +118,7 @@ var makeSubmittedCallback = function (type, sender, receiver, tid, amount) {
 }
 
 var makeTimeoutCallback = function (address) {
-    logger.debug('Making Timeout callback:', address)
+    logger.debug('Making Timeout callback:' + address)
     requests.findOne({ address: address }, (error, doc) => {
         if (error) logger.error('Error: ' + error)
         if (doc) {
@@ -152,7 +152,7 @@ var makeTimeoutCallback = function (address) {
 }
 
 var wsSend = function (address, type, wsType, amount, txHash, callback, token, timestamp, sender, status, timeout) {
-    logger.debug('WS send:', address, type, wsType, amount, txHash, callback, token, timestamp, sender, status, timeout)
+    logger.debug('WS send:', { address, type, wsType, amount, txHash, callback, token, timestamp, sender, status, timeout })
     server.wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
             var url, title, wsMessage

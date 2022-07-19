@@ -2,6 +2,7 @@ var server = require('../server')
 var requests = require('../models/requests')
 var { dbPendingEthTx, dbPendingEthTokenTx } = require('./eth-transaction')
 var { dbPendingBtcTx } = require('./btc-transaction')
+var { dbPendingPhoenixTx } = require('./phoenix-transaction')
 var { makeTimeoutCallback } = require('./callback')
 const { logger } = require('../utils/logger')
 
@@ -10,15 +11,16 @@ var checkPendingRequests = function () {
     requests.find({ status: 'Pending' }, (error, docs) => {
         if (error) logger.error('Error: ' + error)
         if (docs.length) {
-            logger.debug('Pending requests from DB length:', docs.length)
-            logger.verbose('Pending requests for BTC from DB length:', docs.filter(x => x.type === 'btc').length)
-            logger.verbose('Pending requests for ETH from DB length:', docs.filter(x => x.type === 'eth').length)
-            logger.verbose('Pending requests for ERC from DB length:', docs.filter(x => x.type !== 'btc' && x.type !== 'eth').length)
+            logger.debug('Pending requests from DB length: ' + docs.length)
+            logger.verbose('Pending requests for BTC from DB length: ' + docs.filter(x => x.type === 'btc').length)
+            logger.verbose('Pending requests for ETH from DB length: ' + docs.filter(x => x.type === 'eth').length)
+            logger.verbose('Pending requests for ERC from DB length: ' + docs.filter(x => x.type !== 'btc' && x.type !== 'eth' && x.type !== 'phoenix').length)
+            logger.verbose('Pending requests for PHOENIX from DB length: ' + docs.filter(x => x.type === 'phoenix').length)
             var offset = 0
             docs.forEach(doc => {
                 // 1 sec gap between api calls, to reduce limit
                 setTimeout(() => {
-                    logger.debug('Checking transaction for type:', doc.type, ', address:', doc.address, ', api call count:', doc.apiCallCount)
+                    logger.debug(`Checking transaction for type: ${doc.type}, address: ${doc.address}, api call count: ${doc.apiCallCount}`)
                     // increase api's call count
                     requests.updateOne({ address: doc.address }, { $inc: { apiCallCount: 1 } }, (error, doc) => {
                         if (error) logger.error('Error: ' + error)
@@ -27,10 +29,12 @@ var checkPendingRequests = function () {
                         dbPendingBtcTx(doc.address, doc.blocknumber)
                     } else if (doc.type === 'eth') {
                         dbPendingEthTx(doc.address, doc.blocknumber)
+                    } else if (doc.type === 'phoenix') {
+                        dbPendingPhoenixTx(doc.address, doc.blocknumber)
                     } else if (server.ercTokens.some(x => x.ercToken === doc.type)) {
                         dbPendingEthTokenTx(doc.address, doc.blocknumber, doc.contractAddress)
                     } else {
-                        logger.warn('Unknown type from DB', doc.type)
+                        logger.warn('Unknown type from DB' + doc.type)
                     }
                     // 1151 calls ie., 4 days after if no transaction found for address will be timeout
                     if (doc.apiCallCount >= 1151) {

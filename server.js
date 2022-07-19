@@ -7,12 +7,12 @@ const mongoose = require('mongoose')
 const Web3 = require('web3')
 const path = require('path')
 const WebSocket = require('ws')
-// const CronJob = require('cron').CronJob
+const CronJob = require('cron').CronJob
 const RippleAPI = require('ripple-lib').RippleAPI
 const { logger, accessStream } = require('./utils/logger')
 require('dotenv').config()
 var routes = require('./routes')
-// var { checkPendingRequests } = require('./transactions')
+var { checkPendingRequests } = require('./transactions')
 // var { btcWsOnMessage } = require('./transactions/btc-transaction')
 var { makeTimeoutCallback } = require('./transactions/callback')
 
@@ -264,8 +264,15 @@ var mongoUrl = `mongodb://${mongoUserPass}${mongoHost}:${mongoPort}/${isMainnet 
 mongoose.connect(mongoUrl, { useCreateIndex: true, useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true })
     .then(() => {
         logger.info('Mongodb Connected!')
+        checkPendingRequests()
     })
     .catch(error => logger.error('Error: ' + error))
+
+// Cron Job runs every 5 mins
+var job = new CronJob('*/5 * * * *', function () {
+    checkPendingRequests()
+})
+job.start()
 
 // Express
 const app = express()

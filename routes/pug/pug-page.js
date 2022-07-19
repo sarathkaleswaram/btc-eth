@@ -61,6 +61,11 @@ var pugPage = function (req, res) {
                         message += 'Invalid type. '
                     }
                 }
+            } else if (params.type === 'phoenix') {
+                if (!server.phoenixWeb3.utils.isAddress(params.address)) {
+                    error = true
+                    message += 'Invalid address. '
+                }
             } else {
                 error = true
                 message += 'Invalid type. '
@@ -69,7 +74,7 @@ var pugPage = function (req, res) {
     }
 
     if (error) {
-        logger.error('Error message:', message)
+        logger.error('Error message: ' + message)
         res.render('index', { error: error, message: message })
     } else {
         try {
@@ -94,7 +99,7 @@ var pugPage = function (req, res) {
                                             res.render('index', { error: true, message: error.toString() })
                                             return
                                         }
-                                        logger.debug('BTC current blocknumber:', body.height)
+                                        logger.debug('BTC current blocknumber: ' + body.height)
                                         // subscibe address
                                         btcWsSubscribeAddress(params.address)
                                         // Save request
@@ -125,7 +130,7 @@ var pugPage = function (req, res) {
                             // ETH or ERC tokens
                             if (params.type === 'eth' || server.ercTokens.some(x => x.ercToken === params.type)) {
                                 server.web3.eth.getBlockNumber().then((blocknumber) => {
-                                    logger.debug('ETH current blocknumber:', blocknumber)
+                                    logger.debug('ETH current blocknumber: ' + blocknumber)
                                     // Save request
                                     var ethRequest = {
                                         type: params.type,
@@ -142,6 +147,35 @@ var pugPage = function (req, res) {
                                     if (contractAddress)
                                         ethRequest.contractAddress = contractAddress
                                     requests.create(ethRequest).then(() => {
+                                        logger.info('DB Request inserted')
+                                        res.render('index', { src: url, account: params.address })
+                                    }, error => {
+                                        logger.error('Error: ' + error)
+                                        res.render('index', { error: true, message: error.toString() })
+                                    })
+                                }, error => {
+                                    logger.error('Error: ' + error)
+                                    res.render('index', { error: true, message: error.toString() })
+                                })
+                            }
+                            // Phoenix
+                            if (params.type === 'phoenix') {
+                                server.phoenixWeb3.eth.getBlockNumber().then((blocknumber) => {
+                                    logger.debug('Phoenix current blocknumber: ' + blocknumber)
+                                    // Save request
+                                    var phoenixRequest = {
+                                        type: params.type,
+                                        address: params.address,
+                                        token: params.token,
+                                        timestamp: params.timestamp,
+                                        callback: params.callback,
+                                        postCallback: params.postCallback,
+                                        blocknumber: blocknumber,
+                                        status: 'Pending',
+                                        apiCallCount: 0,
+                                        createdDate: new Date()
+                                    }
+                                    requests.create(phoenixRequest).then(() => {
                                         logger.info('DB Request inserted')
                                         res.render('index', { src: url, account: params.address })
                                     }, error => {
