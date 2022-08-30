@@ -215,7 +215,7 @@ exports.isMainnet = isMainnet
 exports.network = network
 exports.btcAPI = btcAPI
 exports.btcExplorerUrl = btcExplorerUrl
-exports.btcWebsocket = undefined// btcWebsocket
+exports.btcWebsocket = undefined // btcWebsocket
 // eth
 exports.ethNetwork = ethNetwork
 exports.etherscanAPI = etherscanAPI

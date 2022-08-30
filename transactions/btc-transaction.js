@@ -42,11 +42,11 @@ var dbPendingBtcTx = function (address, blocknumber) {
 }
 
 var btcWsSubscribeAddress = function (address) {
-    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address }))
+    // server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address }))
 }
 
 var btcWsUnsubscribeAddress = function (address) {
-    server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
+    // server.btcWebsocket.send(JSON.stringify({ type: 'address', address: address, unsubscribe: true }))
 }
 
 var btcWsOnMessage = function () {
