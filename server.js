@@ -294,6 +294,9 @@ app.get('/', routes.pugPage)
 app.get('/requests', routes.pugRequests)
 app.get('/transactions', routes.pugTransactions)
 
+// Common
+app.get('/common/:address/tx/status', routes.commonTxStatus)
+
 // Bitcoin
 app.get('/btc/create', routes.btcCreate)
 app.get('/btc/balance/:address', routes.btcBalance)

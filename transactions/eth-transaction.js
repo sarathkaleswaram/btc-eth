@@ -6,7 +6,7 @@ var { checkTxAndCallback } = require('./callback')
 var dbPendingEthTx = function (address, blocknumber) {
     var web3 = server.web3
     var url = `${server.etherscanAPI}&module=account&action=txlist&address=${address}&startblock=${blocknumber}&sort=asc`
-    logger.verbose('Running Etherscan API:', url)
+    logger.verbose('Running Etherscan API: ' + url)
     request({
         url: url,
         json: true

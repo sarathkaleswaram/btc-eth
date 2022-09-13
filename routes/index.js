@@ -5,6 +5,9 @@ Routes.pugPage = require('./pug/pug-page')
 Routes.pugRequests = require('./pug/pug-requests')
 Routes.pugTransactions = require('./pug/pug-transactions')
 
+// Common
+Routes.commonTxStatus = require('./common/tx-status')
+
 // Bitcoin
 Routes.btcCreate = require('./btc/btc-create-account')
 Routes.btcBalance = require('./btc/btc-get-balance')
