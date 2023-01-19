@@ -3,11 +3,18 @@ $(document).ready(function () {
     var wsUrl = `ws://${window.location.host}`
     var connection = new WebSocket(wsUrl)
     var urlParams = new URLSearchParams(window.location.search)
+    var logo = urlParams.get('logo')
     var address = $('#copy-address').text().trim()
     var callback = `${urlParams.get('callback')}?type=${urlParams.get('type')}&token=${urlParams.get('token')}&timestamp=${urlParams.get('timestamp')}&receiver=${address}&sender=${undefined}&amount=${undefined}&tid=${undefined}`
     var interval
 
     console.log('Callback:', callback)
+
+    if (logo) {
+        $('#logo-img').attr('src', logo)
+    } else {
+        $('#logo-img').attr('src', 'images/logo.png')
+    }
 
     if (address) {
         $('.count-down').append(`
